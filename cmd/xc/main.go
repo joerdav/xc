@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -76,9 +77,12 @@ func main() {
 		return
 	}
 	tav, _ := getArgs()
-	fmt.Println("running tasks")
 	for _, tav := range tav {
-		fmt.Println(tav)
+		err = t.Run(context.Background(), tav)
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
 	}
 
 }
