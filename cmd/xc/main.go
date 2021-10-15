@@ -8,7 +8,6 @@ import (
 	"runtime/debug"
 
 	"github.com/joe-davidson1802/xc/parser"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/pflag"
 )
 
@@ -21,22 +20,20 @@ func main() {
 	log.SetOutput(os.Stderr)
 
 	pflag.Usage = func() {
+		fmt.Println("xc - list tasks")
+		fmt.Println("xc [task...] - run tasks")
 		pflag.PrintDefaults()
 	}
 
 	var (
-		versionFlag  bool
-		helpFlag     bool
-		listFlag     bool
-		listWideFlag bool
-		fileName     string
+		versionFlag bool
+		helpFlag    bool
+		fileName    string
 	)
 
 	pflag.BoolVar(&versionFlag, "version", false, "show xc version")
 	pflag.BoolVarP(&helpFlag, "help", "h", false, "shows xc usage")
 	pflag.StringVarP(&fileName, "file", "f", "README.md", "specify markdown file that contains tasks")
-	pflag.BoolVarP(&listFlag, "list", "l", false, "list tasks")
-	pflag.BoolVar(&listWideFlag, "lw", false, "list tasks and commands")
 	pflag.Parse()
 
 	if versionFlag {
@@ -59,24 +56,13 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	if listFlag || listWideFlag {
-		table := tablewriter.NewWriter(os.Stdout)
-		headers := []string{"task", "description"}
-		if listWideFlag {
-			headers = append(headers, "command")
+	tav, _ := getArgs()
+	if len(tav) == 0 {
+		for _, n := range t {
+			fmt.Printf("%s - %s\n", n.Name, n.Description)
 		}
-		table.SetHeader(headers)
-		for _, ta := range t {
-			row := []string{ta.Name, ta.Description}
-			if listWideFlag {
-				row = append(row, ta.Command)
-			}
-			table.Append(row)
-		}
-		table.Render()
 		return
 	}
-	tav, _ := getArgs()
 	for _, tav := range tav {
 		err = t.Run(context.Background(), tav)
 		if err != nil {

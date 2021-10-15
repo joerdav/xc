@@ -27,9 +27,18 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 	if task == nil {
 		return fmt.Errorf("task %s not found", tsname)
 	}
-	cmd := exec.CommandContext(ctx, task.Command)
+	fmt.Println(task.Name)
+	fmt.Println(task.Command)
+	parts := strings.Split(task.Command, " ")
+	cmd := exec.Command(parts[0])
+	cmd.Args = parts[0:]
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
+	path, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	cmd.Dir = path
 	return cmd.Run()
 }
