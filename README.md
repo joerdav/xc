@@ -1,4 +1,4 @@
-# xc - eXeCute project task from a readme file
+# xc - eXeCute project tasks from a readme file
 
 ## Installation
 
@@ -8,7 +8,7 @@ go install github.com/joe-davidson1802/xc/cmd/xc@latest
 
 ## Tasks
 
-__get__: get dependencies of project
+__get__: get dependencies of the project
 ```
 go get ./...
 ```
@@ -20,7 +20,7 @@ __test__: test project
 go test ./...
 ```
 
-__testshort__: run short test
+__testshort__: run short tests
 ```
 go test ./... -short
 ```
