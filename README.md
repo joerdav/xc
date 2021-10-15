@@ -1,6 +1,10 @@
-## Some docs
+# xc - eXeCute project task from a readme file
 
-Example docs
+## Installation
+
+```
+go install github.com/joe-davidson1802/xc/cmd/xc@latest
+```
 
 ## Tasks
 
