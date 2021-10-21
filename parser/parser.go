@@ -18,7 +18,7 @@ var commandDef = regexp.MustCompile(`^.+:.*$`)
 var commandTitle = regexp.MustCompile(`^.+: *`)
 var cleanName = regexp.MustCompile(`[_*: ]`)
 var codeBlock = regexp.MustCompile("^```.*$")
-var deps = regexp.MustCompile("^!!.*$")
+var deps = regexp.MustCompile("^>.*$")
 
 func ParseFile(f string) (ts models.Tasks, err error) {
 	var foundTasksSection bool
@@ -68,7 +68,7 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 			continue
 		}
 		if deps.MatchString(scanner.Text()) {
-			s := strings.ReplaceAll(scanner.Text(), "!", "")
+			s := strings.ReplaceAll(scanner.Text(), ">", "")
 			ss := strings.Split(s, ",")
 			for i := range ss {
 				ss[i] = strings.Trim(ss[i], " ")

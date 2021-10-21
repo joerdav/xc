@@ -109,7 +109,7 @@ go get ./...
 ```
 
 __deploy-version__: tag current commit with a version
-!!test
+> test
 ```
 sh ./push-tag.sh
 ```
