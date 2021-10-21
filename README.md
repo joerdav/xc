@@ -71,11 +71,11 @@ The are signified by a `!`, they can be comma delimited or on separate lines.
 The following are equivelant:
 
 ```
-!task1, task2, task3
+!!task1, task2, task3
 ```
 ```
-!task1
-!task2, task3
+!!task1
+!!task2, task3
 ```
 
 ### Command
@@ -109,7 +109,7 @@ go get ./...
 ```
 
 __deploy-version__: tag current commit with a version
-!test
+!!test
 ```
 sh ./push-tag.sh
 ```
