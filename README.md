@@ -43,13 +43,13 @@ If a heading of the same level or greater than the "Tasks" heading is found this
 
 Once in the task section a task can be defined using the following syntax:
 
-``` md
+```` md
 taskname: task description
 !task-dependency1, task-dependency2
-\`\`\`
-command
-\`\`\`
 ```
+command
+```
+````
 
 #### Name
 
