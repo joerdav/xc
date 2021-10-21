@@ -67,15 +67,15 @@ Name is everything after the `:`, and can contain any content.
 ### Dependencies
 
 Other tasks can be ran by defining dependencies at the beginning.
-The are signified by a `!`, they can be comma delimited or on separate lines.
+The are signified by a `>`, they can be comma delimited or on separate lines.
 The following are equivelant:
 
 ```
-!!task1, task2, task3
+> task1, task2, task3
 ```
 ```
-!!task1
-!!task2, task3
+> task1
+> task2, task3
 ```
 
 ### Command
