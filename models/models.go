@@ -30,7 +30,6 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 			return err
 		}
 	}
-	fmt.Println(task.Name)
 	fmt.Println(task.Command)
 	parts := strings.Split(task.Command, " ")
 	cmd := exec.Command(parts[0])
