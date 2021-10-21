@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime/debug"
+	"strings"
 
 	"github.com/joe-davidson1802/xc/parser"
 	"github.com/spf13/pflag"
@@ -58,12 +59,26 @@ func main() {
 	}
 	tav, _ := getArgs()
 	if len(tav) == 0 {
+		fmt.Println("tasks:")
+		maxLen := 0
 		for _, n := range t {
-			fmt.Printf("%s - %s\n", n.Name, n.Description)
+			if len(n.Name) > maxLen {
+				maxLen = len(n.Name)
+			}
+		}
+		for _, n := range t {
+			padLen := maxLen - len(n.Name)
+			pad := strings.Repeat(" ", padLen)
+			fmt.Printf("    %s%s  %s\n", n.Name, pad, n.Description)
 		}
 		return
 	}
 	for _, tav := range tav {
+		err = t.ValidateDependencies(tav, []string{})
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
 		err = t.Run(context.Background(), tav)
 		if err != nil {
 			fmt.Println(err.Error())

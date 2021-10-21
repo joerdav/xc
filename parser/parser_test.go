@@ -19,7 +19,7 @@ func TestParseFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(result) != 2 {
+	if len(result) != 3 {
 		t.Errorf("expected %d tasks, got %d", 2, len(result))
 	}
 	task1 := models.Task{
@@ -30,12 +30,13 @@ func TestParseFile(t *testing.T) {
 	if diff := cmp.Diff(task1, result[0]); diff != "" {
 		t.Errorf("task1 does not match expected: %s", diff)
 	}
-	task2 := models.Task{
+	task3 := models.Task{
 		Name:        "hw",
 		Description: "Hello world",
 		Command:     `echo "Hello, world!"`,
+		DependsOn:   []string{"list", "list2"},
 	}
-	if diff := cmp.Diff(task2, result[1]); diff != "" {
+	if diff := cmp.Diff(task3, result[2]); diff != "" {
 		t.Errorf("task2 does not match expected: %s", diff)
 	}
 

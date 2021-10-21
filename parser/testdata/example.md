@@ -7,7 +7,11 @@ Sub text
 
 ## Tasks
 
-__list__: Lists files
+*list*: Lists files
+```
+ls
+```
+*list2*: Lists files
 ```
 ls
 ```
@@ -15,6 +19,7 @@ ls
 ### Sub title
 
 __hw__: Hello world
+!list, list2
 ```
 echo "Hello, world!"
 ```

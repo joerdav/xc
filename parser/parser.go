@@ -14,10 +14,11 @@ var MissingCommand = errors.New("missing command")
 
 var taskR = regexp.MustCompile(`^#+ +Tasks`)
 var heading = regexp.MustCompile(`^#+`)
-var commandDef = regexp.MustCompile(`^__[a-zA-Z]+__:.*$`)
-var commandTitle = regexp.MustCompile(`^__[a-zA-Z]+__: *`)
-var cleanName = regexp.MustCompile(`[_: ]`)
+var commandDef = regexp.MustCompile(`^.+:.*$`)
+var commandTitle = regexp.MustCompile(`^.+: *`)
+var cleanName = regexp.MustCompile(`[_*: ]`)
 var codeBlock = regexp.MustCompile("^```.*$")
+var deps = regexp.MustCompile("^!.*$")
 
 func ParseFile(f string) (ts models.Tasks, err error) {
 	var foundTasksSection bool
@@ -62,7 +63,19 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 			inCodeBlock = !inCodeBlock
 			continue
 		}
-		currentTask.Command += scanner.Text()
+		if inCodeBlock {
+			currentTask.Command += scanner.Text()
+			continue
+		}
+		if deps.MatchString(scanner.Text()) {
+			s := strings.ReplaceAll(scanner.Text(), "!", "")
+			ss := strings.Split(s, ",")
+			for i := range ss {
+				ss[i] = strings.Trim(ss[i], " ")
+			}
+			currentTask.DependsOn = append(currentTask.DependsOn, ss...)
+			continue
+		}
 	}
 	if !foundTasksSection {
 		err = NoTasksError
