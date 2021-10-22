@@ -61,7 +61,7 @@ Anything between the task name and the task command, that is not a "Requires:" s
 ### Dependencies
 
 Other tasks can be ran by defining dependencies at the beginning.
-The are signified by the `Requires:` prefix, they can be comma delimited or on separate lines.
+They are signified by the `Requires:` prefix, they can be comma delimited or on separate lines.
 The following are equivelant:
 
 ```
@@ -101,7 +101,9 @@ go get ./...
 
 #### tag
 Deploys a new tag for the repo.
+
 Also runs tests
+
 Requires: test
 ```
 sh ./push-tag.sh
