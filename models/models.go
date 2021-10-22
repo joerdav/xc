@@ -12,7 +12,7 @@ const MAX_DEPS = 50
 
 type Task struct {
 	Name        string
-	Description string
+	Description []string
 	Command     string
 	DependsOn   []string
 }

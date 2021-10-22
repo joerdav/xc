@@ -7,25 +7,39 @@ Sub text
 
 ## Tasks
 
-*list*: Lists files
+### list
+
+Lists files
+
 ```
 ls
 ```
-*list2*: Lists files
+### list2
+
+Lists files
+
 ```
 ls
 ```
 
-### Sub title
+### hello
 
-__hw__: Hello world
-> list, list2
+Print a message
+
+Requires: list, list2
+
 ```
 echo "Hello, world!"
 ```
 ## Out Of Scope
 
-__s__: Something
+
+### something
+
+Print a message
+
+Requires: list, list2
+
 ```
-something
+echo "Hello, world!"
 ```

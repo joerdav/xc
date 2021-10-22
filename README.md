@@ -35,17 +35,16 @@ If a heading of the same level or greater than the "Tasks" heading is found this
 
 > ### Tasks
 > - Tasks go here
-> #### Subheading - Does not end the task section
-> - More tasks go here
 > ## Another heading - Ends the task section
 
 ### Task definition
 
-Once in the task section a task can be defined using the following syntax:
+Once in the task section a task can be defined by a subheading with a lower level:
 
 ```` md
-taskname: task description
-!task-dependency1, task-dependency2
+### taskname
+taskdescription
+Requires: task-dependency1, task-dependency2
 ```
 command
 ```
@@ -53,29 +52,24 @@ command
 
 #### Name
 
-Name is everything before the `:`, and can contain md styling.
-The following are all valid task names:
-
-_task-1_
-__task-2__
-*task-3*
+The name is denoted by a heading lower than the Tasks heading.
 
 ### Description
 
-Name is everything after the `:`, and can contain any content.
+Anything between the task name and the task command, that is not a "Requires:" section is a description.
 
 ### Dependencies
 
 Other tasks can be ran by defining dependencies at the beginning.
-The are signified by a `>`, they can be comma delimited or on separate lines.
+The are signified by the `Requires:` prefix, they can be comma delimited or on separate lines.
 The following are equivelant:
 
 ```
-> task1, task2, task3
+Requires: task1, task2, task3
 ```
 ```
-> task1
-> task2, task3
+Requires: task1
+Requires: task2, task3
 ```
 
 ### Command
@@ -86,30 +80,29 @@ The tasks command is signified by a md codeblock.
 command --args
 ```
 
-### Subheadings
-
-Subheadings can exist within the tasks section, as long as their level is less than the tasks title. (more # is a lower level)
-
 ## Example
 
 ### Tasks
 
-#### Tests
+#### test
 
-__test__: test project
+Test the project.
+
 ```
 go test ./...
 ```
 
-#### Development
+#### get
+Get the project dependencies.
 
-__get__: get dependencies of the project
 ```
 go get ./...
 ```
 
-__deploy-version__: tag current commit with a version
-> test
+#### tag
+Deploys a new tag for the repo.
+Also runs tests
+Requires: test
 ```
 sh ./push-tag.sh
 ```

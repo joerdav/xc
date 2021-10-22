@@ -3,6 +3,7 @@ package parser
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -16,46 +17,53 @@ var taskR = regexp.MustCompile(`^#+ +Tasks`)
 var heading = regexp.MustCompile(`^#+`)
 var commandDef = regexp.MustCompile(`^.+:.*$`)
 var commandTitle = regexp.MustCompile(`^.+: *`)
-var cleanName = regexp.MustCompile(`[_*: ]`)
+var cleanName = regexp.MustCompile(`[_*: #]`)
 var codeBlock = regexp.MustCompile("^```.*$")
-var deps = regexp.MustCompile("^>.*$")
+var deps = regexp.MustCompile("^Requires:.*$")
+
+func isTask(text string, taskDepth int) bool {
+	isHeading := heading.MatchString(text)
+	comesUnderTasks := strings.Count(text, "#") > taskDepth
+	return isHeading && comesUnderTasks
+}
+func isTaskSection(text string) bool {
+	return taskR.MatchString(text)
+}
 
 func ParseFile(f string) (ts models.Tasks, err error) {
 	var foundTasksSection bool
-	var level int
+	var taskLevel int
 	var inCodeBlock bool
 	var currentTask *models.Task
 	scanner := bufio.NewScanner(strings.NewReader(f))
 	for scanner.Scan() {
-		if taskR.MatchString(scanner.Text()) {
+		text := scanner.Text()
+		if isTaskSection(text) {
 			foundTasksSection = true
-			level = strings.Count(scanner.Text(), "#")
+			taskLevel = strings.Count(text, "#")
 			continue
 		}
 		if !foundTasksSection {
 			continue
 		}
-		if heading.MatchString(scanner.Text()) && strings.Count(scanner.Text(), "#") <= level {
+		if heading.MatchString(text) && strings.Count(text, "#") <= taskLevel {
 			break
 		}
-		if commandDef.MatchString(scanner.Text()) {
+		if isTask(text, taskLevel) {
 			if currentTask != nil {
-				err = MissingCommand
+				err = fmt.Errorf("%v: near %s", MissingCommand, text)
 				return
 			}
-			name := commandTitle.FindStringSubmatch(scanner.Text())[0]
-			name = cleanName.ReplaceAllString(name, "")
-			description := commandTitle.ReplaceAllString(scanner.Text(), "")
+			name := cleanName.ReplaceAllString(text, "")
 			currentTask = &models.Task{
-				Name:        name,
-				Description: description,
+				Name: name,
 			}
 			continue
 		}
 		if currentTask == nil {
 			continue
 		}
-		if codeBlock.MatchString(scanner.Text()) {
+		if codeBlock.MatchString(text) {
 			if inCodeBlock {
 				ts = append(ts, *currentTask)
 				currentTask = nil
@@ -64,16 +72,20 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 			continue
 		}
 		if inCodeBlock {
-			currentTask.Command += scanner.Text()
+			currentTask.Command += text
 			continue
 		}
-		if deps.MatchString(scanner.Text()) {
-			s := strings.ReplaceAll(scanner.Text(), ">", "")
+		if deps.MatchString(text) {
+			s := strings.ReplaceAll(scanner.Text(), "Requires:", "")
 			ss := strings.Split(s, ",")
 			for i := range ss {
 				ss[i] = strings.Trim(ss[i], " ")
 			}
 			currentTask.DependsOn = append(currentTask.DependsOn, ss...)
+			continue
+		}
+		if text != "" {
+			currentTask.Description = append(currentTask.Description, text)
 			continue
 		}
 	}
