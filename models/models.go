@@ -47,10 +47,12 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 		return err
 	}
 	cmd.Dir = path
+	logDir := "."
 	if task.Dir != "" {
 		cmd.Dir = task.Dir
+		logDir = task.Dir
 	}
-	fmt.Printf("%s: %s\n", cmd.Dir, task.Command)
+	fmt.Printf("%s: %s\n", logDir, task.Command)
 	return cmd.Run()
 }
 
