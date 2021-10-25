@@ -14,6 +14,7 @@ type Task struct {
 	Name        string
 	Description []string
 	Command     string
+	Dir         string
 	DependsOn   []string
 }
 
@@ -30,7 +31,6 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 			return err
 		}
 	}
-	fmt.Println(task.Command)
 	parts := strings.Split(task.Command, " ")
 	cmd := exec.Command(parts[0])
 	cmd.Args = parts[0:]
@@ -42,6 +42,10 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 		return err
 	}
 	cmd.Dir = path
+	if task.Dir != "" {
+		cmd.Dir = task.Dir
+	}
+	fmt.Printf("%s: %s\n", cmd.Dir, task.Command)
 	return cmd.Run()
 }
 

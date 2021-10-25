@@ -20,6 +20,7 @@ var commandTitle = regexp.MustCompile(`^.+: *`)
 var cleanName = regexp.MustCompile(`[_*: #]`)
 var codeBlock = regexp.MustCompile("^```.*$")
 var deps = regexp.MustCompile("^Requires:.*$")
+var dir = regexp.MustCompile("^Directory:.*$")
 
 func isTask(text string, taskDepth int) bool {
 	isHeading := heading.MatchString(text)
@@ -82,6 +83,16 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 				ss[i] = strings.Trim(ss[i], " ")
 			}
 			currentTask.DependsOn = append(currentTask.DependsOn, ss...)
+			continue
+		}
+		if dir.MatchString(text) {
+			if currentTask.Dir != "" {
+				err = fmt.Errorf("directory appears more than once for %s", currentTask.Name)
+				return
+			}
+			s := strings.ReplaceAll(scanner.Text(), "Directory:", "")
+			s = strings.Trim(s, " ")
+			currentTask.Dir = s
 			continue
 		}
 		if text != "" {

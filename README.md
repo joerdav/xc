@@ -72,6 +72,10 @@ Requires: task1
 Requires: task2, task3
 ```
 
+### Directory
+
+Directory by default will be the current working directory. However, if you provide a "Directory:" section then it can be overridden.
+
 ### Command
 
 The tasks command is signified by a md codeblock.
@@ -107,5 +111,12 @@ Also runs tests
 Requires: test
 ```
 sh ./push-tag.sh
+```
+
+#### ls
+
+Directory: ./parser
+```
+ls
 ```
 

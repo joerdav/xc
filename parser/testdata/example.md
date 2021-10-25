@@ -18,6 +18,8 @@ ls
 
 Lists files
 
+Directory: ./somefolder
+
 ```
 ls
 ```

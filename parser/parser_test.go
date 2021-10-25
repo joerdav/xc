@@ -30,6 +30,15 @@ func TestParseFile(t *testing.T) {
 	if diff := cmp.Diff(task1, result[0]); diff != "" {
 		t.Errorf("task1 does not match expected: %s", diff)
 	}
+	task2 := models.Task{
+		Name:        "list2",
+		Description: []string{"Lists files"},
+		Dir:         "./somefolder",
+		Command:     "ls",
+	}
+	if diff := cmp.Diff(task2, result[1]); diff != "" {
+		t.Errorf("task2 does not match expected: %s", diff)
+	}
 	task3 := models.Task{
 		Name:        "hello",
 		Description: []string{"Print a message"},
