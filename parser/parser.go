@@ -21,6 +21,7 @@ var cleanName = regexp.MustCompile(`[_*: #]`)
 var codeBlock = regexp.MustCompile("^```.*$")
 var deps = regexp.MustCompile("^Requires:.*$")
 var dir = regexp.MustCompile("^Directory:.*$")
+var env = regexp.MustCompile("^Env:.*$")
 
 func isTask(text string, taskDepth int) bool {
 	isHeading := heading.MatchString(text)
@@ -74,6 +75,15 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 		}
 		if inCodeBlock {
 			currentTask.Command += text
+			continue
+		}
+		if env.MatchString(text) {
+			s := strings.ReplaceAll(scanner.Text(), "Env:", "")
+			ss := strings.Split(s, ",")
+			for i := range ss {
+				ss[i] = strings.Trim(ss[i], " ")
+			}
+			currentTask.Env = append(currentTask.Env, ss...)
 			continue
 		}
 		if deps.MatchString(text) {

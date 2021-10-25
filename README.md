@@ -76,6 +76,10 @@ Requires: task2, task3
 
 Directory by default will be the current working directory. However, if you provide a "Directory:" section then it can be overridden.
 
+### Environment Variables
+
+Environment variables can be set with "Env:".
+
 ### Command
 
 The tasks command is signified by a md codeblock.
@@ -118,5 +122,13 @@ sh ./push-tag.sh
 Directory: ./parser
 ```
 ls
+```
+
+#### echoenv
+
+Env: SOME_VAR=test
+
+```
+printenv SOME_VAR
 ```
 

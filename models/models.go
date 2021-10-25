@@ -15,6 +15,7 @@ type Task struct {
 	Description []string
 	Command     string
 	Dir         string
+	Env         []string
 	DependsOn   []string
 }
 
@@ -37,6 +38,10 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
+	cmd.Env = os.Environ()
+	for _, e := range task.Env {
+		cmd.Env = append(cmd.Env, e)
+	}
 	path, err := os.Getwd()
 	if err != nil {
 		return err

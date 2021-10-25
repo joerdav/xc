@@ -43,6 +43,7 @@ func TestParseFile(t *testing.T) {
 		Name:        "hello",
 		Description: []string{"Print a message"},
 		Command:     `echo "Hello, world!"`,
+		Env:         []string{"somevar=val"},
 		DependsOn:   []string{"list", "list2"},
 	}
 	if diff := cmp.Diff(task3, result[2]); diff != "" {
