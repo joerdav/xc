@@ -89,7 +89,6 @@ func main() {
 			for _, d := range desc[1:] {
 				fmt.Printf("    %s  %s\n", strings.Repeat(" ", maxLen), d)
 			}
-			fmt.Println()
 		}
 		return
 	}
