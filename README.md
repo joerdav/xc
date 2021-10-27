@@ -132,3 +132,9 @@ Env: SOME_VAR=test
 printenv SOME_VAR
 ```
 
+#### combo
+
+Runs multiple commands but doesn't have it's own.
+
+Requires: echoenv, ls
+

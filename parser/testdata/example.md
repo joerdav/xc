@@ -24,6 +24,10 @@ Directory: ./somefolder
 ls
 ```
 
+### empty-task
+
+Description but no task info
+
 ### hello
 
 Print a message
@@ -35,6 +39,14 @@ Env: somevar=val
 ```
 echo "Hello, world!"
 ```
+
+### all-lists
+
+An example of a commandless task.
+
+Requires: list, list2
+
+
 ## Out Of Scope
 
 

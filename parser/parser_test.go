@@ -19,35 +19,29 @@ func TestParseFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(result) != 3 {
-		t.Errorf("expected %d tasks, got %d", 2, len(result))
+	expected := models.Tasks{
+		{Name: "list", Description: []string{"Lists files"}, Command: "ls"},
+		{
+			Name:        "list2",
+			Description: []string{"Lists files"},
+			Command:     "ls",
+			Dir:         "./somefolder",
+		},
+		{
+			Name:         "empty-task",
+			Description:  []string{"Description but no task info"},
+			ParsingError: "missing command or Requires",
+		},
+		{
+			Name:        "hello",
+			Description: []string{"Print a message"},
+			Command:     `echo "Hello, world!"`,
+			Env:         []string{"somevar=val"},
+			DependsOn:   []string{"list", "list2"},
+		},
 	}
-	task1 := models.Task{
-		Name:        "list",
-		Description: []string{"Lists files"},
-		Command:     "ls",
-	}
-	if diff := cmp.Diff(task1, result[0]); diff != "" {
-		t.Errorf("task1 does not match expected: %s", diff)
-	}
-	task2 := models.Task{
-		Name:        "list2",
-		Description: []string{"Lists files"},
-		Dir:         "./somefolder",
-		Command:     "ls",
-	}
-	if diff := cmp.Diff(task2, result[1]); diff != "" {
-		t.Errorf("task2 does not match expected: %s", diff)
-	}
-	task3 := models.Task{
-		Name:        "hello",
-		Description: []string{"Print a message"},
-		Command:     `echo "Hello, world!"`,
-		Env:         []string{"somevar=val"},
-		DependsOn:   []string{"list", "list2"},
-	}
-	if diff := cmp.Diff(task3, result[2]); diff != "" {
-		t.Errorf("task2 does not match expected: %s", diff)
+	if diff := cmp.Diff(expected, result); diff != "" {
+		t.Errorf("tasks does not match expected: %s", diff)
 	}
 
 }

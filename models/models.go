@@ -11,12 +11,13 @@ import (
 const MAX_DEPS = 50
 
 type Task struct {
-	Name        string
-	Description []string
-	Command     string
-	Dir         string
-	Env         []string
-	DependsOn   []string
+	Name         string
+	Description  []string
+	Command      string
+	Dir          string
+	Env          []string
+	DependsOn    []string
+	ParsingError string
 }
 
 type Tasks []Task
@@ -32,28 +33,31 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 			return err
 		}
 	}
-	parts := strings.Split(task.Command, " ")
-	cmd := exec.Command(parts[0])
-	cmd.Args = parts[0:]
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	cmd.Env = os.Environ()
-	for _, e := range task.Env {
-		cmd.Env = append(cmd.Env, e)
+	if strings.TrimSpace(task.Command) != "" {
+		parts := strings.Split(task.Command, " ")
+		cmd := exec.Command(parts[0])
+		cmd.Args = parts[0:]
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		cmd.Env = os.Environ()
+		for _, e := range task.Env {
+			cmd.Env = append(cmd.Env, e)
+		}
+		path, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		cmd.Dir = path
+		logDir := "."
+		if task.Dir != "" {
+			cmd.Dir = task.Dir
+			logDir = task.Dir
+		}
+		fmt.Printf("%s: %s\n", logDir, task.Command)
+		return cmd.Run()
 	}
-	path, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	cmd.Dir = path
-	logDir := "."
-	if task.Dir != "" {
-		cmd.Dir = task.Dir
-		logDir = task.Dir
-	}
-	fmt.Printf("%s: %s\n", logDir, task.Command)
-	return cmd.Run()
+	return nil
 }
 
 func (ts Tasks) Get(tsname string) (task Task, ok bool) {
@@ -74,7 +78,10 @@ func (ts Tasks) ValidateDependencies(task string, prevTasks []string) error {
 	// Check exists
 	t, ok := ts.Get(task)
 	if !ok {
-		return fmt.Errorf("task %s not found", t)
+		return fmt.Errorf("task %s not found", task)
+	}
+	if t.ParsingError != "" {
+		return fmt.Errorf("task %s has a parsing error: %s", task, t.ParsingError)
 	}
 	for _, t := range t.DependsOn {
 		st, ok := ts.Get(t)

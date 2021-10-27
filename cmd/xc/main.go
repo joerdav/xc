@@ -69,15 +69,25 @@ func main() {
 		for _, n := range t {
 			padLen := maxLen - len(n.Name)
 			pad := strings.Repeat(" ", padLen)
-			if len(n.Description) == 0 {
-				n.Description = append(n.Description, "")
+			var desc []string
+			if n.ParsingError != "" {
+				desc = append(desc, fmt.Sprintf("Parsing Error: %s", n.ParsingError), "")
 			}
-			fmt.Printf("    %s%s  %s\n", n.Name, pad, n.Description[0])
-			for _, d := range n.Description[1:] {
-				fmt.Printf("    %s  %s\n", strings.Repeat(" ", maxLen), d)
+			for _, d := range n.Description {
+				desc = append(desc, fmt.Sprintf("%s", d))
+			}
+			if len(n.Description) > 0 {
+				desc = append(desc, "")
 			}
 			if len(n.DependsOn) > 0 {
-				fmt.Printf("    %s  Requires:  %s\n", strings.Repeat(" ", maxLen), strings.Join(n.DependsOn, ", "))
+				desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(n.DependsOn, ", ")), "")
+			}
+			if len(desc) == 0 {
+				desc = append(desc, "")
+			}
+			fmt.Printf("    %s%s  %s\n", n.Name, pad, desc[0])
+			for _, d := range desc[1:] {
+				fmt.Printf("    %s  %s\n", strings.Repeat(" ", maxLen), d)
 			}
 			fmt.Println()
 		}

@@ -11,7 +11,7 @@ import (
 )
 
 var NoTasksError = errors.New("no tasks found")
-var MissingCommand = errors.New("missing command")
+var MissingCommand = errors.New("missing command or Requires")
 
 var taskR = regexp.MustCompile(`^#+ +Tasks`)
 var heading = regexp.MustCompile(`^#+`)
@@ -25,7 +25,7 @@ var env = regexp.MustCompile("^Env:.*$")
 
 func isTask(text string, taskDepth int) bool {
 	isHeading := heading.MatchString(text)
-	comesUnderTasks := strings.Count(text, "#") > taskDepth
+	comesUnderTasks := strings.Count(text, "#") == taskDepth+1
 	return isHeading && comesUnderTasks
 }
 func isTaskSection(text string) bool {
@@ -53,8 +53,10 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 		}
 		if isTask(text, taskLevel) {
 			if currentTask != nil {
-				err = fmt.Errorf("%v: near %s", MissingCommand, text)
-				return
+				if currentTask.Command == "" && len(currentTask.DependsOn) == 0 {
+					currentTask.ParsingError = fmt.Sprintf("%v", MissingCommand)
+				}
+				ts = append(ts, *currentTask)
 			}
 			name := cleanName.ReplaceAllString(text, "")
 			currentTask = &models.Task{
@@ -66,10 +68,6 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 			continue
 		}
 		if codeBlock.MatchString(text) {
-			if inCodeBlock {
-				ts = append(ts, *currentTask)
-				currentTask = nil
-			}
 			inCodeBlock = !inCodeBlock
 			continue
 		}
@@ -113,6 +111,12 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 	if !foundTasksSection {
 		err = NoTasksError
 		return
+	}
+	if currentTask != nil {
+		if currentTask.Command == "" && len(currentTask.DependsOn) == 0 {
+			currentTask.ParsingError = fmt.Sprintf("%v", MissingCommand)
+		}
+		ts = append(ts, *currentTask)
 	}
 	return
 }
