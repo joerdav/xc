@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/joe-davidson1802/xc/parser"
-	"github.com/spf13/pflag"
+	"github.com/posener/complete"
 )
 
 var (
@@ -20,10 +21,10 @@ func main() {
 	log.SetFlags(0)
 	log.SetOutput(os.Stderr)
 
-	pflag.Usage = func() {
+	flag.Usage = func() {
 		fmt.Println("xc - list tasks")
 		fmt.Println("xc [task...] - run tasks")
-		pflag.PrintDefaults()
+		flag.PrintDefaults()
 	}
 
 	var (
@@ -32,10 +33,49 @@ func main() {
 		fileName    string
 	)
 
-	pflag.BoolVar(&versionFlag, "version", false, "show xc version")
-	pflag.BoolVarP(&helpFlag, "help", "h", false, "shows xc usage")
-	pflag.StringVarP(&fileName, "file", "f", "README.md", "specify markdown file that contains tasks")
-	pflag.Parse()
+	flag.BoolVar(&versionFlag, "version", false, "show xc version")
+	flag.BoolVar(&helpFlag, "help", false, "shows xc usage")
+	flag.BoolVar(&helpFlag, "h", false, "shows xc usage")
+	flag.StringVar(&fileName, "file", "README.md", "specify markdown file that contains tasks")
+	flag.StringVar(&fileName, "f", "README.md", "specify markdown file that contains tasks")
+
+	cmp := complete.New("xc", complete.Command{
+		GlobalFlags: complete.Flags{
+			"-version": complete.PredictNothing,
+			"-h":       complete.PredictNothing,
+			"-help":    complete.PredictNothing,
+			"-f":       complete.PredictFiles("*.md"),
+			"-file":    complete.PredictFiles("*.md"),
+		},
+	})
+	b, err := os.ReadFile(fileName)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	f := string(b)
+	t, err := parser.ParseFile(f)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	s := make(map[string]complete.Command)
+	for _, ta := range t {
+		s[ta.Name] = complete.Command{}
+	}
+	cmp.Command.Sub = s
+	cmp.CLI.InstallName = "complete"
+	cmp.CLI.UninstallName = "uncomplete"
+	cmp.AddFlags(nil)
+
+	flag.Parse()
+
+	if cmp.Complete() {
+		return
+	}
+
+	if err != nil {
+		os.Exit(1)
+	}
 
 	if versionFlag {
 		fmt.Printf("xc version: %s\n", getVersion())
@@ -43,21 +83,10 @@ func main() {
 	}
 
 	if helpFlag {
-		pflag.Usage()
+		flag.Usage()
 		return
 	}
-	b, err := os.ReadFile(fileName)
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-	f := string(b)
-	t, err := parser.ParseFile(f)
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-	tav, _ := getArgs()
+	tav := getArgs()
 	if len(tav) == 0 {
 		fmt.Println("tasks:")
 		maxLen := 0
@@ -106,20 +135,11 @@ func main() {
 	}
 
 }
-func getArgs() (tasksAndVars, cliArgs []string) {
+func getArgs() []string {
 	var (
-		args          = pflag.Args()
-		doubleDashPos = pflag.CommandLine.ArgsLenAtDash()
+		args = flag.Args()
 	)
-
-	if doubleDashPos != -1 {
-		tasksAndVars = args[:doubleDashPos]
-		cliArgs = args[doubleDashPos:]
-	} else {
-		tasksAndVars = args
-	}
-
-	return
+	return args
 }
 
 func getVersion() string {

@@ -39,6 +39,11 @@ func TestParseFile(t *testing.T) {
 			Env:         []string{"somevar=val"},
 			DependsOn:   []string{"list", "list2"},
 		},
+		{
+			Name:        "all-lists",
+			Description: []string{"An example of a commandless task."},
+			DependsOn:   []string{"list", "list2"},
+		},
 	}
 	if diff := cmp.Diff(expected, result); diff != "" {
 		t.Errorf("tasks does not match expected: %s", diff)
