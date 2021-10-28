@@ -17,6 +17,39 @@ var (
 	version = ""
 )
 
+func completion(fileName string) bool {
+	cmp := complete.New("xc", complete.Command{
+		GlobalFlags: complete.Flags{
+			"-version": complete.PredictNothing,
+			"-h":       complete.PredictNothing,
+			"-help":    complete.PredictNothing,
+			"-f":       complete.PredictFiles("*.md"),
+			"-file":    complete.PredictFiles("*.md"),
+		},
+	})
+	b, err := os.ReadFile(fileName)
+	if err != nil {
+		return false
+	}
+	f := string(b)
+	t, err := parser.ParseFile(f)
+	if err != nil {
+		return false
+	}
+	s := make(map[string]complete.Command)
+	for _, ta := range t {
+		s[ta.Name] = complete.Command{}
+	}
+	cmp.Command.Sub = s
+	cmp.CLI.InstallName = "complete"
+	cmp.CLI.UninstallName = "uncomplete"
+	cmp.AddFlags(nil)
+
+	flag.Parse()
+
+	return cmp.Complete()
+}
+
 func main() {
 	log.SetFlags(0)
 	log.SetOutput(os.Stderr)
@@ -39,44 +72,21 @@ func main() {
 	flag.StringVar(&fileName, "file", "README.md", "specify markdown file that contains tasks")
 	flag.StringVar(&fileName, "f", "README.md", "specify markdown file that contains tasks")
 
-	cmp := complete.New("xc", complete.Command{
-		GlobalFlags: complete.Flags{
-			"-version": complete.PredictNothing,
-			"-h":       complete.PredictNothing,
-			"-help":    complete.PredictNothing,
-			"-f":       complete.PredictFiles("*.md"),
-			"-file":    complete.PredictFiles("*.md"),
-		},
-	})
+	if completion(fileName) {
+		return
+	}
+
 	b, err := os.ReadFile(fileName)
 	if err != nil {
 		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 	f := string(b)
 	t, err := parser.ParseFile(f)
 	if err != nil {
 		fmt.Println(err.Error())
-	}
-
-	s := make(map[string]complete.Command)
-	for _, ta := range t {
-		s[ta.Name] = complete.Command{}
-	}
-	cmp.Command.Sub = s
-	cmp.CLI.InstallName = "complete"
-	cmp.CLI.UninstallName = "uncomplete"
-	cmp.AddFlags(nil)
-
-	flag.Parse()
-
-	if cmp.Complete() {
-		return
-	}
-
-	if err != nil {
 		os.Exit(1)
 	}
-
 	if versionFlag {
 		fmt.Printf("xc version: %s\n", getVersion())
 		return

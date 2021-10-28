@@ -6,6 +6,12 @@
 go install github.com/joe-davidson1802/xc/cmd/xc@latest
 ```
 
+Install autocompletion for bash:
+
+```
+xc -complete
+```
+
 ## Usage
 
 To list available tasks run the following.
