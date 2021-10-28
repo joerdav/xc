@@ -28,19 +28,18 @@ func completion(fileName string) bool {
 		},
 	})
 	b, err := os.ReadFile(fileName)
-	if err != nil {
-		return false
+	if err == nil {
+		f := string(b)
+		t, err := parser.ParseFile(f)
+		if err != nil {
+			return false
+		}
+		s := make(map[string]complete.Command)
+		for _, ta := range t {
+			s[ta.Name] = complete.Command{}
+		}
+		cmp.Command.Sub = s
 	}
-	f := string(b)
-	t, err := parser.ParseFile(f)
-	if err != nil {
-		return false
-	}
-	s := make(map[string]complete.Command)
-	for _, ta := range t {
-		s[ta.Name] = complete.Command{}
-	}
-	cmp.Command.Sub = s
 	cmp.CLI.InstallName = "complete"
 	cmp.CLI.UninstallName = "uncomplete"
 	cmp.AddFlags(nil)
