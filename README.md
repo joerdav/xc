@@ -2,8 +2,15 @@
 
 ## Installation
 
+Go:
 ```
 go install github.com/joe-davidson1802/xc/cmd/xc@latest
+```
+
+Brew:
+```
+brew tap joe-davidson1802/xc
+brew install xc
 ```
 
 Install autocompletion for bash:
