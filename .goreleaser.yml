@@ -32,6 +32,7 @@ brews:
     tap:
       owner: joe-davidson1802
       name: homebrew-xc
+      token: "{{ .Env.BREW_TOKEN }}"
     license: "MIT"
 signs:
   - artifacts: checksum
