@@ -34,7 +34,7 @@ Print a message
 
 Requires: list, list2
 
-Env: somevar=val
+Env: `somevar=val`
 
 ```
 echo "Hello, world!"

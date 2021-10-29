@@ -13,15 +13,16 @@ import (
 var NoTasksError = errors.New("no tasks found")
 var MissingCommand = errors.New("missing command or Requires")
 
-var taskR = regexp.MustCompile(`^#+ +Tasks`)
-var heading = regexp.MustCompile(`^#+`)
-var commandDef = regexp.MustCompile(`^.+:.*$`)
-var commandTitle = regexp.MustCompile(`^.+: *`)
-var cleanName = regexp.MustCompile(`[_*: #]`)
-var codeBlock = regexp.MustCompile("^```.*$")
-var deps = regexp.MustCompile("^Requires:.*$")
-var dir = regexp.MustCompile("^Directory:.*$")
-var env = regexp.MustCompile("^Env:.*$")
+var taskR = regexp.MustCompile(`(?i)^#+ +Tasks`)
+var heading = regexp.MustCompile(`(?i)^#+`)
+var commandDef = regexp.MustCompile(`(?i)^.+:.*$`)
+var commandTitle = regexp.MustCompile(`(?i)^.+: *`)
+var cleanName = regexp.MustCompile("(?i)[_*:` #]")
+var codeBlock = regexp.MustCompile("(?i)^```.*$")
+var deps = regexp.MustCompile("(?i)^Requires:.*$")
+var dir = regexp.MustCompile("(?i)^Directory:.*$")
+var env = regexp.MustCompile("(?i)^Env:.*$")
+var trimValues = "_*` "
 
 func isTask(text string, taskDepth int) bool {
 	isHeading := heading.MatchString(text)
@@ -30,6 +31,16 @@ func isTask(text string, taskDepth int) bool {
 }
 func isTaskSection(text string) bool {
 	return taskR.MatchString(text)
+}
+
+func parseListValue(text string) (ss []string) {
+	idx := strings.Index(text, ":") + 1
+	s := strings.Trim(text[idx:], trimValues)
+	ss = strings.Split(s, ",")
+	for i := range ss {
+		ss[i] = strings.Trim(ss[i], trimValues)
+	}
+	return
 }
 
 func ParseFile(f string) (ts models.Tasks, err error) {
@@ -76,20 +87,12 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 			continue
 		}
 		if env.MatchString(text) {
-			s := strings.ReplaceAll(scanner.Text(), "Env:", "")
-			ss := strings.Split(s, ",")
-			for i := range ss {
-				ss[i] = strings.Trim(ss[i], " ")
-			}
+			ss := parseListValue(text)
 			currentTask.Env = append(currentTask.Env, ss...)
 			continue
 		}
 		if deps.MatchString(text) {
-			s := strings.ReplaceAll(scanner.Text(), "Requires:", "")
-			ss := strings.Split(s, ",")
-			for i := range ss {
-				ss[i] = strings.Trim(ss[i], " ")
-			}
+			ss := parseListValue(text)
 			currentTask.DependsOn = append(currentTask.DependsOn, ss...)
 			continue
 		}
@@ -98,8 +101,9 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 				err = fmt.Errorf("directory appears more than once for %s", currentTask.Name)
 				return
 			}
-			s := strings.ReplaceAll(scanner.Text(), "Directory:", "")
-			s = strings.Trim(s, " ")
+			idx := strings.Index(text, ":") + 1
+			s := text[idx:]
+			s = strings.Trim(s, trimValues)
 			currentTask.Dir = s
 			continue
 		}
