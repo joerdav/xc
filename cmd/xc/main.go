@@ -109,19 +109,16 @@ func main() {
 			pad := strings.Repeat(" ", padLen)
 			var desc []string
 			if n.ParsingError != "" {
-				desc = append(desc, fmt.Sprintf("Parsing Error: %s", n.ParsingError), "")
+				desc = append(desc, fmt.Sprintf("Parsing Error: %s", n.ParsingError))
 			}
 			for _, d := range n.Description {
 				desc = append(desc, fmt.Sprintf("%s", d))
 			}
-			if len(n.Description) > 0 {
-				desc = append(desc, "")
-			}
 			if len(n.DependsOn) > 0 {
-				desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(n.DependsOn, ", ")), "")
+				desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(n.DependsOn, ", ")))
 			}
 			if len(desc) == 0 {
-				desc = append(desc, "")
+				desc = append(desc, n.Command)
 			}
 			fmt.Printf("    %s%s  %s\n", n.Name, pad, desc[0])
 			for _, d := range desc[1:] {
