@@ -7,6 +7,13 @@ builds:
       - linux
       - darwin
       - windows
+brews:
+  -
+    tap:
+      owner: joe-davidson1802
+      name: homebrew-tap
+      branch: main
+    license: "MIT"
 signs:
   - artifacts: checksum
     args: ["--batch", "-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
