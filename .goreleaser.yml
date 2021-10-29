@@ -33,7 +33,8 @@ brews:
       owner: joe-davidson1802
       name: homebrew-xc
       token: "{{ .Env.BREW_TOKEN }}"
-    description: eXeCute project tasks from a readme file
+    description: A cli to eXeCute project tasks from a readme file
+    homepage: https://github.com/Joe-Davidson1802/xc
     license: "MIT"
 signs:
   - artifacts: checksum
