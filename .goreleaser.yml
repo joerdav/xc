@@ -11,7 +11,7 @@ brews:
   -
     tap:
       owner: joe-davidson1802
-      name: homebrew-tap
+      name: homebrew-xc
       branch: main
     license: "MIT"
 signs:
