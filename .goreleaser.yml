@@ -7,6 +7,9 @@ builds:
       - linux
       - darwin
       - windows
+    goarm:
+      - 6
+      - 7
 brews:
   -
     tap:
