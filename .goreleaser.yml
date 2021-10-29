@@ -4,14 +4,30 @@ builds:
     id: xc
     binary: xc
     goos:
-      - linux
       - darwin
+      - linux
       - windows
+    goarch:
+      - 386
+      - amd64
+      - arm64
+      - arm
     goarm:
       - 6
       - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+release:
+  ids:
+    - xc
 brews:
   -
+    ids:
+      - brew
     goarm: 7
     tap:
       owner: joe-davidson1802
@@ -22,6 +38,9 @@ signs:
     args: ["--batch", "-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
 archives:
   - format: binary
+    id: xc
+  - format: tar.gz
+    id: brew
 checksum:
   name_template: 'checksums.txt'
 changelog:
