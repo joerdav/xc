@@ -1,34 +1,19 @@
 # See documentation at http://goreleaser.com
 builds:
-- env:
-  - CGO_ENABLED=0
-  dir: cmd/xc
-  goos:
-  - linux
-  - windows
-  - darwin
-  goarch:
-  - 386
-  - arm
-  - arm64
-  - amd64
-  ignore:
-  - goos: darwin
-    goarch: 386
+  - main: ./cmd/xc
+    id: xc
+    binary: xc
+    goos:
+      - linux
+      - darwin
+      - windows
 signs:
   - artifacts: checksum
     args: ["--batch", "-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+  format: binary
 checksum:
   name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
