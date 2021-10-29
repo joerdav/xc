@@ -21,9 +21,6 @@ builds:
       - goos: linux
         goarch: arm
         goarm: 6
-release:
-  ids:
-    - xc
 brews:
   -
     ids:
