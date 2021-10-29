@@ -12,11 +12,13 @@ builds:
       - 7
 brews:
   -
+    goarm: 7
     tap:
       owner: joe-davidson1802
       name: homebrew-xc
       branch: main
     license: "MIT"
+    token: "{{ .Env.GITHUB_TOKEN }}"
 signs:
   - artifacts: checksum
     args: ["--batch", "-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
