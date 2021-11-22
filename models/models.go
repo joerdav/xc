@@ -48,14 +48,15 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 			return err
 		}
 	}
+	var cmdl []string
+	for _, c := range task.Commands {
+		if strings.TrimSpace(c) == "" {
+			continue
+		}
+		cmdl = append(cmdl, fmt.Sprintf(`echo "%s"`, c), c)
+	}
 	if len(task.Commands) == 0 {
 		return nil
-
-	}
-	cmdl := []string{}
-
-	for _, c := range task.Commands {
-		cmdl = append(cmdl, fmt.Sprintf(`echo "%s"`, c), c)
 	}
 	cmds := strings.Join(cmdl, COMMAND_SEP)
 	cmd := exec.Command(COMMAND_RUNNER, COMMAND_FLAG, cmds)
