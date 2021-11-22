@@ -5,15 +5,30 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
 const MAX_DEPS = 50
 
+var (
+	COMMAND_SEP    string = ";"
+	COMMAND_RUNNER        = "bash"
+	COMMAND_FLAG          = "-c"
+)
+
+func init() {
+	if runtime.GOOS == "windows" {
+		COMMAND_SEP = "&&"
+		COMMAND_RUNNER = "cmd"
+		COMMAND_FLAG = "/C"
+	}
+}
+
 type Task struct {
 	Name         string
 	Description  []string
-	Command      string
+	Commands     []string
 	Dir          string
 	Env          []string
 	DependsOn    []string
@@ -33,29 +48,35 @@ func (ts Tasks) Run(ctx context.Context, tsname string) error {
 			return err
 		}
 	}
-	if strings.TrimSpace(task.Command) != "" {
-		parts := strings.Split(task.Command, " ")
-		cmd := exec.Command(parts[0])
-		cmd.Args = parts[0:]
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		cmd.Env = os.Environ()
-		for _, e := range task.Env {
-			cmd.Env = append(cmd.Env, e)
-		}
-		path, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		cmd.Dir = path
-		logDir := "."
-		if task.Dir != "" {
-			cmd.Dir = task.Dir
-			logDir = task.Dir
-		}
-		fmt.Printf("%s: %s\n", logDir, task.Command)
-		return cmd.Run()
+	if len(task.Commands) == 0 {
+		return nil
+
+	}
+	cmdl := []string{}
+
+	for _, c := range task.Commands {
+		cmdl = append(cmdl, fmt.Sprintf(`echo "%s"`, c), c)
+	}
+	cmds := strings.Join(cmdl, COMMAND_SEP)
+	cmd := exec.Command(COMMAND_RUNNER, COMMAND_FLAG, cmds)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Env = os.Environ()
+	for _, e := range task.Env {
+		cmd.Env = append(cmd.Env, e)
+	}
+	path, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	cmd.Dir = path
+	if task.Dir != "" {
+		cmd.Dir = task.Dir
+	}
+	err = cmd.Run()
+	if err != nil {
+		return err
 	}
 	return nil
 }

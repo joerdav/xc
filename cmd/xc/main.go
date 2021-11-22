@@ -118,7 +118,7 @@ func main() {
 				desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(n.DependsOn, ", ")))
 			}
 			if len(desc) == 0 {
-				desc = append(desc, n.Command)
+				desc = append(desc, n.Commands...)
 			}
 			fmt.Printf("    %s%s  %s\n", n.Name, pad, desc[0])
 			for _, d := range desc[1:] {

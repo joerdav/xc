@@ -38,6 +38,7 @@ Env: `somevar=val`
 
 ```
 echo "Hello, world!"
+echo "Hello, world2!"
 ```
 
 ### all-lists
