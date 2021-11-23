@@ -64,7 +64,7 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 		}
 		if isTask(text, taskLevel) {
 			if currentTask != nil {
-				if currentTask.Command == "" && len(currentTask.DependsOn) == 0 {
+				if len(currentTask.Commands) == 0 && len(currentTask.DependsOn) == 0 {
 					currentTask.ParsingError = fmt.Sprintf("%v", MissingCommand)
 				}
 				ts = append(ts, *currentTask)
@@ -83,7 +83,7 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 			continue
 		}
 		if inCodeBlock {
-			currentTask.Command += text
+			currentTask.Commands = append(currentTask.Commands, text)
 			continue
 		}
 		if env.MatchString(text) {
@@ -117,7 +117,7 @@ func ParseFile(f string) (ts models.Tasks, err error) {
 		return
 	}
 	if currentTask != nil {
-		if currentTask.Command == "" && len(currentTask.DependsOn) == 0 {
+		if len(currentTask.Commands) == 0 && len(currentTask.DependsOn) == 0 {
 			currentTask.ParsingError = fmt.Sprintf("%v", MissingCommand)
 		}
 		ts = append(ts, *currentTask)

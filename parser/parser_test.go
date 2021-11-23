@@ -20,11 +20,11 @@ func TestParseFile(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	expected := models.Tasks{
-		{Name: "list", Description: []string{"Lists files"}, Command: "ls"},
+		{Name: "list", Description: []string{"Lists files"}, Commands: []string{"ls"}},
 		{
 			Name:        "list2",
 			Description: []string{"Lists files"},
-			Command:     "ls",
+			Commands:    []string{"ls"},
 			Dir:         "./somefolder",
 		},
 		{
@@ -35,9 +35,12 @@ func TestParseFile(t *testing.T) {
 		{
 			Name:        "hello",
 			Description: []string{"Print a message"},
-			Command:     `echo "Hello, world!"`,
-			Env:         []string{"somevar=val"},
-			DependsOn:   []string{"list", "list2"},
+			Commands: []string{
+				`echo "Hello, world!"`,
+				`echo "Hello, world2!"`,
+			},
+			Env:       []string{"somevar=val"},
+			DependsOn: []string{"list", "list2"},
 		},
 		{
 			Name:        "all-lists",
