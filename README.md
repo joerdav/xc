@@ -13,7 +13,7 @@ brew tap joe-davidson1802/xc
 brew install xc
 ```
 
-Install autocompletion for bash:
+Install tab completion for bash:
 
 ```
 xc -complete
