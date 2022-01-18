@@ -19,6 +19,13 @@ Install tab completion for bash:
 xc -complete
 ```
 
+When keys `xc<Tab>` are pressed, completion should be triggered:
+
+```
+[0][~/src/xc][main]$ xc
+combo    echoenv  get      ls       tag      test
+```
+
 ## Usage
 
 To list available tasks run the following.
