@@ -22,6 +22,7 @@ func completion(fileName string) bool {
 		GlobalFlags: complete.Flags{
 			"-version": complete.PredictNothing,
 			"-h":       complete.PredictNothing,
+			"-short":   complete.PredictNothing,
 			"-help":    complete.PredictNothing,
 			"-f":       complete.PredictFiles("*.md"),
 			"-file":    complete.PredictFiles("*.md"),
@@ -63,6 +64,8 @@ func main() {
 		versionFlag bool
 		helpFlag    bool
 		fileName    string
+		short       bool
+		md          bool
 	)
 
 	flag.BoolVar(&versionFlag, "version", false, "show xc version")
@@ -70,6 +73,8 @@ func main() {
 	flag.BoolVar(&helpFlag, "h", false, "shows xc usage")
 	flag.StringVar(&fileName, "file", "README.md", "specify markdown file that contains tasks")
 	flag.StringVar(&fileName, "f", "README.md", "specify markdown file that contains tasks")
+	flag.BoolVar(&short, "short", false, "list task names in a short format")
+	flag.BoolVar(&md, "md", false, "print the markdown for a task rather than running it")
 
 	if completion(fileName) {
 		return
@@ -96,7 +101,7 @@ func main() {
 		return
 	}
 	tav := getArgs()
-	if len(tav) == 0 {
+	if len(tav) == 0 && !short {
 		fmt.Println("tasks:")
 		maxLen := 0
 		for _, n := range t {
@@ -126,6 +131,25 @@ func main() {
 			}
 		}
 		return
+	}
+	if len(tav) == 0 && short {
+		for _, n := range t {
+			fmt.Println(n.Name)
+		}
+		return
+	}
+	if md {
+		if len(tav) != 1 {
+			fmt.Printf("md requires 1 task, got: %d\n", len(tav))
+			os.Exit(1)
+		}
+		ta, ok := t.Get(tav[0])
+		if !ok {
+			fmt.Printf("%s is not a task\n", tav[0])
+		}
+		ta.Display(os.Stdout)
+		return
+
 	}
 	for _, tav := range tav {
 		err = t.ValidateDependencies(tav, []string{})

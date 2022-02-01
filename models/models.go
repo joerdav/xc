@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -33,6 +34,33 @@ type Task struct {
 	Env          []string
 	DependsOn    []string
 	ParsingError string
+}
+
+func (t Task) Display(w io.Writer) {
+	fmt.Fprintf(w, "## %s\n\n", t.Name)
+	for _, d := range t.Description {
+		fmt.Fprintln(w, d)
+		fmt.Fprintln(w)
+	}
+	if len(t.DependsOn) > 0 {
+		fmt.Fprintln(w, "Requires:", strings.Join(t.DependsOn, ", "))
+		fmt.Fprintln(w)
+	}
+	if t.Dir != "" {
+		fmt.Fprintln(w, "Directory:", t.Dir)
+		fmt.Fprintln(w)
+	}
+	if len(t.Env) > 0 {
+		fmt.Fprintln(w, "Env:", strings.Join(t.Env, ", "))
+		fmt.Fprintln(w)
+	}
+	if len(t.Commands) > 0 {
+		fmt.Fprintln(w, "```")
+		for _, d := range t.Commands {
+			fmt.Fprintln(w, d)
+		}
+		fmt.Fprintln(w, "```")
+	}
 }
 
 type Tasks []Task

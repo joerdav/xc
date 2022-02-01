@@ -108,6 +108,19 @@ The tasks command is signified by a md codeblock.
 command --args
 ```
 
+## VIM Usage
+
+I plan to introduce a vim plugin to provide this functionality, but for now you can install:
+
+- <https://github.com/junegunn/fzf>
+- <https://github.com/christoomey/vim-run-interactive>
+
+And use the following mapping:
+
+``` sh
+:map <leader>xc :call fzf#run({'source':'xc -short', 'options': '--prompt "xc> " --preview "xc -md {}"', 'sink': 'RunInInteractiveShell xc', 'window': {'width': 0.9, 'height': 0.6}})
+```
+
 ## Example
 
 ### Tasks
