@@ -28,10 +28,13 @@ func completion(fileName string) bool {
 			"-file":    complete.PredictFiles("*.md"),
 		},
 	})
-	b, err := os.ReadFile(fileName)
+	b, err := os.Open(fileName)
 	if err == nil {
-		f := string(b)
-		t, err := parser.ParseFile(f)
+		p, err := parser.NewParser(b)
+		if err != nil {
+			return false
+		}
+		t, err := p.Parse()
 		if err != nil {
 			return false
 		}
@@ -80,13 +83,17 @@ func main() {
 		return
 	}
 
-	b, err := os.ReadFile(fileName)
+	b, err := os.Open(fileName)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	f := string(b)
-	t, err := parser.ParseFile(f)
+	p, err := parser.NewParser(b)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	t, err := p.Parse()
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)

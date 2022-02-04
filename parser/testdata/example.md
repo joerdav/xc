@@ -24,10 +24,6 @@ Directory: ./somefolder
 ls
 ```
 
-### empty-task
-
-Description but no task info
-
 ### hello
 
 Print a message

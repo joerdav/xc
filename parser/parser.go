@@ -4,123 +4,195 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"regexp"
+	"io"
 	"strings"
 
 	"github.com/joe-davidson1802/xc/models"
 )
 
-var NoTasksError = errors.New("no tasks found")
-var MissingCommand = errors.New("missing command or Requires")
-
-var taskR = regexp.MustCompile(`(?i)^#+ +Tasks`)
-var heading = regexp.MustCompile(`(?i)^#+`)
-var commandDef = regexp.MustCompile(`(?i)^.+:.*$`)
-var commandTitle = regexp.MustCompile(`(?i)^.+: *`)
-var cleanName = regexp.MustCompile("(?i)[_*:` #]")
-var codeBlock = regexp.MustCompile("(?i)^```.*$")
-var deps = regexp.MustCompile("(?i)^Requires:.*$")
-var dir = regexp.MustCompile("(?i)^Directory:.*$")
-var env = regexp.MustCompile("(?i)^Env:.*$")
+// trimValues are the characters that should be ignored in titles and attributes
 var trimValues = "_*` "
 
-func isTask(text string, taskDepth int) bool {
-	isHeading := heading.MatchString(text)
-	comesUnderTasks := strings.Count(text, "#") == taskDepth+1
-	return isHeading && comesUnderTasks
-}
-func isTaskSection(text string) bool {
-	return taskR.MatchString(text)
+type parser struct {
+	scanner    *bufio.Scanner
+	tasks      models.Tasks
+	currTask   models.Task
+	tasksLevel int
 }
 
-func parseListValue(text string) (ss []string) {
-	idx := strings.Index(text, ":") + 1
-	s := strings.Trim(text[idx:], trimValues)
-	ss = strings.Split(s, ",")
-	for i := range ss {
-		ss[i] = strings.Trim(ss[i], trimValues)
+func (p *parser) Parse() (tasks models.Tasks, err error) {
+	ok := true
+	for ok {
+		ok, err = p.parseTask()
+		if err != nil || !ok {
+			break
+		}
 	}
+	tasks = p.tasks
 	return
 }
 
-func ParseFile(f string) (ts models.Tasks, err error) {
-	var foundTasksSection bool
-	var taskLevel int
-	var inCodeBlock bool
-	var currentTask *models.Task
-	scanner := bufio.NewScanner(strings.NewReader(f))
-	for scanner.Scan() {
-		text := scanner.Text()
-		if isTaskSection(text) {
-			foundTasksSection = true
-			taskLevel = strings.Count(text, "#")
-			continue
-		}
-		if !foundTasksSection {
-			continue
-		}
-		if heading.MatchString(text) && strings.Count(text, "#") <= taskLevel {
-			break
-		}
-		if isTask(text, taskLevel) {
-			if currentTask != nil {
-				if len(currentTask.Commands) == 0 && len(currentTask.DependsOn) == 0 {
-					currentTask.ParsingError = fmt.Sprintf("%v", MissingCommand)
-				}
-				ts = append(ts, *currentTask)
-			}
-			name := cleanName.ReplaceAllString(text, "")
-			currentTask = &models.Task{
-				Name: name,
-			}
-			continue
-		}
-		if currentTask == nil {
-			continue
-		}
-		if codeBlock.MatchString(text) {
-			inCodeBlock = !inCodeBlock
-			continue
-		}
-		if inCodeBlock {
-			currentTask.Commands = append(currentTask.Commands, text)
-			continue
-		}
-		if env.MatchString(text) {
-			ss := parseListValue(text)
-			currentTask.Env = append(currentTask.Env, ss...)
-			continue
-		}
-		if deps.MatchString(text) {
-			ss := parseListValue(text)
-			currentTask.DependsOn = append(currentTask.DependsOn, ss...)
-			continue
-		}
-		if dir.MatchString(text) {
-			if currentTask.Dir != "" {
-				err = fmt.Errorf("directory appears more than once for %s", currentTask.Name)
-				return
-			}
-			idx := strings.Index(text, ":") + 1
-			s := text[idx:]
-			s = strings.Trim(s, trimValues)
-			currentTask.Dir = s
-			continue
-		}
-		if text != "" {
-			currentTask.Description = append(currentTask.Description, text)
-			continue
-		}
-	}
-	if !foundTasksSection {
-		err = NoTasksError
+func (p *parser) parseTitle(advance bool) (ok bool, level int, text string) {
+	t := strings.TrimSpace(p.scanner.Text())
+	s := strings.Fields(t)
+	if len(s) < 2 || len(s[0]) < 1 || strings.Count(s[0], "#") != len(s[0]) {
 		return
 	}
-	if currentTask != nil {
-		if len(currentTask.Commands) == 0 && len(currentTask.DependsOn) == 0 {
-			currentTask.ParsingError = fmt.Sprintf("%v", MissingCommand)
-		}
-		ts = append(ts, *currentTask)
+	ok = true
+	level = len(s[0])
+	text = strings.Join(s[1:], " ")
+	if !advance {
+		return
 	}
+	p.scanner.Scan()
+	return
+}
+
+type AttributeType int
+
+const (
+	AttributeTypeEnv AttributeType = iota
+	AttributeTypeDir
+	AttributeTypeReq
+)
+
+var attMap = map[string]AttributeType{
+	"req":         AttributeTypeReq,
+	"requires":    AttributeTypeReq,
+	"env":         AttributeTypeEnv,
+	"environment": AttributeTypeEnv,
+	"dir":         AttributeTypeDir,
+	"directory":   AttributeTypeDir,
+}
+
+func (p *parser) parseAttribute() (ok bool, err error) {
+	s := strings.Split(p.scanner.Text(), ":")
+	if len(s) < 2 {
+		return
+	}
+	ty, ok := attMap[strings.ToLower(strings.Trim(s[0], trimValues))]
+	if !ok {
+		return
+	}
+	rest := strings.Join(s[1:], " ")
+	switch ty {
+	case AttributeTypeReq:
+		vs := strings.Split(rest, ",")
+		for _, v := range vs {
+			p.currTask.DependsOn = append(p.currTask.DependsOn, strings.Trim(v, trimValues))
+		}
+	case AttributeTypeEnv:
+		vs := strings.Split(rest, ",")
+		for _, v := range vs {
+			p.currTask.Env = append(p.currTask.Env, strings.Trim(v, trimValues))
+		}
+	case AttributeTypeDir:
+		if p.currTask.Dir != "" {
+			err = fmt.Errorf("directory appears more than once for %s", p.currTask.Name)
+			return
+		}
+		s := strings.Trim(rest, trimValues)
+		p.currTask.Dir = s
+	}
+	p.scanner.Scan()
+	return
+}
+
+func (p *parser) parseCodeBlock() (ok bool, err error) {
+	t := p.scanner.Text()
+	if len(t) < 3 || t[:3] != "```" {
+		return
+	}
+	if len(p.currTask.Commands) > 0 {
+		err = fmt.Errorf("command block already exists for task %s", p.currTask.Name)
+		return
+	}
+	var ended bool
+	for p.scanner.Scan() {
+		if len(p.scanner.Text()) >= 3 && p.scanner.Text()[:3] == "```" {
+			ended = true
+			break
+		}
+		if strings.TrimSpace(p.scanner.Text()) != "" {
+			p.currTask.Commands = append(p.currTask.Commands, p.scanner.Text())
+		}
+	}
+	if !ended {
+		err = fmt.Errorf("command block in task %s was not ended", p.currTask.Name)
+		return
+	}
+	p.scanner.Scan()
+	return
+}
+
+func (p *parser) parseTask() (ok bool, err error) {
+	p.currTask = models.Task{}
+	for {
+		tok, level, text := p.parseTitle(true)
+		if !tok || level > p.tasksLevel+1 {
+			if !p.scanner.Scan() {
+				break
+			}
+			continue
+		}
+		if level <= p.tasksLevel {
+			return
+		}
+		p.currTask.Name = strings.Trim(text, trimValues)
+		break
+	}
+	if p.scanner.Err() != nil {
+		err = p.scanner.Err()
+		return
+	}
+	for {
+		ok, err = p.parseAttribute()
+		if ok {
+			continue
+		}
+		if err != nil {
+			return
+		}
+		ok, err = p.parseCodeBlock()
+		if ok {
+			continue
+		}
+		if err != nil {
+			return
+		}
+		tok, level, _ := p.parseTitle(false)
+		if tok && level <= p.tasksLevel {
+			break
+		}
+		if tok && level == p.tasksLevel+1 {
+			ok = true
+			break
+		}
+		if strings.TrimSpace(p.scanner.Text()) != "" {
+			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.scanner.Text(), trimValues))
+		}
+		if !p.scanner.Scan() {
+			break
+		}
+	}
+	if len(p.currTask.Commands) < 1 && len(p.currTask.DependsOn) < 1 {
+		err = fmt.Errorf("task %s has no commands or required tasks %v", p.currTask.Name, p.currTask)
+		return
+	}
+	p.tasks = append(p.tasks, p.currTask)
+	return
+}
+
+func NewParser(r io.Reader) (p parser, err error) {
+	p.scanner = bufio.NewScanner(r)
+	for p.scanner.Scan() {
+		ok, level, text := p.parseTitle(true)
+		if !ok || strings.ToLower(text) != "tasks" {
+			continue
+		}
+		p.tasksLevel = level
+		return
+	}
+	err = errors.New("no Tasks section found")
 	return
 }

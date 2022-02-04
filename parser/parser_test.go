@@ -2,6 +2,7 @@ package parser
 
 import (
 	_ "embed"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -15,7 +16,11 @@ var s string
 var e string
 
 func TestParseFile(t *testing.T) {
-	result, err := ParseFile(s)
+	p, err := NewParser(strings.NewReader(s))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := p.Parse()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -26,11 +31,6 @@ func TestParseFile(t *testing.T) {
 			Description: []string{"Lists files"},
 			Commands:    []string{"ls"},
 			Dir:         "./somefolder",
-		},
-		{
-			Name:         "empty-task",
-			Description:  []string{"Description but no task info"},
-			ParsingError: "missing command or Requires",
 		},
 		{
 			Name:        "hello",
@@ -54,9 +54,9 @@ func TestParseFile(t *testing.T) {
 
 }
 func TestParseFileNoTasks(t *testing.T) {
-	_, err := ParseFile(e)
-	if err != NoTasksError {
-		t.Fatalf("expected error %v got: %v", NoTasksError, err)
+	_, err := NewParser(strings.NewReader(e))
+	if err.Error() != "no Tasks section found" {
+		t.Fatalf("expected error %v got: %v", "no Tasks section found", err)
 	}
 
 }
