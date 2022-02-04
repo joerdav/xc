@@ -11,6 +11,7 @@ import (
 
 	"github.com/joe-davidson1802/xc/models"
 	"github.com/joe-davidson1802/xc/parser"
+	"github.com/joe-davidson1802/xc/run"
 	"github.com/posener/complete"
 )
 
@@ -142,7 +143,7 @@ func main() {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		err = t.Run(context.Background(), tav)
+		err = run.RunTask(context.Background(), t, tav)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
