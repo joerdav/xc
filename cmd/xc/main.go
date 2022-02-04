@@ -143,7 +143,8 @@ func main() {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		err = run.RunTask(context.Background(), t, tav)
+		runner := run.NewRunner(t)
+		err = runner.Run(context.Background(), tav)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
