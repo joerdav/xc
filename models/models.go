@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-const MAX_DEPS = 50
-
 type Task struct {
 	Name         string
 	Description  []string
@@ -56,34 +54,4 @@ func (ts Tasks) Get(tsname string) (task Task, ok bool) {
 		}
 	}
 	return
-}
-
-func (ts Tasks) ValidateDependencies(task string, prevTasks []string) error {
-	if len(prevTasks) >= MAX_DEPS {
-		return fmt.Errorf("max dependency depth of %d reached", MAX_DEPS)
-	}
-	// Check exists
-	t, ok := ts.Get(task)
-	if !ok {
-		return fmt.Errorf("task %s not found", task)
-	}
-	if t.ParsingError != "" {
-		return fmt.Errorf("task %s has a parsing error: %s", task, t.ParsingError)
-	}
-	for _, t := range t.DependsOn {
-		st, ok := ts.Get(t)
-		if !ok {
-			return fmt.Errorf("task %s not found", t)
-		}
-		for _, pt := range prevTasks {
-			if pt == st.Name {
-				return fmt.Errorf("task %s contians a circular dependency", t)
-			}
-		}
-		err := ts.ValidateDependencies(st.Name, append([]string{st.Name}, prevTasks...))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }

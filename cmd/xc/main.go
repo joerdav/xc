@@ -138,12 +138,11 @@ func main() {
 	}
 	// xc task1 task2
 	for _, tav := range tav {
-		err = t.ValidateDependencies(tav, []string{})
+		runner, err := run.NewRunner(t)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		runner := run.NewRunner(t)
 		err = runner.Run(context.Background(), tav)
 		if err != nil {
 			fmt.Println(err.Error())

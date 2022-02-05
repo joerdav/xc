@@ -11,6 +11,8 @@ import (
 	"github.com/joe-davidson1802/xc/models"
 )
 
+const MAX_DEPS = 50
+
 func runCmd(c *exec.Cmd) error {
 	return c.Run()
 }
@@ -21,8 +23,8 @@ type Runner struct {
 	tasks                models.Tasks
 }
 
-func NewRunner(ts models.Tasks) Runner {
-	r := Runner{
+func NewRunner(ts models.Tasks) (runner Runner, err error) {
+	runner = Runner{
 		sep:       ";",
 		cmdRunner: "bash",
 		flag:      "-c",
@@ -30,11 +32,17 @@ func NewRunner(ts models.Tasks) Runner {
 		tasks:     ts,
 	}
 	if runtime.GOOS == "windows" {
-		r.sep = "&&"
-		r.cmdRunner = "cmd"
-		r.flag = "/C"
+		runner.sep = "&&"
+		runner.cmdRunner = "cmd"
+		runner.flag = "/C"
 	}
-	return r
+	for _, t := range ts {
+		err = runner.ValidateDependencies(t.Name, []string{})
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (r *Runner) Run(ctx context.Context, name string) error {
@@ -78,6 +86,36 @@ func (r *Runner) Run(ctx context.Context, name string) error {
 	err = r.runner(cmd)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *Runner) ValidateDependencies(task string, prevTasks []string) error {
+	if len(prevTasks) >= MAX_DEPS {
+		return fmt.Errorf("max dependency depth of %d reached", MAX_DEPS)
+	}
+	// Check exists
+	t, ok := r.tasks.Get(task)
+	if !ok {
+		return fmt.Errorf("task %s not found", task)
+	}
+	if t.ParsingError != "" {
+		return fmt.Errorf("task %s has a parsing error: %s", task, t.ParsingError)
+	}
+	for _, t := range t.DependsOn {
+		st, ok := r.tasks.Get(t)
+		if !ok {
+			return fmt.Errorf("task %s not found", t)
+		}
+		for _, pt := range prevTasks {
+			if pt == st.Name {
+				return fmt.Errorf("task %s contians a circular dependency", t)
+			}
+		}
+		err := r.ValidateDependencies(st.Name, append([]string{st.Name}, prevTasks...))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

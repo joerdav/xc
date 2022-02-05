@@ -1,4 +1,8 @@
-# xc - eXeCute project tasks from a readme file
+# xc
+
+Self documenting task runner.
+
+The intent is to be a convenient task runner for any type of project, and if the runner isn't installed the syntax is human readable.
 
 ## Installation
 
@@ -13,7 +17,7 @@ brew tap joe-davidson1802/xc
 brew install xc
 ```
 
-Install tab completion for bash:
+(Optional) Install tab completion for bash:
 
 ```
 xc -complete
@@ -26,24 +30,61 @@ When keys `xc<Tab>` are pressed, completion should be triggered:
 combo    echoenv  get      ls       tag      test
 ```
 
-## Usage
+## Options
 
-To list available tasks run the following.
+To run one or more tasks supply them as arguments to the `xc` command with a space separator.
 
-```
-xc 
-```
-
-To run a task simply run the following replacing `task` with the task to be run.
+The following would run the task `get` and then on success it would run the `test` task.
 
 ```
-xc task
+[0][~/src/xc][main]$ xc get test
+go get ./...
+go test ./...
+?       github.com/joe-davidson1802/xc/cmd/xc   [no test files]
+?       github.com/joe-davidson1802/xc/models   [no test files]
+ok      github.com/joe-davidson1802/xc/parser   (cached)
+ok      github.com/joe-davidson1802/xc/run      0.139s
+```
+
+If no task is provided then a list of available tasks will be presented.
+
+```
+[0][~/src/xc][main]$ xc
+    test  Test the project.
+    get   Get the project dependencies.
+    tag   Deploys a new tag for the repo.
+          Requires:  test
+
 ```
 
 To run a task from a file not named README.md run with the `-f` of `--file` flag.
 
 ```
 xc --file OTHERFILE.md task
+```
+
+Other options
+```
+xc [task...] - run tasks
+  -complete
+        Install completion for xc command
+  -f string
+        specify markdown file that contains tasks (default "README.md")
+  -file string
+        specify markdown file that contains tasks (default "README.md")
+  -h    shows xc usage
+  -help
+        shows xc usage
+  -md
+        print the markdown for a task rather than running it
+  -s    list task names in a short format
+  -short
+        list task names in a short format
+  -uncomplete
+        Uninstall completion for xc command
+  -version
+        show xc version
+  -y    Don't prompt user for typing 'yes' when installing completion
 ```
 
 ## Syntax
@@ -59,7 +100,7 @@ If a heading of the same level or greater than the "Tasks" heading is found this
 
 ### Task definition
 
-Once in the task section a task can be defined by a subheading with a lower level:
+Once in the task section a task can be defined by a subheading one level below the Tasks heading:
 
 ```` md
 ### taskname
@@ -121,8 +162,6 @@ And use the following mapping:
 :map <leader>xc :call fzf#run({'source':'xc -short', 'options': '--prompt "xc> " --preview "xc -md {}"', 'sink': 'RunInInteractiveShell xc', 'window': {'width': 0.9, 'height': 0.6}})
 ```
 
-## Example
-
 ### Tasks
 
 #### test
@@ -143,31 +182,7 @@ go get ./...
 #### tag
 Deploys a new tag for the repo.
 
-Also runs tests
-
 Requires: test
 ```
 sh ./push-tag.sh
 ```
-
-#### ls
-
-Directory: ./parser
-```
-ls
-```
-
-#### echoenv
-
-Env: SOME_VAR=test
-
-```
-printenv SOME_VAR
-```
-
-#### combo
-
-Runs multiple commands but doesn't have it's own.
-
-Requires: echoenv, ls
-

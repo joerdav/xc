@@ -67,12 +67,15 @@ func TestRun(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			cmds := []string{}
-			runner := NewRunner(tt.tasks)
+			runner, err := NewRunner(tt.tasks)
+			if err != nil {
+				t.Fatal(err)
+			}
 			runner.runner = func(c *exec.Cmd) error {
 				cmds = append(cmds, strings.Join(c.Args, " "))
 				return nil
 			}
-			err := runner.Run(context.Background(), tt.taskName)
+			err = runner.Run(context.Background(), tt.taskName)
 			if (err != nil) != tt.expectedError {
 				t.Errorf("expected error %v, got %v", tt.expectedError, err)
 			}

@@ -10,8 +10,8 @@ import (
 	"github.com/joe-davidson1802/xc/models"
 )
 
-// trimValues are the characters that should be ignored in titles and attributes
-var trimValues = "_*` "
+// TRIM_VALUES are the characters that should be ignored in titles and attributes
+const TRIM_VALUES = "_*` "
 
 type parser struct {
 	scanner    *bufio.Scanner
@@ -70,7 +70,7 @@ func (p *parser) parseAttribute() (ok bool, err error) {
 	if len(s) < 2 {
 		return
 	}
-	ty, ok := attMap[strings.ToLower(strings.Trim(s[0], trimValues))]
+	ty, ok := attMap[strings.ToLower(strings.Trim(s[0], TRIM_VALUES))]
 	if !ok {
 		return
 	}
@@ -79,19 +79,19 @@ func (p *parser) parseAttribute() (ok bool, err error) {
 	case AttributeTypeReq:
 		vs := strings.Split(rest, ",")
 		for _, v := range vs {
-			p.currTask.DependsOn = append(p.currTask.DependsOn, strings.Trim(v, trimValues))
+			p.currTask.DependsOn = append(p.currTask.DependsOn, strings.Trim(v, TRIM_VALUES))
 		}
 	case AttributeTypeEnv:
 		vs := strings.Split(rest, ",")
 		for _, v := range vs {
-			p.currTask.Env = append(p.currTask.Env, strings.Trim(v, trimValues))
+			p.currTask.Env = append(p.currTask.Env, strings.Trim(v, TRIM_VALUES))
 		}
 	case AttributeTypeDir:
 		if p.currTask.Dir != "" {
 			err = fmt.Errorf("directory appears more than once for %s", p.currTask.Name)
 			return
 		}
-		s := strings.Trim(rest, trimValues)
+		s := strings.Trim(rest, TRIM_VALUES)
 		p.currTask.Dir = s
 	}
 	p.scanner.Scan()
@@ -138,7 +138,7 @@ func (p *parser) parseTask() (ok bool, err error) {
 		if level <= p.tasksLevel {
 			return
 		}
-		p.currTask.Name = strings.Trim(text, trimValues)
+		p.currTask.Name = strings.Trim(text, TRIM_VALUES)
 		break
 	}
 	if p.scanner.Err() != nil {
@@ -169,7 +169,7 @@ func (p *parser) parseTask() (ok bool, err error) {
 			break
 		}
 		if strings.TrimSpace(p.scanner.Text()) != "" {
-			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.scanner.Text(), trimValues))
+			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.scanner.Text(), TRIM_VALUES))
 		}
 		if !p.scanner.Scan() {
 			break
