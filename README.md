@@ -6,18 +6,18 @@ The intent is to be a convenient task runner for any type of project, and if the
 
 ## Installation
 
-Go:
+### Go:
 ```
 go install github.com/joe-davidson1802/xc/cmd/xc@latest
 ```
 
-Brew:
+### Brew:
 ```
 brew tap joe-davidson1802/xc
 brew install xc
 ```
 
-(Optional) Install tab completion for bash:
+### (Optional) Install tab completion for bash:
 
 ```
 xc -complete
@@ -29,6 +29,24 @@ When keys `xc<Tab>` are pressed, completion should be triggered:
 [0][~/src/xc][main]$ xc
 combo    echoenv  get      ls       tag      test
 ```
+
+### (Optional) Install the vs-code plugin:
+
+<https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode>
+
+### (Optional) Create vim mappings to list and execute tasks:
+
+Required packages:
+
+- <https://github.com/junegunn/fzf>
+- <https://github.com/christoomey/vim-run-interactive>
+
+And use the following mapping:
+
+``` sh
+:map <leader>x :call fzf#run({'source':'xc -short', 'options': '--prompt "xc> " --preview "xc -md {}"', 'sink': 'RunInInteractiveShell xc', 'window': {'width': 0.9, 'height': 0.6}})
+```
+[![asciicast](https://asciinema.org/a/LYwvRiOuKJjKWqlyrV0cVMAC9.svg)](https://asciinema.org/a/LYwvRiOuKJjKWqlyrV0cVMAC9)
 
 ## Options
 
@@ -147,19 +165,6 @@ The tasks command is signified by a md codeblock.
 
 ```
 command --args
-```
-
-## VIM Usage
-
-I plan to introduce a vim plugin to provide this functionality, but for now you can install:
-
-- <https://github.com/junegunn/fzf>
-- <https://github.com/christoomey/vim-run-interactive>
-
-And use the following mapping:
-
-``` sh
-:map <leader>xc :call fzf#run({'source':'xc -short', 'options': '--prompt "xc> " --preview "xc -md {}"', 'sink': 'RunInInteractiveShell xc', 'window': {'width': 0.9, 'height': 0.6}})
 ```
 
 ### Tasks
