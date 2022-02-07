@@ -34,6 +34,9 @@ combo    echoenv  get      ls       tag      test
 
 <https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode>
 
+![vscode demo](./xc.gif)
+
+
 ### (Optional) Create vim mappings to list and execute tasks:
 
 Required packages:
