@@ -1,4 +1,4 @@
-# xc - Markdown/README defined task runner. [![test](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml/badge.svg)](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml) [![Go Reference](https://pkg.go.dev/badge/github.com/joe-davidson1802/xc.svg)](https://pkg.go.dev/github.com/joe-davidson1802/xc)
+# xc - Markdown defined task runner. [![test](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml/badge.svg)](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml) [![Go Reference](https://pkg.go.dev/badge/github.com/joe-davidson1802/xc.svg)](https://pkg.go.dev/github.com/joe-davidson1802/xc)
 
 ![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
 
