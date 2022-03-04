@@ -3,6 +3,7 @@ on:
   push: { branches: [main] }
   pull_request: {}
 jobs:
+  runs-on: ubuntu-latest
   test:
     steps:
       - uses: actions/checkout@v2
