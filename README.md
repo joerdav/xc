@@ -3,7 +3,7 @@
 ![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
 
 
-Self documenting task runner.
+Define project tasks within the README.md file, similar to npm scripts or a Makefile, but more human readable.
 
 The intent is to be a convenient task runner for any type of project, and if the runner isn't installed the syntax is human readable.
 
