@@ -51,7 +51,6 @@ And use the following mapping:
 ``` sh
 :map <leader>x :call fzf#run({'source':'xc -short', 'options': '--prompt "xc> " --preview "xc -md {}"', 'sink': 'RunInInteractiveShell xc', 'window': {'width': 0.9, 'height': 0.6}})
 ```
-[![asciicast](https://asciinema.org/a/LYwvRiOuKJjKWqlyrV0cVMAC9.svg)](https://asciinema.org/a/LYwvRiOuKJjKWqlyrV0cVMAC9)
 
 ## Options
 
