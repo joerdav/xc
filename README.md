@@ -1,4 +1,4 @@
-![xc](https://user-images.githubusercontent.com/19927761/156735719-5d4bc990-3912-4b20-86b0-abd7b72b3248.png)
+![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
 
 # xc
 
