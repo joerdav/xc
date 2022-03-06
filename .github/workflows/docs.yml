@@ -1,7 +1,8 @@
 name: tests
 on:
-  push: { tags: [*] }
-  pull_request: {}
+  push:  
+    tags: 
+      - '*' 
 jobs:
   deploy:
     permissions:
