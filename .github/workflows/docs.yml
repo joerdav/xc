@@ -20,7 +20,7 @@ jobs:
           hugo-version: '0.91.2'
 
       - name: Build
-        run: cd doc && hugo --minify ./doc
+        run: cd doc && hugo --minify 
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v0'
