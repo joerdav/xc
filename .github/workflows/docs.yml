@@ -15,7 +15,7 @@ jobs:
           submodules: true
           fetch-depth: 0
       - name: Hugo
-        uses: peaceiris/action-hugo@v2
+        uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: '0.91.2'
 
