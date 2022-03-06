@@ -1,0 +1,11 @@
+.git
+.gitignore
+.hugo_build.lock
+README.md
+app.yaml
+config.yml
+dispatch.yml
+content/
+layouts/
+resources/
+static/

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+
+<head >
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+	<meta name="description" content="Define project tasks within the README.md file, similar to npm scripts or a Makefile, but more human readable.">
+
+	<title> &mdash; xc</title>
+
+	<link href="https://fonts.googleapis.com/css?family=Nunito:400,400i,700|Source+Code+Pro:400,700|Work+Sans:500,700" rel="stylesheet">
+	<link rel="stylesheet" href="https://xcfile.dev/main.css?v=3" type="text/css" />
+	<link rel="stylesheet" href="https://xcfile.dev/syntax.css?v=2" type="text/css" />
+
+	
+	<script src="https://xcfile.dev/main.js?v=1" async></script>
+
+</head>
+
+<body>
+	
+
+
+
+<div class="version-switcher">
+	<span></span>
+	<div class="version-switcher-options">
+		<a class="version-switcher-option"></a>
+		
+			
+		
+	</div>
+</div>
+
+	<div class="layout--logo">
+	<a class="logo" href="http://github.com/joe-davidson1802/xc">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 0 33 33" preserveAspectRatio="none">
+  <g>
+    <defs>
+      <path id="s-Path_3-d1224" d="M16.0 0.9899449201150787 C16.0 0.9899449201150787 16.012418365144317 -1.0 17.8416168227086 -1.0 C19.67081528027288 -1.0 19.75396066470762 0.9899449201150787 19.75396066470762 0.9899449201150787 L19.726245536149722 11.91246379116751 C19.726245536149722 11.91246379116751 19.643313333220828 13.547656351717393 17.841616822708595 13.547656351717393 C16.03992031219636 13.547656351717393 16.0 11.91246379116751 16.0 11.91246379116751 Z "></path>
+    </defs>
+    <g transform="rotate(45.0 17.87698033235381 6.2738281758586965)" style="mix-blend-mode:normal">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#s-Path_3-d1224" fill="#595959" fill-opacity="1.0"></use>
+    </g>
+  </g>
+  <g>
+    <defs>
+      <path id="s-Path_4-d1224" d="M15.0 13.989944920115093 C15.0 13.989944920115093 15.012418365144315 12.0 16.8416168227086 12.0 C18.67081528027288 12.0 18.75396066470762 13.989944920115093 18.75396066470762 13.989944920115093 L18.726245536149722 33.72384905731417 C18.726245536149722 33.72384905731417 18.64331333322083 35.35904161786405 16.8416168227086 35.35904161786405 C15.039920312196363 35.35904161786405 15.0 33.72384905731417 15.0 33.72384905731417 Z "></path>
+    </defs>
+    <g transform="rotate(45.0 16.87698033235381 23.679520808932025)" style="mix-blend-mode:normal">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#s-Path_4-d1224" fill="#595959" fill-opacity="1.0"></use>
+    </g>
+  </g>
+  <g>
+    <defs>
+      <path id="s-Path_7-d1224" d="M15.0 -0.01005507988492127 C15.0 -0.01005507988492127 15.012418365144315 -2.0 16.84161682270857 -2.0 C18.670815280272823 -2.0 18.753960664707563 -0.01005507988492127 18.753960664707563 -0.01005507988492127 L18.726245536149666 19.398346732065505 C18.726245536149666 19.398346732065505 18.643313333220778 21.033539292615387 16.84161682270857 21.033539292615387 C15.039920312196365 21.033539292615387 15.000000000000002 19.398346732065505 15.000000000000002 19.398346732065505 Z "></path>
+    </defs>
+    <g transform="rotate(315.0 16.87698033235378 9.516769646307694)" style="mix-blend-mode:normal">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#s-Path_7-d1224" fill="#595959" fill-opacity="1.0"></use>
+    </g>
+  </g>
+  <g>
+    <defs>
+      <path id="s-Path_8-d1224" d="M15.999999999999998 20.989944920115093 C15.999999999999998 20.989944920115093 16.012418365144313 19.0 17.841616822708595 19.0 C19.670815280272876 19.0 19.75396066470762 20.989944920115093 19.75396066470762 20.989944920115093 L19.726245536149722 32.07670838730928 C19.726245536149722 32.07670838730928 19.64331333322083 33.711900947859164 17.8416168227086 33.711900947859164 C16.039920312196365 33.711900947859164 16.0 32.07670838730928 16.0 32.07670838730928 Z "></path>
+    </defs>
+    <g transform="rotate(315.0 17.87698033235381 26.355950473929582)" style="mix-blend-mode:normal">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#s-Path_8-d1224" fill="#595959" fill-opacity="1.0"></use>
+    </g>
+  </g>
+  <g>
+    <defs>
+      <path id="s-Path_6-d1224" d="M25.000000000000004 14.989944920115086 C25.000000000000004 14.989944920115086 25.012418365144317 13.0 26.841616822708627 13.0 C28.670815280272933 13.0 28.753960664707677 14.989944920115086 28.753960664707677 14.989944920115086 L28.726245536149776 23.836881029337544 C28.726245536149776 23.836881029337544 28.643313333220885 25.472073589887426 26.841616822708623 25.472073589887426 C25.039920312196365 25.472073589887426 25.0 23.836881029337547 25.0 23.836881029337547 Z "></path>
+    </defs>
+    <g transform="rotate(315.0 26.87698033235384 19.236036794943715)" style="mix-blend-mode:normal">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#s-Path_6-d1224" fill="#FFFFFF" fill-opacity="1.0"></use>
+    </g>
+  </g>
+  <g>
+    <defs>
+      <path id="s-Path_5-d1224" d="M25.000000000000004 8.989944920115093 C25.000000000000004 8.989944920115093 25.012418365144317 7.0 26.8416168227086 7.0 C28.67081528027288 7.0 28.75396066470762 8.989944920115093 28.75396066470762 8.989944920115093 L28.726245536149722 17.836881029337572 C28.726245536149722 17.836881029337572 28.64331333322083 19.472073589887458 26.8416168227086 19.472073589887458 C25.039920312196365 19.472073589887458 25.0 17.836881029337576 25.0 17.836881029337576 Z "></path>
+    </defs>
+    <g transform="rotate(45.0 26.87698033235381 13.236036794943729)" style="mix-blend-mode:normal">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#s-Path_5-d1224" fill="#FFFFFF" fill-opacity="1.0"></use>
+    </g>
+  </g>
+  <g>
+    <defs>
+      <path id="s-Path_2-d1224" d="M6.0 7.989944920115093 C6.0 7.989944920115093 6.012418365144315 6.0 7.8416168227085965 6.0 C9.670815280272878 6.0 9.75396066470762 7.989944920115093 9.75396066470762 7.989944920115093 L9.726245536149722 25.345159448866355 C9.726245536149722 25.345159448866355 9.643313333220831 26.980352009416237 7.8416168227085965 26.980352009416237 C6.039920312196363 26.980352009416237 6.0 25.34515944886636 6.0 25.34515944886636 Z "></path>
+    </defs>
+    <g transform="rotate(45.0 7.87698033235381 16.49017600470812)" style="mix-blend-mode:normal">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#s-Path_2-d1224" fill="#FFFFFF" fill-opacity="1.0"></use>
+    </g>
+  </g>
+  <g>
+    <defs>
+      <path id="s-Path_1-d1224" d="M6.0 7.989944920115086 C6.0 7.989944920115086 6.012418365144315 6.0 7.8416168227085965 6.0 C9.670815280272878 6.0 9.75396066470762 7.989944920115086 9.75396066470762 7.989944920115086 L9.726245536149722 25.345159448866347 C9.726245536149722 25.345159448866347 9.64331333322083 26.98035200941623 7.8416168227085965 26.98035200941623 C6.039920312196363 26.98035200941623 6.0 25.345159448866355 6.0 25.345159448866355 Z "></path>
+    </defs>
+    <g transform="rotate(315.0 7.87698033235381 16.490176004708115)" style="mix-blend-mode:normal">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#s-Path_1-d1224" fill="#FFFFFF" fill-opacity="1.0"></use>
+    </g>
+  </g>
+</svg>
+
+
+		<span class="logo--name">xc</span>
+	</a>
+</div>
+
+<nav>
+	<input class="hamburger-toggle" type="checkbox" />
+
+	<div class="hamburger">
+		<span></span>
+		<span></span>
+		<span></span>
+	</div>
+
+	<ul class="menu">
+	
+		<li class="">
+			
+				<a class="menu-item" href="https://xcfile.dev/">Introduction</a>
+			
+		</li>
+		<li class="">
+			
+				<a class="menu-item" href="https://xcfile.dev/getting-started/">Getting Started</a>
+			
+		</li>
+		<li class="">
+			
+				<span class="menu-item submenu-heading">Reference</span>
+			
+			<ul class="submenu">
+				<li class="">
+					
+						<a class="menu-item" href="https://xcfile.dev/reference/task-section/">
+							Tasks Section
+						</a>
+					
+				</li>
+				<li class="">
+					
+						<a class="menu-item" href="https://pkg.go.dev/github.com/joe-davidson1802/xc">
+							pkg.go.dev →
+						</a>
+					
+				</li>
+			</ul>
+		</li>
+	</ul>
+</nav>
+ 
+    <header>
+        <div class="content">
+            <h1></h1>
+            <div class="description"></div>
+            <a class="header-link"
+               target="_blank"
+               href="https://github.com/joe-davidson1802/xc/blob/main/xcfile.dev/content/_introduction.md">
+                [edit]
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div class="content">
+	
+
+
+
+
+
+
+            <h1 id="xc---markdown-defined-task-runner-testhttpsgithubcomjoe-davidson1802xcactionsworkflowstestyamlbadgesvghttpsgithubcomjoe-davidson1802xcactionsworkflowstestyaml-go-referencehttpspkggodevbadgegithubcomjoe-davidson1802xcsvghttpspkggodevgithubcomjoe-davidson1802xc">xc - Markdown defined task runner. <a href="https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml"><img src="https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml/badge.svg" alt="test"></a> <a href="https://pkg.go.dev/github.com/joe-davidson1802/xc"><img src="https://pkg.go.dev/badge/github.com/joe-davidson1802/xc.svg" alt="Go Reference"></a></h1>
+<p><img src="https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png" alt="xc"></p>
+<p>Define project tasks within the README.md file, similar to npm scripts or a Makefile, but more human readable.</p>
+<p>The intent is to be a convenient task runner for any type of project, and if the runner isn&rsquo;t installed the syntax is human readable.</p>
+<h2 id="installation">Installation</h2>
+<h3 id="go">Go:</h3>
+<pre tabindex="0"><code>go install github.com/joe-davidson1802/xc/cmd/xc@latest
+</code></pre><h3 id="brew">Brew:</h3>
+<pre tabindex="0"><code>brew tap joe-davidson1802/xc
+brew install xc
+</code></pre><h3 id="optional-install-tab-completion-for-bash">(Optional) Install tab completion for bash:</h3>
+<pre tabindex="0"><code>xc -complete
+</code></pre><p>When keys <code>xc&lt;Tab&gt;</code> are pressed, completion should be triggered:</p>
+<pre tabindex="0"><code>[0][~/src/xc][main]$ xc
+combo    echoenv  get      ls       tag      test
+</code></pre><h3 id="optional-install-the-vs-code-plugin">(Optional) Install the vs-code plugin:</h3>
+<p><a href="https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode">https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode</a></p>
+<p><img src="./xc.gif" alt="vscode demo"></p>
+<h3 id="optional-create-vim-mappings-to-list-and-execute-tasks">(Optional) Create vim mappings to list and execute tasks:</h3>
+<p>Required packages:</p>
+<ul>
+<li><a href="https://github.com/junegunn/fzf">https://github.com/junegunn/fzf</a></li>
+<li><a href="https://github.com/christoomey/vim-run-interactive">https://github.com/christoomey/vim-run-interactive</a></li>
+</ul>
+<p>And use the following mapping:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">:map &lt;leader&gt;x :call fzf#run<span class="o">({</span><span class="s1">&#39;source&#39;</span>:<span class="s1">&#39;xc -short&#39;</span>, <span class="s1">&#39;options&#39;</span>: <span class="s1">&#39;--prompt &#34;xc&gt; &#34; --preview &#34;xc -md {}&#34;&#39;</span>, <span class="s1">&#39;sink&#39;</span>: <span class="s1">&#39;RunInInteractiveShell xc&#39;</span>, <span class="s1">&#39;window&#39;</span>: <span class="o">{</span><span class="s1">&#39;width&#39;</span>: 0.9, <span class="s1">&#39;height&#39;</span>: 0.6<span class="o">}})</span>
+</span></span></code></pre></div><h2 id="options">Options</h2>
+<p>To run one or more tasks supply them as arguments to the <code>xc</code> command with a space separator.</p>
+<p>The following would run the task <code>get</code> and then on success it would run the <code>test</code> task.</p>
+<pre tabindex="0"><code>[0][~/src/xc][main]$ xc get test
+go get ./...
+go test ./...
+?       github.com/joe-davidson1802/xc/cmd/xc   [no test files]
+?       github.com/joe-davidson1802/xc/models   [no test files]
+ok      github.com/joe-davidson1802/xc/parser   (cached)
+ok      github.com/joe-davidson1802/xc/run      0.139s
+</code></pre><p>If no task is provided then a list of available tasks will be presented.</p>
+<pre tabindex="0"><code>[0][~/src/xc][main]$ xc
+    test  Test the project.
+    get   Get the project dependencies.
+    tag   Deploys a new tag for the repo.
+          Requires:  test
+</code></pre><p>To run a task from a file not named README.md run with the <code>-f</code> of <code>--file</code> flag.</p>
+<pre tabindex="0"><code>xc --file OTHERFILE.md task
+</code></pre><p>Other options</p>
+<pre tabindex="0"><code>xc [task...] - run tasks
+  -complete
+        Install completion for xc command
+  -f string
+        specify markdown file that contains tasks (default &#34;README.md&#34;)
+  -file string
+        specify markdown file that contains tasks (default &#34;README.md&#34;)
+  -h    shows xc usage
+  -help
+        shows xc usage
+  -md
+        print the markdown for a task rather than running it
+  -s    list task names in a short format
+  -short
+        list task names in a short format
+  -uncomplete
+        Uninstall completion for xc command
+  -version
+        show xc version
+  -y    Don&#39;t prompt user for typing &#39;yes&#39; when installing completion
+</code></pre><h2 id="syntax">Syntax</h2>
+<h3 id="task-section">Task section</h3>
+<p>To signify the start of the task definition section create a heading name &ldquo;Tasks&rdquo;.
+If a heading of the same level or greater than the &ldquo;Tasks&rdquo; heading is found this signifys the end of the Task section.</p>
+<blockquote>
+<h3 id="tasks">Tasks</h3>
+<ul>
+<li>Tasks go here</li>
+</ul>
+<h2 id="another-heading---ends-the-task-section">Another heading - Ends the task section</h2>
+</blockquote>
+<h3 id="task-definition">Task definition</h3>
+<p>Once in the task section a task can be defined by a subheading one level below the Tasks heading:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-md" data-lang="md"><span class="line"><span class="cl"><span class="gu">### taskname
+</span></span></span><span class="line"><span class="cl"><span class="gu"></span>taskdescription
+</span></span><span class="line"><span class="cl">Requires: task-dependency1, task-dependency2
+</span></span><span class="line"><span class="cl"><span class="s">```
+</span></span></span><span class="line"><span class="cl"><span class="s"></span>command
+</span></span><span class="line"><span class="cl"><span class="s">```</span>
+</span></span></code></pre></div><h4 id="name">Name</h4>
+<p>The name is denoted by a heading lower than the Tasks heading.</p>
+<h3 id="description">Description</h3>
+<p>Anything between the task name and the task command, that is not a &ldquo;Requires:&rdquo; section is a description.</p>
+<h3 id="dependencies">Dependencies</h3>
+<p>Other tasks can be ran by defining dependencies at the beginning.
+They are signified by the <code>Requires:</code> prefix, they can be comma delimited or on separate lines.
+The following are equivelant:</p>
+<pre tabindex="0"><code>Requires: task1, task2, task3
+</code></pre><pre tabindex="0"><code>Requires: task1
+Requires: task2, task3
+</code></pre><h3 id="directory">Directory</h3>
+<p>Directory by default will be the current working directory. However, if you provide a &ldquo;Directory:&rdquo; section then it can be overridden.</p>
+<h3 id="environment-variables">Environment Variables</h3>
+<p>Environment variables can be set with &ldquo;Env:&rdquo;.</p>
+<h3 id="command">Command</h3>
+<p>The tasks command is signified by a md codeblock.</p>
+<pre tabindex="0"><code>command --args
+</code></pre><h3 id="tasks-1">Tasks</h3>
+<h4 id="test">test</h4>
+<p>Test the project.</p>
+<pre tabindex="0"><code>go test ./...
+</code></pre><h4 id="get">get</h4>
+<p>Get the project dependencies.</p>
+<pre tabindex="0"><code>go get ./...
+</code></pre><h4 id="tag">tag</h4>
+<p>Deploys a new tag for the repo.</p>
+<p>Requires: test</p>
+<pre tabindex="0"><code>sh ./push-tag.sh
+</code></pre>
+        </div>
+    </main>
+
+</body>
+
+</html>

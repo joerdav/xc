@@ -1,0 +1,30 @@
+baseurl: https://xcfile.dev/
+metadataformat: yaml
+title: xc
+enableGitInfo: true
+pygmentsCodeFences: true
+pygmentsUseClasses: true
+canonifyURLs: true
+
+params:
+  name: xc
+  description: Define project tasks within the README.md file, similar to npm scripts or a Makefile, but more human readable.
+
+menu:
+  main:
+    - name: Introduction
+      url: /
+      weight: -10
+    - name: Reference
+      identifier: reference
+      weight: 5
+    - name: pkg.go.dev →
+      parent: reference
+      url: https://pkg.go.dev/github.com/joe-davidson1802/xc
+
+security:
+  funcs:
+    getenv:
+    - '^HUGO_'
+    - 'VERSIONS'
+    - 'CURRENT_VERSION'

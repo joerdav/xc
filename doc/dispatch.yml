@@ -1,0 +1,3 @@
+dispatch:
+  - url: xcfile.dev/*
+    service: default

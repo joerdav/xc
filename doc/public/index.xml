@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>xc</title>
+    <link>https://xcfile.dev/</link>
+    <description>Recent content on xc</description>
+    <generator>Hugo -- gohugo.io</generator><atom:link href="https://xcfile.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Create your first xc file</title>
+      <link>https://xcfile.dev/getting-started/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xcfile.dev/getting-started/</guid>
+      <description>TODO</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://xcfile.dev/_introduction/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xcfile.dev/_introduction/</guid>
+      <description>xc - Markdown defined task runner.   Define project tasks within the README.md file, similar to npm scripts or a Makefile, but more human readable.
+The intent is to be a convenient task runner for any type of project, and if the runner isn&amp;rsquo;t installed the syntax is human readable.
+Installation Go: go install github.com/joe-davidson1802/xc/cmd/xc@latest Brew: brew tap joe-davidson1802/xc brew install xc (Optional) Install tab completion for bash: xc -complete When keys xc&amp;lt;Tab&amp;gt; are pressed, completion should be triggered:</description>
+    </item>
+    
+    <item>
+      <title>Self documenting task runner.</title>
+      <link>https://xcfile.dev/introduction/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xcfile.dev/introduction/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tasks section</title>
+      <link>https://xcfile.dev/reference/task-section/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xcfile.dev/reference/task-section/</guid>
+      <description>TODO: Tasks section</description>
+    </item>
+    
+  </channel>
+</rss>
