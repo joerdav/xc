@@ -1,180 +1,64 @@
-# xc - Markdown defined task runner. [![test](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml/badge.svg)](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml) [![Go Reference](https://pkg.go.dev/badge/github.com/joe-davidson1802/xc.svg)](https://pkg.go.dev/github.com/joe-davidson1802/xc)
+# xc - Markdown defined task runner. 
+
+
+[![test](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml/badge.svg)](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml) 
+[![docs](https://github.com/joe-davidson1802/xc/actions/workflows/docs.yml/badge.svg)](https://github.com/joe-davidson1802/xc/actions/workflows/docs.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/joe-davidson1802/xc.svg)](https://pkg.go.dev/github.com/joe-davidson1802/xc)
 
 ![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
 
 
-Define project tasks within the README.md file, similar to npm scripts or a Makefile, but more human readable.
+[Docs](https://xcfile.dev/) | [Getting Started Guide](https://xcfile.dev/getting-started/) | [Github](https://github.com/joe-davidson1802/xc)
 
-The intent is to be a convenient task runner for any type of project, and if the runner isn't installed the syntax is human readable.
+`xc` is a task runner designed to maximise convenience, and minimise complexity.
 
-## Installation
+Each `xc` task is defined in simple, human-readable Markdown. Meaning that for people without the `xc` tool installed there is a clear source of useful commands in the README.md file.
 
-### Go:
-```
-go install github.com/joe-davidson1802/xc/cmd/xc@latest
-```
+# Example
 
-### Brew:
-```
-brew tap joe-davidson1802/xc
-brew install xc
-```
 
-### (Optional) Install tab completion for bash:
+Take the `tag` task in this repository:
 
-```
-xc -complete
-```
+````
+## tag
 
-When keys `xc<Tab>` are pressed, completion should be triggered:
+Deploys a new tag for the repo.
+
+Requires: test
 
 ```
-[0][~/src/xc][main]$ xc
-combo    echoenv  get      ls       tag      test
+export VERSION=`git rev-list --count HEAD`
+echo Adding git tag with version v0.0.${VERSION}
+git tag v0.0.${VERSION}
+git push origin v0.0.${VERSION}
 ```
+````
 
-### (Optional) Install the vs-code plugin:
-
-<https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode>
-
-![vscode demo](./xc.gif)
-
-
-### (Optional) Create vim mappings to list and execute tasks:
-
-Required packages:
-
-- <https://github.com/junegunn/fzf>
-- <https://github.com/christoomey/vim-run-interactive>
-
-And use the following mapping:
-
-``` sh
-:map <leader>x :call fzf#run({'source':'xc -short', 'options': '--prompt "xc> " --preview "xc -md {}"', 'sink': 'RunInInteractiveShell xc', 'window': {'width': 0.9, 'height': 0.6}})
-```
-
-## Options
-
-To run one or more tasks supply them as arguments to the `xc` command with a space separator.
-
-The following would run the task `get` and then on success it would run the `test` task.
+The task could be run simply with `xc tag`, but a side-effect is that the steps for pushing a tag without the use of `xc` are clearly documented too.
 
 ```
-[0][~/src/xc][main]$ xc get test
-go get ./...
+$ xc tag
 go test ./...
 ?       github.com/joe-davidson1802/xc/cmd/xc   [no test files]
 ?       github.com/joe-davidson1802/xc/models   [no test files]
 ok      github.com/joe-davidson1802/xc/parser   (cached)
-ok      github.com/joe-davidson1802/xc/run      0.139s
+ok      github.com/joe-davidson1802/xc/run      (cached)
+export VERSION=78
+echo Adding git tag with version v0.0.78
+Adding git tag with version v0.0.78
+git tag v0.0.78
+git push origin v0.0.78
+Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
+To github.com:joe-davidson1802/xc
+ * [new tag]         v0.0.78 -> v0.0.78
 ```
 
-If no task is provided then a list of available tasks will be presented.
 
-```
-[0][~/src/xc][main]$ xc
-    test  Test the project.
-    get   Get the project dependencies.
-    tag   Deploys a new tag for the repo.
-          Requires:  test
+# Tasks for this project:
 
-```
+## Tasks
 
-To run a task from a file not named README.md run with the `-f` of `--file` flag.
-
-```
-xc --file OTHERFILE.md task
-```
-
-Other options
-```
-xc [task...] - run tasks
-  -complete
-        Install completion for xc command
-  -f string
-        specify markdown file that contains tasks (default "README.md")
-  -file string
-        specify markdown file that contains tasks (default "README.md")
-  -h    shows xc usage
-  -help
-        shows xc usage
-  -md
-        print the markdown for a task rather than running it
-  -s    list task names in a short format
-  -short
-        list task names in a short format
-  -uncomplete
-        Uninstall completion for xc command
-  -version
-        show xc version
-  -y    Don't prompt user for typing 'yes' when installing completion
-```
-
-## Syntax
-
-### Task section
-
-To signify the start of the task definition section create a heading name "Tasks".
-If a heading of the same level or greater than the "Tasks" heading is found this signifys the end of the Task section.
-
-> ### Tasks
-> - Tasks go here
-> ## Another heading - Ends the task section
-
-### Task definition
-
-Once in the task section a task can be defined by a subheading one level below the Tasks heading:
-
-```` md
-### taskname
-taskdescription
-Requires: task-dependency1, task-dependency2
-```
-command
-```
-````
-
-#### Name
-
-The name is denoted by a heading lower than the Tasks heading.
-
-### Description
-
-Anything between the task name and the task command, that is not a "Requires:" section is a description.
-
-### Dependencies
-
-Other tasks can be ran by defining dependencies at the beginning.
-They are signified by the `Requires:` prefix, they can be comma delimited or on separate lines.
-The following are equivelant:
-
-```
-Requires: task1, task2, task3
-```
-```
-Requires: task1
-Requires: task2, task3
-```
-
-### Directory
-
-Directory by default will be the current working directory. However, if you provide a "Directory:" section then it can be overridden.
-
-### Environment Variables
-
-Environment variables can be set with "Env:".
-
-### Command
-
-The tasks command is signified by a md codeblock.
-
-```
-command --args
-```
-
-### Tasks
-
-#### test
+### test
 
 Test the project.
 
@@ -182,17 +66,21 @@ Test the project.
 go test ./...
 ```
 
-#### get
-Get the project dependencies.
+### build
+
+Builds the `xc` binary.
 
 ```
-go get ./...
+go build ./cmd/xc
 ```
 
-#### tag
+### tag
 Deploys a new tag for the repo.
 
 Requires: test
 ```
-sh ./push-tag.sh
+export VERSION=`git rev-list --count HEAD`
+echo Adding git tag with version v0.0.${VERSION}
+git tag v0.0.${VERSION}
+git push origin v0.0.${VERSION}
 ```
