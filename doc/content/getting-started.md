@@ -1,9 +1,90 @@
 ---
 linkTitle: Getting Started
-title: Create your first xc file
-description: Create your first xc file.
+title: Getting Started
+description: Create your first xc file
 menu: main
 weight: -7
 ---
 
+## Installation
+
+{{% details "Binary" %}}
+Download the binary from [GitHub Releases](https://github.com/joe-davidson1802/xc/releases) and add to your `$PATH`
+{{% /details %}}
+{{% details "Go Install" %}}
+```sh
+go install github.com/joe-davidson1802/xc/cmd/xc@latest
+```
+{{% /details %}}
+{{% details "Homebrew" %}}
+```sh
+brew tap joe-davidson1802/xc
+brew install xc
+```
+{{% /details %}}
+{{% details "Snap" %}}
+```sh
 TODO
+```
+{{% /details %}}
+{{% details "Nix" %}}
+```sh
+TODO
+```
+{{% /details %}}
+{{% details "Scoop" %}}
+```sh
+TODO
+```
+{{% /details %}}
+{{% details "AUR" %}}
+```sh
+TODO
+```
+{{% /details %}}
+
+## Verify Installation
+
+Run `xc -version` to verify the installation.
+If installed via `go install` the version will be `devel`.
+
+## Create some tasks.
+
+Create a file named README.md:
+
+````
+## Tasks
+### hello
+Prints hello
+```sh
+echo hello
+```
+### world
+Prints world
+Requires: hello
+```sh
+echo world
+```
+````
+
+## List tasks.
+
+Run `xc` to list the tasks.
+
+```
+$ xc
+    hello  Prints hello
+    world  Prints world
+           Requires:  hello
+```
+
+## Run a task.
+
+Run `xc world` to run the `world` task.
+```
+$ xc world
+echo hello
+hello
+echo world
+world
+```

@@ -544,6 +544,25 @@ tr td:first-child, th {
 .icon svg path {
     fill: currentColor;
 }
+.clipboard-button {
+  position: absolute;
+  right: 0;
+  padding: 3px 3px 5px 7px;
+  margin: 5px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 0.8em;
+  z-index: 1;
+  transition: 0.1s;
+  background-color: #FFFFFF00;
+  border: #FFFFFF00;
+}
+.clipboard-button > svg {
+  fill: var(--color-heading-text);
+}
+.clipboard-button:hover > svg {
+  fill: var(--color-text);
+}
 
 ul.submenu span.icon {
     padding: 0;

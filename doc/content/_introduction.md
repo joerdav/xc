@@ -1,4 +1,4 @@
-# xc - Markdown defined task runner. 
+# xc - Simple, Convenient, Markdown defined task runner. 
 
 
 [![test](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml/badge.svg)](https://github.com/joe-davidson1802/xc/actions/workflows/test.yaml) 
@@ -8,16 +8,22 @@
 ![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
 
 
-[Docs](https://xcfile.dev/) | [Getting Started Guide](https://xcfile.dev/getting-started/) | [Github](https://github.com/joe-davidson1802/xc)
+[Docs](https://xcfile.dev/) | [Getting Started](https://xcfile.dev/getting-started/) | [Github](https://github.com/joe-davidson1802/xc)
 
 `xc` is a task runner designed to maximise convenience, and minimise complexity.
 
 Each `xc` task is defined in simple, human-readable Markdown. Meaning that for people without the `xc` tool installed there is a clear source of useful commands in the README.md file.
 
+# Features
+
+- Markdown defined tasks.
+- Editor tools:
+	- VSCode (list and run xc tasks)
+	- Vim (recommended config for listing and running xc tasks)
+
 # Example
 
-
-Take the `tag` task in this repository:
+Take the `tag` task in the [README.md](https://github.com/joe-davidson1802/xc#tag) of the `xc` repository:
 
 ````
 ## tag
@@ -34,7 +40,7 @@ git push origin v0.0.${VERSION}
 ```
 ````
 
-The task could be run simply with `xc tag`, but a side-effect is that the steps for pushing a tag without the use of `xc` are clearly documented too.
+The task could be run simply with `xc tag`, but a side-effect of it being an `xc` task is that the steps for pushing a tag without the use of `xc` are clearly documented too.
 
 ```
 $ xc tag
