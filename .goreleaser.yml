@@ -27,11 +27,11 @@ brews:
       - brew
     goarm: 7
     tap:
-      owner: joe-davidson1802
+      owner: joerdav
       name: homebrew-xc
       token: "{{ .Env.BREW_TOKEN }}"
     description: A cli to eXeCute project tasks from a readme file
-    homepage: https://github.com/Joe-Davidson1802/xc
+    homepage: https://github.com/joerdav/xc
     license: "MIT"
 signs:
   - artifacts: checksum
