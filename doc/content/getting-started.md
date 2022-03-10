@@ -9,16 +9,16 @@ weight: -7
 ## Installation
 
 {{% details "Binary" %}}
-Download the binary from [GitHub Releases](https://github.com/joe-davidson1802/xc/releases) and add to your `$PATH`
+Download the binary from [GitHub Releases](https://github.com/joerdav/xc/releases) and add to your `$PATH`
 {{% /details %}}
 {{% details "Go Install" %}}
 ```sh
-go install github.com/joe-davidson1802/xc/cmd/xc@latest
+go install github.com/joerdav/xc/cmd/xc@latest
 ```
 {{% /details %}}
 {{% details "Homebrew" %}}
 ```sh
-brew tap joe-davidson1802/xc
+brew tap joerdav/xc
 brew install xc
 ```
 {{% /details %}}

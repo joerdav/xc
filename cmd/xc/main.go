@@ -9,9 +9,9 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/joe-davidson1802/xc/models"
-	"github.com/joe-davidson1802/xc/parser"
-	"github.com/joe-davidson1802/xc/run"
+	"github.com/joerdav/xc/models"
+	"github.com/joerdav/xc/parser"
+	"github.com/joerdav/xc/run"
 	"github.com/posener/complete"
 )
 

@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/joe-davidson1802/xc/models"
+	"github.com/joerdav/xc/models"
 )
 
 // TRIM_VALUES are the characters that should be ignored in titles and attributes

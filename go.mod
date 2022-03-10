@@ -1,4 +1,4 @@
-module github.com/joe-davidson1802/xc
+module github.com/joerdav/xc
 
 go 1.16
 

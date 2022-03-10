@@ -24,7 +24,7 @@ menu:
       identifier: task-syntax
       weight: 5
     - name: pkg.go.dev →
-      url: https://pkg.go.dev/github.com/joe-davidson1802/xc
+      url: https://pkg.go.dev/github.com/joerdav/xc
       weight: 100
 
 security:

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/joe-davidson1802/xc/models"
+	"github.com/joerdav/xc/models"
 )
 
 func TestRun(t *testing.T) {

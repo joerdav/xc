@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/joe-davidson1802/xc/models"
+	"github.com/joerdav/xc/models"
 )
 
 const MAX_DEPS = 50
