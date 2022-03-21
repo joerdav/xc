@@ -7,10 +7,10 @@ set -e
 
 GREEN='\033[32;1m'
 RESET='\033[0m'
-HOST=https://gqlgen.com
+HOST=https://xcfile.dev
 
 VERSIONS_ARRAY=(
-    'v0.0.88'
+    'v0.0.89'
     'origin/main'
 )
 
