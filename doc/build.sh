@@ -10,8 +10,8 @@ RESET='\033[0m'
 HOST=https://gqlgen.com
 
 VERSIONS_ARRAY=(
-	'origin/main'
-	'v0.0.83'
+    'v0.0.83',
+    'origin/main'
 )
 
 joinVersions() {
