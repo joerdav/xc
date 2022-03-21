@@ -88,3 +88,7 @@ hello
 echo world
 world
 ```
+
+## RTFM!
+
+Now that you have a simple task working, [RTFM](/task-syntax/) to learn what else `xc` is capable of.

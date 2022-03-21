@@ -20,9 +20,6 @@ menu:
     - name: Introduction
       url: /
       weight: -10
-    - name: Task Syntax
-      identifier: task-syntax
-      weight: 5
     - name: pkg.go.dev →
       url: https://pkg.go.dev/github.com/joerdav/xc
       weight: 100
