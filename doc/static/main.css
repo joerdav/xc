@@ -483,7 +483,7 @@ tr td:first-child, th {
     position: absolute;
     top: 0;
     right: 0;
-    background-color: #f9f9f9;
+    background-color: var(--color-nav-background);
     width: 80px;
     box-shadow: 0px 3px 7px 0px rgba(0,0,0,0.2);
     z-index: 2;
@@ -508,12 +508,12 @@ tr td:first-child, th {
 }
 
 .version-switcher-options a:hover {
-    background: #bbb;
+    background: var(--main-bg-color);
     text-decoration: none;
 }
 
 .version-switcher-options a:first-child {
-    background: #ccc;
+    background: var(--main-bg-color);
 }
 
 .version-switcher:hover .version-switcher-options {
