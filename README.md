@@ -14,6 +14,8 @@
 
 Each `xc` task is defined in simple, human-readable Markdown. Meaning that for people without the `xc` tool installed there is a clear source of useful commands in the README.md file.
 
+![vscode demo](https://user-images.githubusercontent.com/19927761/159442194-809f7d16-3105-4e5e-ace0-ecd197625951.gif)
+
 # Features
 
 - Markdown defined tasks.
