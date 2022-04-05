@@ -30,7 +30,7 @@ brews:
       owner: joerdav
       name: homebrew-xc
       token: "{{ .Env.BREW_TOKEN }}"
-    description: A cli to eXeCute project tasks from a readme file
+    description: Self documenting task runner.
     homepage: https://github.com/joerdav/xc
     license: "MIT"
 signs:
