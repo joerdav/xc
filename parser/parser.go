@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 
 	"github.com/joerdav/xc/models"
@@ -14,10 +15,12 @@ import (
 const TRIM_VALUES = "_*` "
 
 type parser struct {
-	scanner    *bufio.Scanner
-	tasks      models.Tasks
-	currTask   models.Task
-	tasksLevel int
+	scanner               *bufio.Scanner
+	tasks                 models.Tasks
+	currTask              models.Task
+	tasksLevel            int
+	nextLine, currentLine string
+	reachedEnd            bool
 }
 
 func (p *parser) Parse() (tasks models.Tasks, err error) {
@@ -31,9 +34,45 @@ func (p *parser) Parse() (tasks models.Tasks, err error) {
 	tasks = p.tasks
 	return
 }
+func (p *parser) scan() bool {
+	if p.reachedEnd {
+		return false
+	}
+	p.currentLine = p.nextLine
+	if !p.scanner.Scan() {
+		p.reachedEnd = true
+		return true
+	}
+	p.nextLine = p.scanner.Text()
+	return true
+}
 
+func (p *parser) parseAltTitle(advance bool) (ok bool, level int, text string) {
+	t := strings.TrimSpace(p.currentLine)
+	n := strings.TrimSpace(p.nextLine)
+	if regexp.MustCompile("^-+$").MatchString(n) {
+		ok = true
+		level = 2
+		text = t
+	}
+	if regexp.MustCompile("^=+$").MatchString(n) {
+		ok = true
+		level = 1
+		text = t
+	}
+	if !advance || !ok {
+		return
+	}
+	p.scan()
+	p.scan()
+	return
+}
 func (p *parser) parseTitle(advance bool) (ok bool, level int, text string) {
-	t := strings.TrimSpace(p.scanner.Text())
+	ok, level, text = p.parseAltTitle(advance)
+	if ok {
+		return
+	}
+	t := strings.TrimSpace(p.currentLine)
 	s := strings.Fields(t)
 	if len(s) < 2 || len(s[0]) < 1 || strings.Count(s[0], "#") != len(s[0]) {
 		return
@@ -44,7 +83,7 @@ func (p *parser) parseTitle(advance bool) (ok bool, level int, text string) {
 	if !advance {
 		return
 	}
-	p.scanner.Scan()
+	p.scan()
 	return
 }
 
@@ -66,7 +105,7 @@ var attMap = map[string]AttributeType{
 }
 
 func (p *parser) parseAttribute() (ok bool, err error) {
-	s := strings.Split(p.scanner.Text(), ":")
+	s := strings.Split(p.currentLine, ":")
 	if len(s) < 2 {
 		return
 	}
@@ -94,12 +133,12 @@ func (p *parser) parseAttribute() (ok bool, err error) {
 		s := strings.Trim(rest, TRIM_VALUES)
 		p.currTask.Dir = s
 	}
-	p.scanner.Scan()
+	p.scan()
 	return
 }
 
 func (p *parser) parseCodeBlock() (ok bool, err error) {
-	t := p.scanner.Text()
+	t := p.currentLine
 	if len(t) < 3 || t[:3] != "```" {
 		return
 	}
@@ -108,20 +147,20 @@ func (p *parser) parseCodeBlock() (ok bool, err error) {
 		return
 	}
 	var ended bool
-	for p.scanner.Scan() {
-		if len(p.scanner.Text()) >= 3 && p.scanner.Text()[:3] == "```" {
+	for p.scan() {
+		if len(p.currentLine) >= 3 && p.currentLine[:3] == "```" {
 			ended = true
 			break
 		}
-		if strings.TrimSpace(p.scanner.Text()) != "" {
-			p.currTask.Commands = append(p.currTask.Commands, p.scanner.Text())
+		if strings.TrimSpace(p.currentLine) != "" {
+			p.currTask.Commands = append(p.currTask.Commands, p.currentLine)
 		}
 	}
 	if !ended {
 		err = fmt.Errorf("command block in task %s was not ended", p.currTask.Name)
 		return
 	}
-	p.scanner.Scan()
+	p.scan()
 	return
 }
 
@@ -130,7 +169,7 @@ func (p *parser) parseTask() (ok bool, err error) {
 	for {
 		tok, level, text := p.parseTitle(true)
 		if !tok || level > p.tasksLevel+1 {
-			if !p.scanner.Scan() {
+			if !p.scan() {
 				break
 			}
 			continue
@@ -168,10 +207,10 @@ func (p *parser) parseTask() (ok bool, err error) {
 			ok = true
 			break
 		}
-		if strings.TrimSpace(p.scanner.Text()) != "" {
-			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.scanner.Text(), TRIM_VALUES))
+		if strings.TrimSpace(p.currentLine) != "" {
+			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.currentLine, TRIM_VALUES))
 		}
-		if !p.scanner.Scan() {
+		if !p.scan() {
 			break
 		}
 	}
@@ -185,7 +224,7 @@ func (p *parser) parseTask() (ok bool, err error) {
 
 func NewParser(r io.Reader) (p parser, err error) {
 	p.scanner = bufio.NewScanner(r)
-	for p.scanner.Scan() {
+	for p.scan() {
 		ok, level, text := p.parseTitle(true)
 		if !ok || strings.ToLower(text) != "tasks" {
 			continue
