@@ -1,11 +1,20 @@
 ---
 title: "Task Syntax"
 weight: 1
-description: Task Syntax
+description:
 linkTitle: "Task Syntax"
 ---
 
 ## The anatomy of an `xc` task.
+
+### Structure
+
+- Tasks Section
+  - Task Name
+    - Dependencies
+    - Directory
+    - Environment Variables
+    - Command
 
 ### Example
 
