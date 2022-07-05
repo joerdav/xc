@@ -10,6 +10,7 @@ RESET='\033[0m'
 HOST=https://xcfile.dev
 
 VERSIONS_ARRAY=(
+    'v0.0.103'
     'v0.0.90'
     'origin/main'
 )
