@@ -9,10 +9,11 @@ GREEN='\033[32;1m'
 RESET='\033[0m'
 HOST=https://xcfile.dev
 
+# only use most recent 6 versions
+VERSIONS_ARRAY=($(git tag | sort -t "." -k1n,1 -k2n,2 -k3n,3 | tail -r | head -6))
 VERSIONS_ARRAY=(
-    'v0.0.103'
-    'v0.0.90'
     'origin/main'
+    "${VERSIONS_ARRAY[@]}"
 )
 
 joinVersions() {
