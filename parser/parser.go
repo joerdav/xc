@@ -113,7 +113,7 @@ func (p *parser) parseAttribute() (ok bool, err error) {
 	if !ok {
 		return
 	}
-	rest := strings.Join(s[1:], " ")
+	rest := strings.Join(s[1:], ":")
 	switch ty {
 	case AttributeTypeReq:
 		vs := strings.Split(rest, ",")
