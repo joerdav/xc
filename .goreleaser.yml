@@ -29,7 +29,6 @@ brews:
     tap:
       owner: joerdav
       name: homebrew-xc
-      token: "{{ .Env.BREW_TOKEN }}"
     description: Self documenting task runner
     homepage: https://github.com/joerdav/xc
     license: "MIT"

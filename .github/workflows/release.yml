@@ -40,6 +40,5 @@ jobs:
           version: latest
           args: release --rm-dist
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BREW_TOKEN: ${{ secrets.BREW_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BREW_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
