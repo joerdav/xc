@@ -105,15 +105,14 @@ var attMap = map[string]AttributeType{
 }
 
 func (p *parser) parseAttribute() (ok bool, err error) {
-	s := strings.Split(p.currentLine, ":")
-	if len(s) < 2 {
+	a, rest, found := strings.Cut(p.currentLine, ":")
+	if !found {
 		return
 	}
-	ty, ok := attMap[strings.ToLower(strings.Trim(s[0], TRIM_VALUES))]
+	ty, ok := attMap[strings.ToLower(strings.Trim(a, TRIM_VALUES))]
 	if !ok {
 		return
 	}
-	rest := strings.Join(s[1:], ":")
 	switch ty {
 	case AttributeTypeReq:
 		vs := strings.Split(rest, ",")

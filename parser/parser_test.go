@@ -60,3 +60,111 @@ func TestParseFileNoTasks(t *testing.T) {
 	}
 
 }
+func TestParseAttribute(t *testing.T) {
+	tests := []struct {
+		name            string
+		in              string
+		expectNotOk     bool
+		expectEnv       string
+		expectDir       string
+		expectDependsOn string
+	}{
+		{
+			name:      "given a basic Env, should parse",
+			in:        "Env: my attribute",
+			expectEnv: "my attribute",
+		},
+		{
+			name:      "given environment attribute with mixed casing, should parse",
+			in:        "EnvIronMent: my attribute",
+			expectEnv: "my attribute",
+		},
+		{
+			name:      "given Env with colons, should parse",
+			in:        "Env: my:attribute",
+			expectEnv: "my:attribute",
+		},
+		{
+			name:      "given Env with formatting, should parse",
+			in:        "Env: _*`my:attribute_*`",
+			expectEnv: "my:attribute",
+		},
+		{
+			name:            "given a basic req, should parse",
+			in:              "req: my attribute",
+			expectDependsOn: "my attribute",
+		},
+		{
+			name:            "given requires attribute with mixed casing, should parse",
+			in:              "ReqUiRES: my attribute",
+			expectDependsOn: "my attribute",
+		},
+		{
+			name:            "given req with colons, should parse",
+			in:              "req: my:attribute",
+			expectDependsOn: "my:attribute",
+		},
+		{
+			name:            "given req with formatting, should parse",
+			in:              "req: _*`my:attribute_*`",
+			expectDependsOn: "my:attribute",
+		},
+		{
+			name:      "given a basic dir, should parse",
+			in:        "dir: my attribute",
+			expectDir: "my attribute",
+		},
+		{
+			name:      "given directory attribute with mixed casing, should parse",
+			in:        "dIrECTORY: my attribute",
+			expectDir: "my attribute",
+		},
+		{
+			name:      "given dir with colons, should parse",
+			in:        "dir: my:attribute",
+			expectDir: "my:attribute",
+		},
+		{
+			name:      "given dir with formatting, should parse",
+			in:        "dir: _*`my:attribute_*`",
+			expectDir: "my:attribute",
+		},
+		{
+			name:        "given env with no colon, should not parse",
+			in:          "env _*`my:attribute_*`",
+			expectNotOk: true,
+		},
+		{
+			name:        "given dir with no colon, should not parse",
+			in:          "dir _*`my:attribute_*`",
+			expectNotOk: true,
+		},
+		{
+			name:        "given req with no colon, should not parse",
+			in:          "req _*`my:attribute_*`",
+			expectNotOk: true,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			p, _ := NewParser(strings.NewReader(tt.in))
+			ok, err := p.parseAttribute()
+			if err != nil {
+				t.Error(err)
+			}
+			if ok == tt.expectNotOk {
+				t.Errorf("ok=%v want=%v", ok, !tt.expectNotOk)
+			}
+			if tt.expectEnv != "" && p.currTask.Env[0] != tt.expectEnv {
+				t.Errorf("Env[0]=%s, want=%s", p.currTask.Env[0], tt.expectEnv)
+			}
+			if tt.expectDependsOn != "" && p.currTask.DependsOn[0] != tt.expectDependsOn {
+				t.Errorf("DependsOn[0]=%s, want=%s", p.currTask.DependsOn[0], tt.expectDependsOn)
+			}
+			if tt.expectDir != "" && p.currTask.Dir != tt.expectDir {
+				t.Errorf("Dir=%s, want=%s", p.currTask.Dir, tt.expectDir)
+			}
+		})
+	}
+}
