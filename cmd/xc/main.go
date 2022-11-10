@@ -72,16 +72,13 @@ func printTasks(t models.Tasks) {
 	for _, n := range t {
 		print(n, maxLen)
 	}
-	return
 }
 
 func printTask(t models.Task, maxLen int) {
 	padLen := maxLen - len(t.Name)
 	pad := strings.Repeat(" ", padLen)
 	var desc []string
-	for _, d := range t.Description {
-		desc = append(desc, fmt.Sprintf("%s", d))
-	}
+	desc = append(desc, t.Description...)
 	if len(t.DependsOn) > 0 {
 		desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(t.DependsOn, ", ")))
 	}
@@ -95,30 +92,36 @@ func printTask(t models.Task, maxLen int) {
 }
 
 func main() {
+	if err := runMain(); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+}
+
+func runMain() error {
 	flags()
 	t, err := parse()
 	if completion(t) {
-		return
+		return nil
 	}
 	// xc -version
 	if cfg.version {
 		fmt.Printf("xc version: %s\n", getVersion())
-		return
+		return nil
 	}
 	// xc -h / xc -help
 	if cfg.help {
 		flag.Usage()
-		return
+		return nil
 	}
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 	tav := getArgs()
 	// xc
 	if len(tav) == 0 {
 		printTasks(t)
-		return
+		return nil
 	}
 	// xc -md task1 task2
 	if cfg.md {
@@ -133,15 +136,14 @@ func main() {
 			}
 			ta.Display(os.Stdout)
 		}
-		return
+		return nil
 
 	}
 	// xc task1 task2
 	for _, tav := range tav {
 		runner, err := run.NewRunner(t)
 		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+			return err
 		}
 		err = runner.Run(context.Background(), tav)
 		if err != nil {
@@ -149,6 +151,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	return nil
 
 }
 func getArgs() []string {

@@ -1,0 +1,6 @@
+linters:
+  enable:
+    - gosec
+issues:
+  exclude:
+    - G204

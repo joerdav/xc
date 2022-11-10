@@ -47,7 +47,7 @@ type Tasks []Task
 
 func (ts Tasks) Get(tsname string) (task Task, ok bool) {
 	for _, t := range ts {
-		if strings.ToLower(tsname) == strings.ToLower(t.Name) {
+		if strings.EqualFold(tsname, t.Name) {
 			ok = true
 			task = t
 			break
