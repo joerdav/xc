@@ -1,7 +1,6 @@
 name: tests
 on:
   push: { branches: [main] }
-  pull_request: {}
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -11,3 +10,11 @@ jobs:
         with:
           go-version: "1.19"
       - run: go test ./...
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run golangci-lint
+        uses: matoous/golangci-lint-action@v1.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
