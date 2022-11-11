@@ -92,3 +92,9 @@ echo Adding git tag with version v0.0.${VERSION}
 git tag v0.0.${VERSION}
 git push origin v0.0.${VERSION}
 ```
+
+### update-nix
+Updates nix flake.
+```
+sh ./update-nix.sh
+```

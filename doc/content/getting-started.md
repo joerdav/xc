@@ -28,8 +28,31 @@ TODO
 ```
 {{% /details %}}
 {{% details "Nix" %}}
+There is a nix flake that can be used:
 ```sh
-TODO
+nix develop github:joerdav/xc
+```
+Or to create your own `xc.nix`, replace `<version>` and add the correct `sha256` and `vendorSha256` for the version:
+```nix
+{ config, pkgs, fetchFromGitHub, ... }:
+
+let
+  xc = pkgs.buildGoModule rec {
+    pname = "xc";
+    version = "<version>";
+    subPackages = ["cmd/xc"];
+    src = pkgs.fetchFromGitHub {
+      owner = "joerdav";
+      repo = "xc";
+      rev = version;
+      sha256 = "";
+    };
+    vendorSha256 = "";
+  };
+in
+{
+  environment.systemPackages = [ xc ];
+}
 ```
 {{% /details %}}
 {{% details "Scoop" %}}
