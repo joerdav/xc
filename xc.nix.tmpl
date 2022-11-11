@@ -1,0 +1,14 @@
+{ config, lib, pkgs, fetchFromGitHub, ... }:
+
+pkgs.buildGoModule rec {
+  pname = "xc";
+  version = "__VERSION__";
+  subPackages = ["cmd/xc"];
+  src = pkgs.fetchFromGitHub {
+    owner = "joerdav";
+    repo = "xc";
+    rev = version;
+    sha256 = lib.fakeSha256;
+  };
+  vendorSha256 = lib.fakeSha256;
+}
