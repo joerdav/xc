@@ -7,16 +7,19 @@
 
 ![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
 
-
 [Docs](https://xcfile.dev/) | [Getting Started](https://xcfile.dev/getting-started/) | [Github](https://github.com/joerdav/xc)
 
 `xc` is a task runner designed to maximise convenience, and minimise complexity.
 
 Each `xc` task is defined in simple, human-readable Markdown. Meaning that for people without the `xc` tool installed there is a clear source of useful commands in the README.md file.
 
-![vscode demo](https://user-images.githubusercontent.com/19927761/159442194-809f7d16-3105-4e5e-ace0-ecd197625951.gif)
+# Installation
+
+Installation instructions are defined at <https://xcfile.dev/getting-started/#installation>.
 
 # Features
+
+![vscode demo](https://user-images.githubusercontent.com/19927761/159442194-809f7d16-3105-4e5e-ace0-ecd197625951.gif)
 
 - Markdown defined tasks.
 - Editor tools:
