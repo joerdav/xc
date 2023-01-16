@@ -22,6 +22,12 @@ brew tap joerdav/xc
 brew install xc
 ```
 {{% /details %}}
+{{% details "tea" %}}
+With `tea` just use `tea +xc` in place of `xc`.
+```sh
+tea +xc --version
+```
+{{% /details %}}
 {{% details "Snap" %}}
 ```sh
 TODO
