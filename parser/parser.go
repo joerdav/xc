@@ -34,6 +34,7 @@ func (p *parser) Parse() (tasks models.Tasks, err error) {
 	tasks = p.tasks
 	return
 }
+
 func (p *parser) scan() bool {
 	if p.reachedEnd {
 		return false
@@ -67,6 +68,7 @@ func (p *parser) parseAltTitle(advance bool) (ok bool, level int, text string) {
 	p.scan()
 	return
 }
+
 func (p *parser) parseTitle(advance bool) (ok bool, level int, text string) {
 	ok, level, text = p.parseAltTitle(advance)
 	if ok {
@@ -87,11 +89,25 @@ func (p *parser) parseTitle(advance bool) (ok bool, level int, text string) {
 	return
 }
 
+// AttributeType represents metadata related to a Task.
+//	# Tasks
+//	## Task1
+//	AttributeName: AttributeValue
+//	```
+//	script
+//	```
 type AttributeType int
 
 const (
+	// AttributeTypeEnv sets the environment variables for a Task.
+	// It can be represented by an attribute with name `environment` or `env`.
 	AttributeTypeEnv AttributeType = iota
+	// AttributeTypeDir sets the working directory for a Task.
+	// It can be represented by an attribute with name `directory` or `dir`.
 	AttributeTypeDir
+	// AttributeTypeReq sets the required Tasks for a Task, they will run
+	// prior to the execution of the selected task.
+	// It can be represented by an attribute with name `requires` or `req`.
 	AttributeTypeReq
 )
 
@@ -221,6 +237,8 @@ func (p *parser) parseTask() (ok bool, err error) {
 	return
 }
 
+// NewParser will read from r until it finds a valid `tasks` block.
+// If no block is found an error is returned.
 func NewParser(r io.Reader) (p parser, err error) {
 	p.scanner = bufio.NewScanner(r)
 	for p.scan() {
