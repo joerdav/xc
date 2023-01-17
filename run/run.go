@@ -11,18 +11,27 @@ import (
 	"github.com/joerdav/xc/models"
 )
 
-const MAX_DEPS = 50
+const maxDeps = 50
 
 func runCmd(c *exec.Cmd) error {
 	return c.Run()
 }
 
+// Runner is responsible for running Tasks.
 type Runner struct {
 	sep, cmdRunner, flag string
 	runner               func(*exec.Cmd) error
 	tasks                models.Tasks
 }
 
+// NewRunner takes Tasks and returns a Runner.
+// If the OS is windows commands will be run using `cmd \C`
+// and separated by `&&`.
+// Otherwise, commands will be run using `bash -c`
+// and separated by `;`.
+//
+// NewRunner will return an error in the case that Dependent tasks are cyclical,
+// invalid or at a larger depth than 50.
 func NewRunner(ts models.Tasks) (runner Runner, err error) {
 	runner = Runner{
 		sep:       ";",
@@ -45,6 +54,9 @@ func NewRunner(ts models.Tasks) (runner Runner, err error) {
 	return
 }
 
+// Run runs a task given a string name.
+// Task dependencies will be run first, an error will return if any fail.
+// Task commands are run next, in case of a non zero result an error will return.
 func (r *Runner) Run(ctx context.Context, name string) error {
 	task, ok := r.tasks.Get(name)
 	if !ok {
@@ -88,9 +100,13 @@ func (r *Runner) Run(ctx context.Context, name string) error {
 	return nil
 }
 
+// ValidateDependencies checks that task dependencies follow these rules:
+// - No deeper dependency trees than maxDeps.
+// - Dependencies must exist as tasks.
+// - No cyclical dependencies.
 func (r *Runner) ValidateDependencies(task string, prevTasks []string) error {
-	if len(prevTasks) >= MAX_DEPS {
-		return fmt.Errorf("max dependency depth of %d reached", MAX_DEPS)
+	if len(prevTasks) >= maxDeps {
+		return fmt.Errorf("max dependency depth of %d reached", maxDeps)
 	}
 	// Check exists
 	t, ok := r.tasks.Get(task)
@@ -107,7 +123,7 @@ func (r *Runner) ValidateDependencies(task string, prevTasks []string) error {
 		}
 		for _, pt := range prevTasks {
 			if pt == st.Name {
-				return fmt.Errorf("task %s contians a circular dependency", t)
+				return fmt.Errorf("task %s contains a circular dependency", t)
 			}
 		}
 		err := r.ValidateDependencies(st.Name, append([]string{st.Name}, prevTasks...))
