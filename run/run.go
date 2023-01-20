@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"github.com/joerdav/xc/models"
@@ -32,7 +31,7 @@ type Runner struct {
 //
 // NewRunner will return an error in the case that Dependent tasks are cyclical,
 // invalid or at a larger depth than 50.
-func NewRunner(ts models.Tasks) (runner Runner, err error) {
+func NewRunner(ts models.Tasks, runtime string) (runner Runner, err error) {
 	runner = Runner{
 		sep:       ";",
 		cmdRunner: "bash",
@@ -40,7 +39,7 @@ func NewRunner(ts models.Tasks) (runner Runner, err error) {
 		runner:    runCmd,
 		tasks:     ts,
 	}
-	if runtime.GOOS == "windows" {
+	if runtime == "windows" {
 		runner.sep = "&&"
 		runner.cmdRunner = "cmd"
 		runner.flag = "/C"
