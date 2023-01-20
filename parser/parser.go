@@ -179,55 +179,64 @@ func (p *parser) parseCodeBlock() (ok bool, err error) {
 	return
 }
 
-func (p *parser) parseTask() (ok bool, err error) {
-	p.currTask = models.Task{}
+func (p *parser) findTaskTitle() (title string, done bool, err error) {
 	for {
 		tok, level, text := p.parseTitle(true)
 		if !tok || level > p.tasksLevel+1 {
 			if !p.scan() {
-				break
+				return "", false, p.scanner.Err()
 			}
 			continue
 		}
 		if level <= p.tasksLevel {
-			return
+			return "", true, nil
 		}
-		p.currTask.Name = strings.Trim(text, TRIM_VALUES)
-		break
+		return strings.Trim(text, TRIM_VALUES), false, nil
 	}
-	if p.scanner.Err() != nil {
-		err = p.scanner.Err()
-		return
-	}
+}
+
+func (p *parser) parseTaskBody() (bool, error) {
 	for {
-		ok, err = p.parseAttribute()
+		ok, err := p.parseAttribute()
 		if ok {
 			continue
 		}
 		if err != nil {
-			return
+			return false, err
 		}
 		ok, err = p.parseCodeBlock()
 		if ok {
 			continue
 		}
 		if err != nil {
-			return
+			return false, err
 		}
 		tok, level, _ := p.parseTitle(false)
 		if tok && level <= p.tasksLevel {
-			break
+			return false, nil
 		}
 		if tok && level == p.tasksLevel+1 {
-			ok = true
-			break
+			return true, nil
 		}
 		if strings.TrimSpace(p.currentLine) != "" {
 			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.currentLine, TRIM_VALUES))
 		}
 		if !p.scan() {
-			break
+			return false, nil
 		}
+	}
+}
+
+func (p *parser) parseTask() (ok bool, err error) {
+	p.currTask = models.Task{}
+	title, done, err := p.findTaskTitle()
+	if err != nil || done {
+		return
+	}
+	p.currTask.Name = title
+	ok, err = p.parseTaskBody()
+	if err != nil {
+		return
 	}
 	if len(p.currTask.Commands) < 1 && len(p.currTask.DependsOn) < 1 {
 		err = fmt.Errorf("task %s has no commands or required tasks %v", p.currTask.Name, p.currTask)
