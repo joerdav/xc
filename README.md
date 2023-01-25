@@ -21,7 +21,7 @@ Installation instructions are defined at <https://xcfile.dev/getting-started/#in
 
 # Features
 
-![vscode demo](https://user-images.githubusercontent.com/19927761/159442194-809f7d16-3105-4e5e-ace0-ecd197625951.gif)
+![vscode demo](https://user-images.githubusercontent.com/19927761/214538057-963f9a47-ff95-486c-8856-b90bd358be3f.png)
 
 - Markdown defined tasks.
 - Editor tools:
