@@ -42,3 +42,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BREW_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+  flake:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      -
+        name: Generate flake file
+        run: ./update-nix.sh
+      -
+        name: Add and Commit
+        run: |
+          git config --global user.name 'joerdav'
+          git config --global user.email 'joe.davidson.21111@gmail.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git checkout "${GITHUB_REF:11}"
+          git commit -am "Update Nix Flake"
+          git push
