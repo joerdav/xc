@@ -23,9 +23,10 @@ brew install xc
 ```
 {{% /details %}}
 {{% details "tea" %}}
-With `tea` just use `tea +xc` in place of `xc`.
+With `tea` just type `xc`.
 ```sh
-tea +xc --version
+$ xc --version
+# ^^ or `tea xc` if there’s no magic
 ```
 {{% /details %}}
 {{% details "Snap" %}}
