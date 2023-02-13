@@ -6,6 +6,14 @@ menu: main
 weight: -7
 ---
 
+## Prerequisites
+
+Access to a `bash` shell. `xc` runs Tasks as `bash` scripts.
+
+For windows users it is recommended that you install the Windows Subsystem for Linux (WSL):
+
+- <https://learn.microsoft.com/en-us/windows/wsl/install>
+
 ## Installation
 
 {{% details "Binary" %}}
