@@ -10,7 +10,7 @@ import (
 type Task struct {
 	Name         string
 	Description  []string
-	Commands     []string
+	Script       string
 	Dir          string
 	Env          []string
 	DependsOn    []string
@@ -36,11 +36,9 @@ func (t Task) Display(w io.Writer) {
 		fmt.Fprintln(w, "Env:", strings.Join(t.Env, ", "))
 		fmt.Fprintln(w)
 	}
-	if len(t.Commands) > 0 {
+	if len(t.Script) > 0 {
 		fmt.Fprintln(w, "```")
-		for _, d := range t.Commands {
-			fmt.Fprintln(w, d)
-		}
+		fmt.Fprintln(w, t.Script)
 		fmt.Fprintln(w, "```")
 	}
 }

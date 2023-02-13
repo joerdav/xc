@@ -16,9 +16,7 @@ import (
 	"github.com/posener/complete"
 )
 
-var (
-	version = ""
-)
+var version = ""
 
 type config struct {
 	version, help, short, md bool
@@ -84,7 +82,7 @@ func printTask(t models.Task, maxLen int) {
 		desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(t.DependsOn, ", ")))
 	}
 	if len(desc) == 0 {
-		desc = append(desc, t.Commands...)
+		desc = strings.Fields(t.Script)
 	}
 	fmt.Printf("    %s%s  %s\n", t.Name, pad, desc[0])
 	for _, d := range desc[1:] {
@@ -153,12 +151,10 @@ func runMain() error {
 		}
 	}
 	return nil
-
 }
+
 func getArgs() []string {
-	var (
-		args = flag.Args()
-	)
+	args := flag.Args()
 	return args
 }
 

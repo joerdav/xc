@@ -157,7 +157,7 @@ func (p *parser) parseCodeBlock() (ok bool, err error) {
 	if len(t) < 3 || t[:3] != "```" {
 		return
 	}
-	if len(p.currTask.Commands) > 0 {
+	if len(p.currTask.Script) > 0 {
 		err = fmt.Errorf("command block already exists for task %s", p.currTask.Name)
 		return
 	}
@@ -168,7 +168,7 @@ func (p *parser) parseCodeBlock() (ok bool, err error) {
 			break
 		}
 		if strings.TrimSpace(p.currentLine) != "" {
-			p.currTask.Commands = append(p.currTask.Commands, p.currentLine)
+			p.currTask.Script += p.currentLine + "\n"
 		}
 	}
 	if !ended {
@@ -238,7 +238,7 @@ func (p *parser) parseTask() (ok bool, err error) {
 	if err != nil {
 		return
 	}
-	if len(p.currTask.Commands) < 1 && len(p.currTask.DependsOn) < 1 {
+	if len(p.currTask.Script) < 1 && len(p.currTask.DependsOn) < 1 {
 		err = fmt.Errorf("task %s has no commands or required tasks %v", p.currTask.Name, p.currTask)
 		return
 	}

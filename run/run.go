@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/joerdav/xc/models"
 )
@@ -18,9 +17,9 @@ func runCmd(c *exec.Cmd) error {
 
 // Runner is responsible for running Tasks.
 type Runner struct {
-	sep, cmdRunner, flag string
-	runner               func(*exec.Cmd) error
-	tasks                models.Tasks
+	cmdRunner string
+	runner    func(*exec.Cmd) error
+	tasks     models.Tasks
 }
 
 // NewRunner takes Tasks and returns a Runner.
@@ -33,16 +32,9 @@ type Runner struct {
 // invalid or at a larger depth than 50.
 func NewRunner(ts models.Tasks, runtime string) (runner Runner, err error) {
 	runner = Runner{
-		sep:       ";",
 		cmdRunner: "bash",
-		flag:      "-c",
 		runner:    runCmd,
 		tasks:     ts,
-	}
-	if runtime == "windows" {
-		runner.sep = "&&"
-		runner.cmdRunner = "cmd"
-		runner.flag = "/C"
 	}
 	for _, t := range ts {
 		err = runner.ValidateDependencies(t.Name, []string{})
@@ -52,6 +44,11 @@ func NewRunner(ts models.Tasks, runtime string) (runner Runner, err error) {
 	}
 	return
 }
+
+const scriptHeader = ` #!/bin/bash
+      set -e
+      set -o xtrace
+`
 
 // Run runs a task given a string name.
 // Task dependencies will be run first, an error will return if any fail.
@@ -67,18 +64,22 @@ func (r *Runner) Run(ctx context.Context, name string) error {
 			return err
 		}
 	}
-	var cmdl []string
-	for _, c := range task.Commands {
-		if strings.TrimSpace(c) == "" {
-			continue
-		}
-		cmdl = append(cmdl, fmt.Sprintf(`echo "%s"`, c), c)
-	}
-	if len(task.Commands) == 0 {
+	if len(task.Script) == 0 {
 		return nil
 	}
-	cmds := strings.Join(cmdl, r.sep)
-	cmd := exec.Command(r.cmdRunner, r.flag, cmds)
+	script, err := os.CreateTemp("", "xc-temp-*.sh")
+	if err != nil {
+		return err
+	}
+	defer script.Close()
+	defer os.Remove(script.Name())
+	if _, err := script.Write([]byte(scriptHeader)); err != nil {
+		return err
+	}
+	if _, err := script.Write([]byte(task.Script)); err != nil {
+		return err
+	}
+	cmd := exec.Command(r.cmdRunner, script.Name())
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
