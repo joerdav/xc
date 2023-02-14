@@ -1,25 +1,26 @@
 package run
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/joerdav/xc/models"
+	"mvdan.cc/sh/v3/expand"
+	"mvdan.cc/sh/v3/interp"
+	"mvdan.cc/sh/v3/syntax"
 )
 
 const maxDeps = 50
 
-func runCmd(c *exec.Cmd) error {
-	return c.Run()
-}
+type ScriptRunner func(ctx context.Context, runner *interp.Runner, node syntax.Node) error
 
 // Runner is responsible for running Tasks.
 type Runner struct {
-	cmdRunner string
-	runner    func(*exec.Cmd) error
-	tasks     models.Tasks
+	cmdRunner    string
+	scriptRunner ScriptRunner
+	tasks        models.Tasks
 }
 
 // NewRunner takes Tasks and returns a Runner.
@@ -33,8 +34,10 @@ type Runner struct {
 func NewRunner(ts models.Tasks, runtime string) (runner Runner, err error) {
 	runner = Runner{
 		cmdRunner: "bash",
-		runner:    runCmd,
-		tasks:     ts,
+		scriptRunner: func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
+			return runner.Run(ctx, node)
+		},
+		tasks: ts,
 	}
 	for _, t := range ts {
 		err = runner.ValidateDependencies(t.Name, []string{})
@@ -67,37 +70,35 @@ func (r *Runner) Run(ctx context.Context, name string) error {
 	if len(task.Script) == 0 {
 		return nil
 	}
-	script, err := os.CreateTemp("", "xc-temp-*.sh")
-	if err != nil {
-		return err
-	}
-	defer script.Close()
-	defer os.Remove(script.Name())
+	env := os.Environ()
+	env = append(env, task.Env...)
+	var script bytes.Buffer
 	if _, err := script.Write([]byte(scriptHeader)); err != nil {
 		return err
 	}
 	if _, err := script.Write([]byte(task.Script)); err != nil {
 		return err
 	}
-	cmd := exec.Command(r.cmdRunner, script.Name())
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, task.Env...)
+	file, err := syntax.NewParser().Parse(&script, "")
+	if err != nil {
+		return err
+	}
 	path, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	cmd.Dir = path
 	if task.Dir != "" {
-		cmd.Dir = task.Dir
+		path = task.Dir
 	}
-	err = r.runner(cmd)
+	runner, err := interp.New(
+		interp.Env(expand.ListEnviron(env...)),
+		interp.StdIO(os.Stdin, os.Stdout, os.Stderr),
+		interp.Dir(path),
+	)
 	if err != nil {
 		return err
 	}
-	return nil
+	return r.scriptRunner(ctx, runner, file)
 }
 
 // ValidateDependencies checks that task dependencies follow these rules:

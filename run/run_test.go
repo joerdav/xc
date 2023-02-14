@@ -3,11 +3,11 @@ package run
 import (
 	"context"
 	"fmt"
-	"os/exec"
-	"strings"
 	"testing"
 
 	"github.com/joerdav/xc/models"
+	"mvdan.cc/sh/v3/interp"
+	"mvdan.cc/sh/v3/syntax"
 )
 
 func TestRun(t *testing.T) {
@@ -93,7 +93,6 @@ func TestRun(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			cmds := []string{}
 			runner, err := NewRunner(tt.tasks, tt.runtime)
 			fmt.Println("results", err, tt.expectedParseError)
 			if (err != nil) != tt.expectedParseError {
@@ -102,8 +101,7 @@ func TestRun(t *testing.T) {
 			if err != nil {
 				return
 			}
-			runner.runner = func(c *exec.Cmd) error {
-				cmds = append(cmds, strings.Join(c.Args, " "))
+			runner.scriptRunner = func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
 				return nil
 			}
 			err = runner.Run(context.Background(), tt.taskName)
