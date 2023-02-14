@@ -90,6 +90,7 @@ func (p *parser) parseTitle(advance bool) (ok bool, level int, text string) {
 }
 
 // AttributeType represents metadata related to a Task.
+//
 //	# Tasks
 //	## Task1
 //	AttributeName: AttributeValue
