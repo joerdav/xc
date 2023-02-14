@@ -30,7 +30,7 @@ type Runner struct {
 //
 // NewRunner will return an error in the case that Dependent tasks are cyclical,
 // invalid or at a larger depth than 50.
-func NewRunner(ts models.Tasks, runtime string) (runner Runner, err error) {
+func NewRunner(ts models.Tasks) (runner Runner, err error) {
 	runner = Runner{
 		scriptRunner: func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
 			return runner.Run(ctx, node)

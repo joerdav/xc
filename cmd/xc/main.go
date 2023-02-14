@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"runtime"
 	"runtime/debug"
 	"strings"
 
@@ -140,7 +139,7 @@ func runMain() error {
 	}
 	// xc task1 task2
 	for _, tav := range tav {
-		runner, err := run.NewRunner(t, runtime.GOOS)
+		runner, err := run.NewRunner(t)
 		if err != nil {
 			return err
 		}

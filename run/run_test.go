@@ -2,6 +2,7 @@ package run
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -13,15 +14,15 @@ import (
 func TestRun(t *testing.T) {
 	tests := []struct {
 		name               string
-		runtime            string
 		tasks              models.Tasks
 		taskName           string
+		err                error
 		expectedRunError   bool
 		expectedParseError bool
+		expectedTasksRun   int
 	}{
 		{
-			name:    "given an invalid task should not run command",
-			runtime: "darwin",
+			name: "given an invalid task should not run command",
 			tasks: []models.Task{
 				{
 					Name: "mytask",
@@ -31,19 +32,18 @@ func TestRun(t *testing.T) {
 			expectedRunError: true,
 		},
 		{
-			name:    "given a valid command should run",
-			runtime: "darwin",
+			name: "given a valid command should run",
 			tasks: []models.Task{
 				{
 					Name:   "mytask",
 					Script: "somecmd",
 				},
 			},
-			taskName: "mytask",
+			taskName:         "mytask",
+			expectedTasksRun: 1,
 		},
 		{
-			name:    "given a circular task should not run",
-			runtime: "darwin",
+			name: "given a circular task should not run",
 			tasks: []models.Task{
 				{
 					Name:      "mytask",
@@ -58,24 +58,33 @@ func TestRun(t *testing.T) {
 			expectedParseError: true,
 		},
 		{
-			name:    "given a valid command with dep should run",
-			runtime: "darwin",
+			name: "given invalid script should fail",
 			tasks: []models.Task{
 				{
 					Name:   "mytask",
-					Script: "somecmd",
-				},
-				{
-					Name:      "mytask2",
-					Script:    "somecmd2",
-					DependsOn: []string{"mytask"},
+					Script: "[[ ]]",
 				},
 			},
-			taskName: "mytask2",
+			taskName:         "mytask",
+			expectedRunError: true,
 		},
 		{
-			name:    "given a valid command with dep should run on windows",
-			runtime: "windows",
+			name: "given a valid command with deps only should run",
+			tasks: []models.Task{
+				{
+					Name:   "mytask",
+					Script: "somecmd",
+				},
+				{
+					Name:      "mytask2",
+					DependsOn: []string{"mytask"},
+				},
+			},
+			taskName:         "mytask2",
+			expectedTasksRun: 1,
+		},
+		{
+			name: "given first task fails stop",
 			tasks: []models.Task{
 				{
 					Name:   "mytask",
@@ -84,16 +93,37 @@ func TestRun(t *testing.T) {
 				{
 					Name:      "mytask2",
 					Script:    "somecmd2",
+					Dir:       ".",
 					DependsOn: []string{"mytask"},
 				},
 			},
-			taskName: "mytask2",
+			taskName:         "mytask2",
+			err:              errors.New("some error"),
+			expectedTasksRun: 1,
+			expectedRunError: true,
+		},
+		{
+			name: "given a valid command with dep should run",
+			tasks: []models.Task{
+				{
+					Name:   "mytask",
+					Script: "somecmd",
+				},
+				{
+					Name:      "mytask2",
+					Script:    "somecmd2",
+					Dir:       ".",
+					DependsOn: []string{"mytask"},
+				},
+			},
+			taskName:         "mytask2",
+			expectedTasksRun: 2,
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			runner, err := NewRunner(tt.tasks, tt.runtime)
+			runner, err := NewRunner(tt.tasks)
 			fmt.Println("results", err, tt.expectedParseError)
 			if (err != nil) != tt.expectedParseError {
 				t.Fatalf("expected error %v, got %v", tt.expectedParseError, err)
@@ -101,12 +131,17 @@ func TestRun(t *testing.T) {
 			if err != nil {
 				return
 			}
+			runs := 0
 			runner.scriptRunner = func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
-				return nil
+				runs++
+				return tt.err
 			}
 			err = runner.Run(context.Background(), tt.taskName)
 			if (err != nil) != tt.expectedRunError {
 				t.Fatalf("expected error %v, got %v", tt.expectedRunError, err)
+			}
+			if runs != tt.expectedTasksRun {
+				t.Fatalf("expected %d task runs got %d", tt.expectedTasksRun, runs)
 			}
 		})
 	}
