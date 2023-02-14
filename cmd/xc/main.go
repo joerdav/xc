@@ -82,7 +82,7 @@ func printTask(t models.Task, maxLen int) {
 		desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(t.DependsOn, ", ")))
 	}
 	if len(desc) == 0 {
-		desc = strings.Fields(t.Script)
+		desc = strings.Split(t.Script, "\n")
 	}
 	fmt.Printf("    %s%s  %s\n", t.Name, pad, desc[0])
 	for _, d := range desc[1:] {
