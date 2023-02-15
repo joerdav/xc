@@ -65,9 +65,9 @@ func taskUsage(task models.Task) string {
 	return fmt.Sprintf("Task has required inputs:\n\t%s\n\t%s", argUsage, envUsage)
 }
 
-func taskContainsEnvVar(task models.Task, env string) bool {
-	for _, en := range task.Env {
-		if strings.Split(en, "=")[0] == env {
+func environmentContainsInput(env []string, input string) bool {
+	for _, en := range env {
+		if strings.Split(en, "=")[0] == input {
 			return true
 		}
 	}
@@ -84,7 +84,7 @@ func getInputs(task models.Task, inputs []string, env []string) ([]string, error
 			continue
 		}
 		// Does the task environment contain the input?
-		if taskContainsEnvVar(task, n) {
+		if environmentContainsInput(env, n) {
 			continue
 		}
 		return nil, fmt.Errorf(taskUsage(task))

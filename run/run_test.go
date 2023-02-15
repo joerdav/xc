@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/joerdav/xc/models"
@@ -145,4 +146,73 @@ func TestRun(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRunWithInputs(t *testing.T) {
+	t.Run("given a required input is not provided, return an error", func(t *testing.T) {
+		runner, err := NewRunner(models.Tasks{
+			{
+				Name:   "task",
+				Script: "somecmd",
+				Inputs: []string{"FOO"},
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = runner.Run(context.Background(), "task", nil)
+		if err == nil {
+			t.Fatal("expected an error got non")
+		}
+	})
+	t.Run("given a required input is provided as an argument, run the task", func(t *testing.T) {
+		runner, err := NewRunner(models.Tasks{
+			{
+				Name:   "task",
+				Script: "somecmd",
+				Inputs: []string{"FOO"},
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var taskWasRan bool
+		runner.scriptRunner = func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
+			taskWasRan = true
+			return nil
+		}
+		err = runner.Run(context.Background(), "task", []string{"bar"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !taskWasRan {
+			t.Fatal("task was not run")
+		}
+	})
+	t.Run("given a required input is provided as an environment variable, run the task", func(t *testing.T) {
+		runner, err := NewRunner(models.Tasks{
+			{
+				Name:   "task",
+				Script: "somecmd",
+				Inputs: []string{"FOO"},
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		os.Setenv("FOO", "BAR")
+		defer os.Unsetenv("FOO")
+		var taskWasRan bool
+		runner.scriptRunner = func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
+			taskWasRan = true
+			return nil
+		}
+		err = runner.Run(context.Background(), "task", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !taskWasRan {
+			t.Fatal("task was not run")
+		}
+	})
 }
