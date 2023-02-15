@@ -11,7 +11,7 @@ Task definitions are run as shell scripts, therefore you can pass arguments to t
 
 `xc [task-name] [inputs...]`
 
-### Positional Syntax
+## Positional Syntax
 
 ````markdown
 ## Tasks
@@ -21,7 +21,7 @@ echo "Hello, $1."
 ```
 ````
 
-Result:
+Can be ran as:
 
 ```sh
 $ xc greet Joe
@@ -29,7 +29,7 @@ $ xc greet Joe
 Hello, Joe.
 ```
 
-### Variadic Syntax
+## Variadic Syntax
 
 ````markdown
 ## Tasks
@@ -39,7 +39,7 @@ echo "Hello, $@."
 ```
 ````
 
-Result:
+Can be ran as:
 
 ```sh
 $ xc greet Joe Bob Steve
@@ -47,7 +47,7 @@ $ xc greet Joe Bob Steve
 Hello, Joe Bob Steve.
 ```
 
-### Named Inputs
+## Named Inputs
 
 The `Inputs` attribute can be used to denote required parameters.
 
@@ -90,7 +90,7 @@ Task has required inputs:
 exit status 1
 ```
 
-### Optional Inputs
+## Optional Inputs
 
 Combining the `Environment` attribute and the `Inputs` attribute, you can provide optional inputs.
 
@@ -106,13 +106,14 @@ echo "Hello, $NAME."
 ```
 ````
 
-Result:
+Can be ran as:
 
 ```sh
 $ xc greet Joe
 + echo 'Hello, Joe.'
 Hello, Joe.
 ```
+or
 
 ```sh
 $ xc greet
