@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/joerdav/xc/models"
 	"mvdan.cc/sh/v3/expand"
@@ -51,16 +52,57 @@ const scriptHeader = ` #!/bin/bash
       set -o xtrace
 `
 
+func taskUsage(task models.Task) string {
+	argUsage := fmt.Sprintf("xc %s", task.Name)
+	for _, n := range task.Inputs {
+		argUsage += fmt.Sprintf(" [%s]", n)
+	}
+	envUsage := ""
+	for _, n := range task.Inputs {
+		envUsage += fmt.Sprintf("%s=[%s] ", n, n)
+	}
+	envUsage += fmt.Sprintf("xc %s", task.Name)
+	return fmt.Sprintf("Task has required inputs:\n\t%s\n\t%s", argUsage, envUsage)
+}
+
+func taskContainsEnvVar(task models.Task, env string) bool {
+	for _, en := range task.Env {
+		if strings.Split(en, "=")[0] == env {
+			return true
+		}
+	}
+	return false
+}
+
+func getInputs(task models.Task, inputs []string, env []string) ([]string, error) {
+	result := []string{}
+	for i, n := range task.Inputs {
+		fmt.Println(i, n, len(inputs))
+		// Do the command args contain the input?
+		if len(inputs) > i {
+			result = append(result, fmt.Sprintf("%v=%v", n, inputs[i]))
+			continue
+		}
+		// Does the task environment contain the input?
+		if taskContainsEnvVar(task, n) {
+			continue
+		}
+		return nil, fmt.Errorf(taskUsage(task))
+	}
+	return result, nil
+}
+
 // Run runs a task given a string name.
 // Task dependencies will be run first, an error will return if any fail.
 // Task commands are run next, in case of a non zero result an error will return.
-func (r *Runner) Run(ctx context.Context, name string) error {
+func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	task, ok := r.tasks.Get(name)
 	if !ok {
 		return fmt.Errorf("task %s not found", name)
 	}
 	for _, t := range task.DependsOn {
-		err := r.Run(ctx, t)
+		ta := strings.Fields(t)
+		err := r.Run(ctx, ta[0], ta[1:])
 		if err != nil {
 			return err
 		}
@@ -70,6 +112,11 @@ func (r *Runner) Run(ctx context.Context, name string) error {
 	}
 	env := os.Environ()
 	env = append(env, task.Env...)
+	inp, err := getInputs(task, inputs, env)
+	if err != nil {
+		return err
+	}
+	env = append(env, inp...)
 	var script bytes.Buffer
 	if _, err := script.Write([]byte(scriptHeader)); err != nil {
 		return err
@@ -92,6 +139,7 @@ func (r *Runner) Run(ctx context.Context, name string) error {
 		interp.Env(expand.ListEnviron(env...)),
 		interp.StdIO(os.Stdin, os.Stdout, os.Stderr),
 		interp.Dir(path),
+		interp.Params(inputs...),
 	)
 	if err != nil {
 		return err

@@ -136,7 +136,7 @@ func TestRun(t *testing.T) {
 				runs++
 				return tt.err
 			}
-			err = runner.Run(context.Background(), tt.taskName)
+			err = runner.Run(context.Background(), tt.taskName, nil)
 			if (err != nil) != tt.expectedRunError {
 				t.Fatalf("expected error %v, got %v", tt.expectedRunError, err)
 			}
