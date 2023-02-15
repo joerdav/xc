@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"runtime"
 	"runtime/debug"
 	"strings"
 
@@ -16,9 +15,7 @@ import (
 	"github.com/posener/complete"
 )
 
-var (
-	version = ""
-)
+var version = ""
 
 type config struct {
 	version, help, short, md bool
@@ -84,7 +81,7 @@ func printTask(t models.Task, maxLen int) {
 		desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(t.DependsOn, ", ")))
 	}
 	if len(desc) == 0 {
-		desc = append(desc, t.Commands...)
+		desc = strings.Split(t.Script, "\n")
 	}
 	fmt.Printf("    %s%s  %s\n", t.Name, pad, desc[0])
 	for _, d := range desc[1:] {
@@ -142,7 +139,7 @@ func runMain() error {
 	}
 	// xc task1 task2
 	for _, tav := range tav {
-		runner, err := run.NewRunner(t, runtime.GOOS)
+		runner, err := run.NewRunner(t)
 		if err != nil {
 			return err
 		}
@@ -153,12 +150,10 @@ func runMain() error {
 		}
 	}
 	return nil
-
 }
+
 func getArgs() []string {
-	var (
-		args = flag.Args()
-	)
+	args := flag.Args()
 	return args
 }
 

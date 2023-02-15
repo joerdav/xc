@@ -1,26 +1,25 @@
 package run
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/joerdav/xc/models"
+	"mvdan.cc/sh/v3/expand"
+	"mvdan.cc/sh/v3/interp"
+	"mvdan.cc/sh/v3/syntax"
 )
 
 const maxDeps = 50
 
-func runCmd(c *exec.Cmd) error {
-	return c.Run()
-}
+type ScriptRunner func(ctx context.Context, runner *interp.Runner, node syntax.Node) error
 
 // Runner is responsible for running Tasks.
 type Runner struct {
-	sep, cmdRunner, flag string
-	runner               func(*exec.Cmd) error
-	tasks                models.Tasks
+	scriptRunner ScriptRunner
+	tasks        models.Tasks
 }
 
 // NewRunner takes Tasks and returns a Runner.
@@ -31,18 +30,12 @@ type Runner struct {
 //
 // NewRunner will return an error in the case that Dependent tasks are cyclical,
 // invalid or at a larger depth than 50.
-func NewRunner(ts models.Tasks, runtime string) (runner Runner, err error) {
+func NewRunner(ts models.Tasks) (runner Runner, err error) {
 	runner = Runner{
-		sep:       ";",
-		cmdRunner: "bash",
-		flag:      "-c",
-		runner:    runCmd,
-		tasks:     ts,
-	}
-	if runtime == "windows" {
-		runner.sep = "&&"
-		runner.cmdRunner = "cmd"
-		runner.flag = "/C"
+		scriptRunner: func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
+			return runner.Run(ctx, node)
+		},
+		tasks: ts,
 	}
 	for _, t := range ts {
 		err = runner.ValidateDependencies(t.Name, []string{})
@@ -52,6 +45,11 @@ func NewRunner(ts models.Tasks, runtime string) (runner Runner, err error) {
 	}
 	return
 }
+
+const scriptHeader = ` #!/bin/bash
+      set -e
+      set -o xtrace
+`
 
 // Run runs a task given a string name.
 // Task dependencies will be run first, an error will return if any fail.
@@ -67,36 +65,38 @@ func (r *Runner) Run(ctx context.Context, name string) error {
 			return err
 		}
 	}
-	var cmdl []string
-	for _, c := range task.Commands {
-		if strings.TrimSpace(c) == "" {
-			continue
-		}
-		cmdl = append(cmdl, fmt.Sprintf(`echo "%s"`, c), c)
-	}
-	if len(task.Commands) == 0 {
+	if len(task.Script) == 0 {
 		return nil
 	}
-	cmds := strings.Join(cmdl, r.sep)
-	cmd := exec.Command(r.cmdRunner, r.flag, cmds)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, task.Env...)
+	env := os.Environ()
+	env = append(env, task.Env...)
+	var script bytes.Buffer
+	if _, err := script.Write([]byte(scriptHeader)); err != nil {
+		return err
+	}
+	if _, err := script.Write([]byte(task.Script)); err != nil {
+		return err
+	}
+	file, err := syntax.NewParser().Parse(&script, "")
+	if err != nil {
+		return err
+	}
 	path, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	cmd.Dir = path
 	if task.Dir != "" {
-		cmd.Dir = task.Dir
+		path = task.Dir
 	}
-	err = r.runner(cmd)
+	runner, err := interp.New(
+		interp.Env(expand.ListEnviron(env...)),
+		interp.StdIO(os.Stdin, os.Stdout, os.Stderr),
+		interp.Dir(path),
+	)
 	if err != nil {
 		return err
 	}
-	return nil
+	return r.scriptRunner(ctx, runner, file)
 }
 
 // ValidateDependencies checks that task dependencies follow these rules:

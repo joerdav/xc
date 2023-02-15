@@ -25,20 +25,19 @@ func TestParseFile(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	expected := models.Tasks{
-		{Name: "list", Description: []string{"Lists files"}, Commands: []string{"ls"}},
+		{Name: "list", Description: []string{"Lists files"}, Script: "ls\n"},
 		{
 			Name:        "list2",
 			Description: []string{"Lists files"},
-			Commands:    []string{"ls"},
+			Script:      "ls\n",
 			Dir:         "./somefolder",
 		},
 		{
 			Name:        "hello",
 			Description: []string{"Print a message"},
-			Commands: []string{
-				`echo "Hello, world!"`,
-				`echo "Hello, world2!"`,
-			},
+			Script: `echo "Hello, world!"
+echo "Hello, world2!"
+`,
 			Env:       []string{"somevar=val"},
 			DependsOn: []string{"list", "list2"},
 		},
@@ -51,15 +50,15 @@ func TestParseFile(t *testing.T) {
 	if diff := cmp.Diff(expected, result); diff != "" {
 		t.Errorf("tasks does not match expected: %s", diff)
 	}
-
 }
+
 func TestParseFileNoTasks(t *testing.T) {
 	_, err := NewParser(strings.NewReader(e))
 	if err.Error() != "no Tasks section found" {
 		t.Fatalf("expected error %v got: %v", "no Tasks section found", err)
 	}
-
 }
+
 func TestParseAttribute(t *testing.T) {
 	tests := []struct {
 		name            string
