@@ -60,8 +60,7 @@ ok      github.com/joerdav/xc/run      (cached)
 + echo Adding git tag with version v0.0.78
 Adding git tag with version v0.0.78
 + git tag v0.0.78
-+ git push origin v0.0.78
-Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
++ git push origin v0.0.78 Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
 To github.com:joerdav/xc
  * [new tag]         v0.0.78 -> v0.0.78
 ```
@@ -95,7 +94,7 @@ git tag v0.0.${VERSION}
 git push origin v0.0.${VERSION}
 ```
 
-### update-nix
+## update-nix
 Updates nix flake.
 ```
 sh ./update-nix.sh

@@ -80,6 +80,16 @@ $ xc greet
 Hello, Joe Bloggs.
 ```
 
+xc will return an error if `Inputs` are not passed:
+
+```sh
+$ xc greet
+Task has required inputs:
+        xc greet [FORENAME] [SURNAME]
+        FORENAME=[FORENAME] SURNAME=[SURNAME] xc greet
+exit status 1
+```
+
 ### Optional Inputs
 
 Combining the `Environment` attribute and the `Inputs` attribute, you can provide optional inputs.
