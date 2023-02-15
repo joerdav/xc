@@ -77,7 +77,6 @@ func environmentContainsInput(env []string, input string) bool {
 func getInputs(task models.Task, inputs []string, env []string) ([]string, error) {
 	result := []string{}
 	for i, n := range task.Inputs {
-		fmt.Println(i, n, len(inputs))
 		// Do the command args contain the input?
 		if len(inputs) > i {
 			result = append(result, fmt.Sprintf("%v=%v", n, inputs[i]))
