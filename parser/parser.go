@@ -110,6 +110,9 @@ const (
 	// prior to the execution of the selected task.
 	// It can be represented by an attribute with name `requires` or `req`.
 	AttributeTypeReq
+	// AttributeTypeInp sets the required inputs for a Task, inputs can be provided
+	// as commandline arguments or environment variables.
+	AttributeTypeInp
 )
 
 var attMap = map[string]AttributeType{
@@ -119,6 +122,7 @@ var attMap = map[string]AttributeType{
 	"environment": AttributeTypeEnv,
 	"dir":         AttributeTypeDir,
 	"directory":   AttributeTypeDir,
+	"inputs":      AttributeTypeInp,
 }
 
 func (p *parser) parseAttribute() (ok bool, err error) {
@@ -131,6 +135,11 @@ func (p *parser) parseAttribute() (ok bool, err error) {
 		return
 	}
 	switch ty {
+	case AttributeTypeInp:
+		vs := strings.Split(rest, ",")
+		for _, v := range vs {
+			p.currTask.Inputs = append(p.currTask.Inputs, strings.Trim(v, TRIM_VALUES))
+		}
 	case AttributeTypeReq:
 		vs := strings.Split(rest, ",")
 		for _, v := range vs {

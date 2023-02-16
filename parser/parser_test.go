@@ -40,6 +40,7 @@ echo "Hello, world2!"
 `,
 			Env:       []string{"somevar=val"},
 			DependsOn: []string{"list", "list2"},
+			Inputs:    []string{"FOO", "BAR"},
 		},
 		{
 			Name:        "all-lists",
@@ -67,6 +68,7 @@ func TestParseAttribute(t *testing.T) {
 		expectEnv       string
 		expectDir       string
 		expectDependsOn string
+		expectInputs    string
 	}{
 		{
 			name:      "given a basic Env, should parse",
@@ -107,6 +109,26 @@ func TestParseAttribute(t *testing.T) {
 			name:            "given req with formatting, should parse",
 			in:              "req: _*`my:attribute_*`",
 			expectDependsOn: "my:attribute",
+		},
+		{
+			name:         "given a basic Inputs, should parse",
+			in:           "Inputs: my attribute",
+			expectInputs: "my attribute",
+		},
+		{
+			name:         "given inputs attribute with mixed casing, should parse",
+			in:           "InpUts: my attribute",
+			expectInputs: "my attribute",
+		},
+		{
+			name:         "given Inputs with colons, should parse",
+			in:           "Inputs: my:attribute",
+			expectInputs: "my:attribute",
+		},
+		{
+			name:         "given Inputs with formatting, should parse",
+			in:           "Inputs: _*`my:attribute_*`",
+			expectInputs: "my:attribute",
 		},
 		{
 			name:      "given a basic dir, should parse",
@@ -160,6 +182,9 @@ func TestParseAttribute(t *testing.T) {
 			}
 			if tt.expectDependsOn != "" && p.currTask.DependsOn[0] != tt.expectDependsOn {
 				t.Errorf("DependsOn[0]=%s, want=%s", p.currTask.DependsOn[0], tt.expectDependsOn)
+			}
+			if tt.expectInputs != "" && p.currTask.Inputs[0] != tt.expectInputs {
+				t.Errorf("Inputs[0]=%s, want=%s", p.currTask.Inputs[0], tt.expectInputs)
 			}
 			if tt.expectDir != "" && p.currTask.Dir != tt.expectDir {
 				t.Errorf("Dir=%s, want=%s", p.currTask.Dir, tt.expectDir)

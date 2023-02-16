@@ -51,27 +51,23 @@ The task could be run simply with `xc tag`, but a side-effect of it being an `xc
 
 ```
 $ xc tag
-go test ./...
++ go test ./...
 ?       github.com/joerdav/xc/cmd/xc   [no test files]
 ?       github.com/joerdav/xc/models   [no test files]
 ok      github.com/joerdav/xc/parser   (cached)
 ok      github.com/joerdav/xc/run      (cached)
-export VERSION=78
-echo Adding git tag with version v0.0.78
++ export VERSION=78
++ echo Adding git tag with version v0.0.78
 Adding git tag with version v0.0.78
-git tag v0.0.78
-git push origin v0.0.78
-Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
++ git tag v0.0.78
++ git push origin v0.0.78 Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
 To github.com:joerdav/xc
  * [new tag]         v0.0.78 -> v0.0.78
 ```
 
+# Tasks
 
-# Tasks for this project:
-
-## Tasks
-
-### test
+## test
 
 Test the project.
 
@@ -79,7 +75,7 @@ Test the project.
 go test ./...
 ```
 
-### build
+## build
 
 Builds the `xc` binary.
 
@@ -87,7 +83,7 @@ Builds the `xc` binary.
 go build ./cmd/xc
 ```
 
-### tag
+## tag
 Deploys a new tag for the repo.
 
 Requires: test
@@ -98,7 +94,7 @@ git tag v0.0.${VERSION}
 git push origin v0.0.${VERSION}
 ```
 
-### update-nix
+## update-nix
 Updates nix flake.
 ```
 sh ./update-nix.sh

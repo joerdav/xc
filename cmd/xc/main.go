@@ -29,7 +29,7 @@ func flags() {
 	log.SetOutput(os.Stderr)
 	flag.Usage = func() {
 		fmt.Println("xc - list tasks")
-		fmt.Println("xc [task...] - run tasks")
+		fmt.Println("xc [task] [inputs...] - run tasks")
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(&cfg.version, "version", false, "show xc version")
@@ -121,33 +121,30 @@ func runMain() error {
 		printTasks(t)
 		return nil
 	}
-	// xc -md task1 task2
+	// xc -md task1
 	if cfg.md {
 		if len(tav) == 0 {
-			fmt.Println("md requires atleast 1 task")
+			fmt.Println("a task is required")
+			flag.Usage()
 			os.Exit(1)
 		}
-		for _, tv := range tav {
-			ta, ok := t.Get(tv)
-			if !ok {
-				fmt.Printf("%s is not a task\n", tav[0])
-			}
-			ta.Display(os.Stdout)
+		ta, ok := t.Get(tav[0])
+		if !ok {
+			fmt.Printf("%s is not a task\n", tav[0])
 		}
+		ta.Display(os.Stdout)
 		return nil
 
 	}
-	// xc task1 task2
-	for _, tav := range tav {
-		runner, err := run.NewRunner(t)
-		if err != nil {
-			return err
-		}
-		err = runner.Run(context.Background(), tav)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+	// xc task1
+	runner, err := run.NewRunner(t)
+	if err != nil {
+		return err
+	}
+	err = runner.Run(context.Background(), tav[0], tav[1:])
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 	return nil
 }

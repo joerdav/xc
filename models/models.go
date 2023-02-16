@@ -14,6 +14,7 @@ type Task struct {
 	Dir          string
 	Env          []string
 	DependsOn    []string
+	Inputs       []string
 	ParsingError string
 }
 
@@ -34,6 +35,10 @@ func (t Task) Display(w io.Writer) {
 	}
 	if len(t.Env) > 0 {
 		fmt.Fprintln(w, "Env:", strings.Join(t.Env, ", "))
+		fmt.Fprintln(w)
+	}
+	if len(t.Inputs) > 0 {
+		fmt.Fprintln(w, "Inputs:", strings.Join(t.Inputs, ", "))
 		fmt.Fprintln(w)
 	}
 	if len(t.Script) > 0 {

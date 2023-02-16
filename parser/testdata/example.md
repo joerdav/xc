@@ -33,6 +33,7 @@ Print a message
 Requires: list, list2
 
 Env: `somevar=val`
+Inputs: FOO, BAR
 
 ```
 echo "Hello, world!"
