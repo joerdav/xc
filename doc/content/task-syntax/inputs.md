@@ -111,7 +111,7 @@ Hello, Joe.
 
 ## Variadic Syntax
 
-As xc tasks are executed as shell scripts you can also use positional syntax of arguments.
+As xc tasks are executed as shell scripts you can also use variadic syntax of arguments.
 
 (xc will not return an error if a script uses variadic syntax and no inputs are provided)
 
