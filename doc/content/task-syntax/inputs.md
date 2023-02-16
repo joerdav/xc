@@ -5,9 +5,11 @@ linkTitle: "Inputs"
 menu: { main: { parent: 'task-syntax', weight: 10 } }
 ---
 
-## Pass an input to a task
+## Task inputs
 
-Task definitions are run as shell scripts, therefore you can pass arguments to them as such.
+Some tasks will require inputs such as the name of servers, paths to files, or credentials.
+
+`xc` tasks are executed as shell scripts, so they support shell syntax for variables.
 
 `xc [task-name] [inputs...]`
 
