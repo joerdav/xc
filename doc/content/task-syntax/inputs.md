@@ -11,45 +11,9 @@ Task definitions are run as shell scripts, therefore you can pass arguments to t
 
 `xc [task-name] [inputs...]`
 
-## Positional Syntax
-
-````markdown
-## Tasks
-### greet
-```
-echo "Hello, $1."
-```
-````
-
-Can be ran as:
-
-```sh
-$ xc greet Joe
-+ echo 'Hello, Joe.'
-Hello, Joe.
-```
-
-## Variadic Syntax
-
-````markdown
-## Tasks
-### greet-everyone
-```
-echo "Hello, $@."
-```
-````
-
-Can be ran as:
-
-```sh
-$ xc greet Joe Bob Steve
-+ echo 'Hello, Joe Bob Steve.'
-Hello, Joe Bob Steve.
-```
-
 ## Named Inputs
 
-The `Inputs` attribute can be used to denote required parameters.
+The `Inputs` attribute can be used to denote required parameters, which at runtime will be converted to environment variables.
 
 ````markdown
 ## Tasks
@@ -62,7 +26,7 @@ echo "Hello, $FORENAME $SURNAME."
 ```
 ````
 
-Named Inputs can be passed via task arguments:
+Named Inputs can be passed via command arguments:
 
 ```sh
 $ xc greet Joe Bloggs
@@ -92,7 +56,7 @@ exit status 1
 
 ## Optional Inputs
 
-Combining the `Environment` attribute and the `Inputs` attribute, you can provide optional inputs.
+Combining the `Environment` attribute and the `Inputs` attribute, you can create optional inputs to a task.
 
 ````markdown
 ## Tasks
@@ -119,4 +83,48 @@ or
 $ xc greet
 + echo 'Hello, World.'
 Hello, World.
+```
+
+## Positional Syntax
+
+As xc tasks are executed as shell scripts you can also use positional syntax of arguments.
+
+(xc will not return an error if a script uses positional syntax and the input is not provided)
+
+````markdown
+## Tasks
+### greet
+```
+echo "Hello, $1."
+```
+````
+
+Can be ran as:
+
+```sh
+$ xc greet Joe
++ echo 'Hello, Joe.'
+Hello, Joe.
+```
+
+## Variadic Syntax
+
+As xc tasks are executed as shell scripts you can also use positional syntax of arguments.
+
+(xc will not return an error if a script uses variadic syntax and no inputs are provided)
+
+````markdown
+## Tasks
+### greet-everyone
+```
+echo "Hello, $@."
+```
+````
+
+Can be ran as:
+
+```sh
+$ xc greet Joe Bob Steve
++ echo 'Hello, Joe Bob Steve.'
+Hello, Joe Bob Steve.
 ```
