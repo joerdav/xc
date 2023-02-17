@@ -99,3 +99,21 @@ Updates nix flake.
 ```
 sh ./update-nix.sh
 ```
+
+## install-hugo
+
+Install hugo via `go install`.
+
+```sh
+go install github.com/gohugoio/hugo@latest
+```
+
+## run-docs
+
+Run the hugo development server.
+
+Directory: doc
+
+```sh
+hugo serve
+```

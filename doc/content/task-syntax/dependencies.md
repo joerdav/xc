@@ -5,9 +5,11 @@ linkTitle: "Dependencies"
 menu: { main: { parent: 'task-syntax', weight: 10 } }
 ---
 
-## How to create a dependency between two tasks
+## Task Dependencies
 
-You can run another before the task you're trying to run as a dependency.
+The `requires` attribute can be used to define tasks that should be run prior to another task.
+
+## Syntax
 
 For example, you want to run a task to deploy your code, but you want to run all the unit tests and linters before that happens.
 

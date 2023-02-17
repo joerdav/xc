@@ -5,7 +5,7 @@ linkTitle: "Inputs"
 menu: { main: { parent: 'task-syntax', weight: 10 } }
 ---
 
-## Task inputs
+## How to define inputs to a task
 
 Some tasks will require inputs such as the name of servers, paths to files, or credentials.
 
@@ -13,7 +13,7 @@ Some tasks will require inputs such as the name of servers, paths to files, or c
 
 `xc [task-name] [inputs...]`
 
-## Named Inputs
+## Syntax - Named Inputs
 
 The `Inputs` attribute can be used to denote required parameters, which at runtime will be converted to environment variables.
 
@@ -56,7 +56,7 @@ Task has required inputs:
 exit status 1
 ```
 
-## Optional Inputs
+## Syntax - Optional Inputs
 
 Combining the `Environment` attribute and the `Inputs` attribute, you can create optional inputs to a task.
 
@@ -87,7 +87,7 @@ $ xc greet
 Hello, World.
 ```
 
-## Positional Syntax
+## Syntax - Positional
 
 As xc tasks are executed as shell scripts you can also use positional syntax of arguments.
 
@@ -109,7 +109,7 @@ $ xc greet Joe
 Hello, Joe.
 ```
 
-## Variadic Syntax
+## Syntax - Variadic
 
 As xc tasks are executed as shell scripts you can also use variadic syntax of arguments.
 

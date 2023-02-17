@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"flag"
 	"fmt"
 	"log"
@@ -24,13 +25,14 @@ type config struct {
 
 var cfg = config{}
 
+//go:embed usage.txt
+var usage string
+
 func flags() {
 	log.SetFlags(0)
 	log.SetOutput(os.Stderr)
 	flag.Usage = func() {
-		fmt.Println("xc - list tasks")
-		fmt.Println("xc [task] [inputs...] - run tasks")
-		flag.PrintDefaults()
+		fmt.Print(usage)
 	}
 	flag.BoolVar(&cfg.version, "version", false, "show xc version")
 	flag.BoolVar(&cfg.help, "help", false, "shows xc usage")

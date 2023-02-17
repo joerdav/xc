@@ -4,11 +4,13 @@ description:
 linkTitle: "Environment Variables"
 menu: { main: { parent: 'task-syntax', weight: 10 } }
 ---
-## How to use environment variables
+## Task Environment Variables
 
-You can define environment variables that will be used during the execution of your task.
+The `environment` attribute can be used to define environment variables that should be set before a task runs.
 
-Do this by adding an `env:` or `environment:` between the H3 of the task name and the command
+## Syntax
+
+Do this by adding an `env:` or `environment:` between the task name and the script.
 
 ````markdown
 ## Tasks

@@ -1,0 +1,20 @@
+xc [task] [inputs...] - run tasks
+  -f -file string
+        Specify a markdown file that contains tasks (default "README.md").
+  -md
+        Print the markdown for a task rather than running it.
+
+xc - list tasks
+  -s -short
+        List task names in a short format.
+  -h -help
+        Print this help text.
+  -f -file string
+        Specify a markdown file that contains tasks (default "README.md").
+  -version
+        Show xc version.
+  -complete
+        Install completion for xc.
+  -uncomplete
+        Uninstall completion for xc.
+  -y    Don't prompt user for typing 'yes' when installing completion.

@@ -1,11 +1,15 @@
 ---
-title: "Tasks Section"
+title: "Task List"
 description:
-linkTitle: "Tasks Section"
+linkTitle: "Task List"
 menu: { main: { parent: 'task-syntax', weight: 1 } }
 ---
 
-## Tasks Section
+## Task List
+
+The task list is the section of markdown that contains xc tasks.
+
+## Syntax
 
 An xc compatible markdown file needs to define a heading of any level called `Tasks`.
 
