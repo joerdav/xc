@@ -9,12 +9,13 @@ linkTitle: "Task Syntax"
 
 ### Structure
 
-- Tasks Section
-  - Task Name
-    - Dependencies
-    - Directory
-    - Environment Variables
-    - Command
+- [Task List](/task-syntax/task-list)
+  - [Name](/task-syntax/task-name)
+    - [Scripts](/task-syntax/scripts)
+    - [Dependencies](/task-syntax/dependencies)
+    - [Directory](/task-syntax/directory)
+    - [Environment Variables](/task-syntax/environment-variables)
+    - [Inputs](/task-syntax/inputs)
 
 ### Example
 

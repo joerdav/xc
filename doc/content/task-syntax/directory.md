@@ -5,11 +5,13 @@ linkTitle: "Directory"
 menu: { main: { parent: 'task-syntax', weight: 10 } }
 ---
 
-## How to use a custom working directory
+## Task Directory
 
-You can define the working directory of the task for the command to run in.
+The `directory` attribute can be used to define a file path in which the task should run.
 
-Do this by adding a `dir:` or `directory:` between the H3 of the task name and the command.
+## Syntax
+
+Do this by adding a `dir:` or `directory:` between the task name and the script.
 
 ````markdown
 ## Tasks
