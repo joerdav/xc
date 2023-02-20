@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/joerdav/xc/models"
@@ -21,6 +22,7 @@ type ScriptRunner func(ctx context.Context, runner *interp.Runner, node syntax.N
 type Runner struct {
 	scriptRunner ScriptRunner
 	tasks        models.Tasks
+	dir          string
 }
 
 // NewRunner takes Tasks and returns a Runner.
@@ -31,12 +33,13 @@ type Runner struct {
 //
 // NewRunner will return an error in the case that Dependent tasks are cyclical,
 // invalid or at a larger depth than 50.
-func NewRunner(ts models.Tasks) (runner Runner, err error) {
+func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
 	runner = Runner{
 		scriptRunner: func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
 			return runner.Run(ctx, node)
 		},
 		tasks: ts,
+		dir:   dir,
 	}
 	for _, t := range ts {
 		err = runner.ValidateDependencies(t.Name, []string{})
@@ -127,23 +130,26 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	if err != nil {
 		return err
 	}
-	path, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	if task.Dir != "" {
-		path = task.Dir
-	}
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(env...)),
 		interp.StdIO(os.Stdin, os.Stdout, os.Stderr),
-		interp.Dir(path),
+		interp.Dir(r.getExecutionPath(task)),
 		interp.Params(inputs...),
 	)
 	if err != nil {
 		return err
 	}
 	return r.scriptRunner(ctx, runner, file)
+}
+
+func (r *Runner) getExecutionPath(task models.Task) string {
+	if task.Dir == "" {
+		return r.dir
+	}
+	if filepath.IsAbs(task.Dir) {
+		return task.Dir
+	}
+	return filepath.Join(r.dir, task.Dir)
 }
 
 // ValidateDependencies checks that task dependencies follow these rules:

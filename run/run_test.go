@@ -124,7 +124,7 @@ func TestRun(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			runner, err := NewRunner(tt.tasks)
+			runner, err := NewRunner(tt.tasks, "")
 			fmt.Println("results", err, tt.expectedParseError)
 			if (err != nil) != tt.expectedParseError {
 				t.Fatalf("expected error %v, got %v", tt.expectedParseError, err)
@@ -156,7 +156,7 @@ func TestRunWithInputs(t *testing.T) {
 				Script: "somecmd",
 				Inputs: []string{"FOO"},
 			},
-		})
+		}, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -172,7 +172,7 @@ func TestRunWithInputs(t *testing.T) {
 				Script: "somecmd",
 				Inputs: []string{"FOO"},
 			},
-		})
+		}, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -196,7 +196,7 @@ func TestRunWithInputs(t *testing.T) {
 				Script: "somecmd",
 				Inputs: []string{"FOO"},
 			},
-		})
+		}, "")
 		if err != nil {
 			t.Fatal(err)
 		}
