@@ -2,6 +2,7 @@ package parser
 
 import (
 	_ "embed"
+	"errors"
 	"strings"
 	"testing"
 
@@ -55,7 +56,7 @@ echo "Hello, world2!"
 
 func TestParseFileNoTasks(t *testing.T) {
 	_, err := NewParser(strings.NewReader(e))
-	if err.Error() != "no Tasks section found" {
+	if !errors.Is(err, ErrNoTasksTitle) {
 		t.Fatalf("expected error %v got: %v", "no Tasks section found", err)
 	}
 }

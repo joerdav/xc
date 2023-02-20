@@ -11,6 +11,9 @@ import (
 	"github.com/joerdav/xc/models"
 )
 
+// ErrNoTaskTitle is returned if the markdown contains no title named Tasks
+var ErrNoTasksTitle = errors.New("no tasks title found")
+
 // TRIM_VALUES are the characters that should be ignored in titles and attributes
 const TRIM_VALUES = "_*` "
 
@@ -268,6 +271,6 @@ func NewParser(r io.Reader) (p parser, err error) {
 		p.tasksLevel = level
 		return
 	}
-	err = errors.New("no Tasks section found")
+	err = ErrNoTasksTitle
 	return
 }

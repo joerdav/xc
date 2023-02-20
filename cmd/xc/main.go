@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	_ "embed"
+	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 	"strings"
 
@@ -16,17 +19,28 @@ import (
 	"github.com/posener/complete"
 )
 
-var version = ""
+// ErrNoMarkdownFile will be returned if no markdown file is found in the cwd or any parent directories.
+var ErrNoMarkdownFile = errors.New("no xc compatable mardown file found")
 
 type config struct {
 	version, help, short, md bool
 	filename                 string
 }
 
-var cfg = config{}
-
 //go:embed usage.txt
 var usage string
+
+var (
+	version = ""
+	cfg     = config{}
+)
+
+func main() {
+	if err := runMain(); err != nil {
+		fmt.Println("xc error: ", err.Error())
+		os.Exit(1)
+	}
+}
 
 func flags() {
 	log.SetFlags(0)
@@ -37,16 +51,52 @@ func flags() {
 	flag.BoolVar(&cfg.version, "version", false, "show xc version")
 	flag.BoolVar(&cfg.help, "help", false, "shows xc usage")
 	flag.BoolVar(&cfg.help, "h", false, "shows xc usage")
-	flag.StringVar(&cfg.filename, "file", "README.md", "specify markdown file that contains tasks")
-	flag.StringVar(&cfg.filename, "f", "README.md", "specify markdown file that contains tasks")
+	flag.StringVar(&cfg.filename, "file", "", "specify markdown file that contains tasks")
+	flag.StringVar(&cfg.filename, "f", "", "specify markdown file that contains tasks")
 	flag.BoolVar(&cfg.short, "short", false, "list task names in a short format")
 	flag.BoolVar(&cfg.short, "s", false, "list task names in a short format")
 	flag.BoolVar(&cfg.md, "md", false, "print the markdown for a task rather than running it")
 	flag.Parse()
 }
 
-func parse() (t models.Tasks, err error) {
-	b, err := os.Open(cfg.filename)
+func parse() (t models.Tasks, directory string, err error) {
+	if cfg.filename != "" {
+		return tryParse(cfg.filename)
+	}
+	curr, err := filepath.Abs(filepath.Dir("."))
+	if err != nil {
+		return nil, "", err
+	}
+	return searchUpForFile(curr)
+}
+
+func searchUpForFile(curr string) (t models.Tasks, directory string, err error) {
+	rm := filepath.Join(curr, "README.md")
+	t, directory, err = tryParse(rm)
+	if err == nil {
+		return t, directory, err
+	}
+	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parser.ErrNoTasksTitle) {
+		return nil, "", err
+	}
+	git := filepath.Join(curr, ".git")
+	_, err = os.Stat(git)
+	if err == nil {
+		return nil, "", ErrNoMarkdownFile
+	}
+	next := filepath.Dir(curr)
+	if strings.HasSuffix(next, string([]rune{filepath.Separator})) {
+		return nil, "", ErrNoMarkdownFile
+	}
+	return searchUpForFile(next)
+}
+
+func tryParse(path string) (t models.Tasks, directory string, err error) {
+	directory = filepath.Dir(path)
+	if err != nil {
+		return
+	}
+	b, err := os.Open(path)
 	if err != nil {
 		return
 	}
@@ -91,16 +141,9 @@ func printTask(t models.Task, maxLen int) {
 	}
 }
 
-func main() {
-	if err := runMain(); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-}
-
 func runMain() error {
 	flags()
-	t, err := parse()
+	t, dir, err := parse()
 	if completion(t) {
 		return nil
 	}
@@ -117,7 +160,7 @@ func runMain() error {
 	if err != nil {
 		return err
 	}
-	tav := getArgs()
+	tav := flag.Args()
 	// xc
 	if len(tav) == 0 {
 		printTasks(t)
@@ -139,7 +182,7 @@ func runMain() error {
 
 	}
 	// xc task1
-	runner, err := run.NewRunner(t)
+	runner, err := run.NewRunner(t, dir)
 	if err != nil {
 		return err
 	}
@@ -149,11 +192,6 @@ func runMain() error {
 		os.Exit(1)
 	}
 	return nil
-}
-
-func getArgs() []string {
-	args := flag.Args()
-	return args
 }
 
 func getVersion() string {
