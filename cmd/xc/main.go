@@ -20,7 +20,7 @@ import (
 )
 
 // ErrNoMarkdownFile will be returned if no markdown file is found in the cwd or any parent directories.
-var ErrNoMarkdownFile = errors.New("no xc compatable mardown file found")
+var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
 
 type config struct {
 	version, help, short, md bool
