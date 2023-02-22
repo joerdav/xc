@@ -1,2 +1,4 @@
 dist/
 doc/public/
+
+coverage.out

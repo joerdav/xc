@@ -3,7 +3,6 @@ module github.com/joerdav/xc
 go 1.19
 
 require (
-	github.com/google/go-cmp v0.5.9
 	github.com/posener/complete v1.2.3
 	mvdan.cc/sh/v3 v3.6.0
 )

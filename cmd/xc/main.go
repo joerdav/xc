@@ -30,19 +30,18 @@ type config struct {
 //go:embed usage.txt
 var usage string
 
-var (
-	version = ""
-	cfg     = config{}
-)
+var version = ""
 
 func main() {
 	if err := runMain(); err != nil {
-		fmt.Println("xc error: ", err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }
 
-func flags() {
+func flags() config {
+	var cfg config
+
 	log.SetFlags(0)
 	log.SetOutput(os.Stderr)
 	flag.Usage = func() {
@@ -57,24 +56,25 @@ func flags() {
 	flag.BoolVar(&cfg.short, "s", false, "list task names in a short format")
 	flag.BoolVar(&cfg.md, "md", false, "print the markdown for a task rather than running it")
 	flag.Parse()
+	return cfg
 }
 
-func parse() (t models.Tasks, directory string, err error) {
-	if cfg.filename != "" {
-		return tryParse(cfg.filename)
+func parse(filename string) (models.Tasks, string, error) {
+	if filename != "" {
+		return tryParse(filename)
 	}
 	curr, err := filepath.Abs(filepath.Dir("."))
 	if err != nil {
-		return nil, "", err
+		return nil, "", fmt.Errorf("error getting current directory: %w", err)
 	}
 	return searchUpForFile(curr)
 }
 
-func searchUpForFile(curr string) (t models.Tasks, directory string, err error) {
+func searchUpForFile(curr string) (models.Tasks, string, error) {
 	rm := filepath.Join(curr, "README.md")
-	t, directory, err = tryParse(rm)
+	tasks, directory, err := tryParse(rm)
 	if err == nil {
-		return t, directory, err
+		return tasks, directory, nil
 	}
 	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parser.ErrNoTasksTitle) {
 		return nil, "", err
@@ -91,60 +91,59 @@ func searchUpForFile(curr string) (t models.Tasks, directory string, err error) 
 	return searchUpForFile(next)
 }
 
-func tryParse(path string) (t models.Tasks, directory string, err error) {
-	directory = filepath.Dir(path)
-	if err != nil {
-		return
-	}
+func tryParse(path string) (models.Tasks, string, error) {
+	directory := filepath.Dir(path)
 	b, err := os.Open(path)
 	if err != nil {
-		return
+		return nil, "", fmt.Errorf("xc error opening file: %w", err)
 	}
 	p, err := parser.NewParser(b)
 	if err != nil {
-		return
+		return nil, "", fmt.Errorf("xc parse error: %w", err)
 	}
-	t, err = p.Parse()
-	return
+	tasks, err := p.Parse()
+	if err != nil {
+		return nil, "", fmt.Errorf("xc parse error: %w", err)
+	}
+	return tasks, directory, nil
 }
 
-func printTasks(t models.Tasks) {
+func printTasks(tasks models.Tasks, short bool) {
 	print := printTask
-	if cfg.short {
+	if short {
 		print = func(t models.Task, maxLen int) { fmt.Println(t.Name) }
 	}
 	maxLen := 0
-	for _, n := range t {
+	for _, n := range tasks {
 		if len(n.Name) > maxLen {
 			maxLen = len(n.Name)
 		}
 	}
-	for _, n := range t {
+	for _, n := range tasks {
 		print(n, maxLen)
 	}
 }
 
-func printTask(t models.Task, maxLen int) {
-	padLen := maxLen - len(t.Name)
+func printTask(task models.Task, maxLen int) {
+	padLen := maxLen - len(task.Name)
 	pad := strings.Repeat(" ", padLen)
-	var desc []string
-	desc = append(desc, t.Description...)
-	if len(t.DependsOn) > 0 {
-		desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(t.DependsOn, ", ")))
+	desc := task.Description
+	if len(task.DependsOn) > 0 {
+		desc = append(desc, fmt.Sprintf("Requires:  %s", strings.Join(task.DependsOn, ", ")))
 	}
 	if len(desc) == 0 {
-		desc = strings.Split(t.Script, "\n")
+		desc = strings.Split(task.Script, "\n")
 	}
-	fmt.Printf("    %s%s  %s\n", t.Name, pad, desc[0])
+	fmt.Printf("    %s%s  %s\n", task.Name, pad, desc[0])
 	for _, d := range desc[1:] {
 		fmt.Printf("    %s  %s\n", strings.Repeat(" ", maxLen), d)
 	}
 }
 
 func runMain() error {
-	flags()
-	t, dir, err := parse()
-	if completion(t) {
+	cfg := flags()
+	tasks, dir, err := parse(cfg.filename)
+	if completion(tasks) {
 		return nil
 	}
 	// xc -version
@@ -163,33 +162,26 @@ func runMain() error {
 	tav := flag.Args()
 	// xc
 	if len(tav) == 0 {
-		printTasks(t)
+		printTasks(tasks, cfg.short)
 		return nil
+	}
+	ta, ok := tasks.Get(tav[0])
+	if !ok {
+		fmt.Printf("task \"%s\" not found\n", tav[0])
 	}
 	// xc -md task1
 	if cfg.md {
-		if len(tav) == 0 {
-			fmt.Println("a task is required")
-			flag.Usage()
-			os.Exit(1)
-		}
-		ta, ok := t.Get(tav[0])
-		if !ok {
-			fmt.Printf("%s is not a task\n", tav[0])
-		}
 		ta.Display(os.Stdout)
 		return nil
-
 	}
 	// xc task1
-	runner, err := run.NewRunner(t, dir)
+	runner, err := run.NewRunner(tasks, dir)
 	if err != nil {
-		return err
+		return fmt.Errorf("xc parse error: %w", err)
 	}
 	err = runner.Run(context.Background(), tav[0], tav[1:])
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		return fmt.Errorf("xc: %w", err)
 	}
 	return nil
 }
@@ -212,7 +204,7 @@ func getVersion() string {
 	return version
 }
 
-func completion(t models.Tasks) bool {
+func completion(tasks models.Tasks) bool {
 	cmp := complete.New("xc", complete.Command{
 		GlobalFlags: complete.Flags{
 			"-version": complete.PredictNothing,
@@ -222,12 +214,20 @@ func completion(t models.Tasks) bool {
 			"-f":       complete.PredictFiles("*.md"),
 			"-file":    complete.PredictFiles("*.md"),
 		},
+		Sub:   nil,
+		Flags: nil,
+		Args:  nil,
 	})
-	s := make(map[string]complete.Command)
-	for _, ta := range t {
-		s[ta.Name] = complete.Command{}
+	commands := make(map[string]complete.Command)
+	for _, ta := range tasks {
+		commands[ta.Name] = complete.Command{
+			Sub:         nil,
+			Flags:       nil,
+			GlobalFlags: nil,
+			Args:        nil,
+		}
 	}
-	cmp.Command.Sub = s
+	cmp.Command.Sub = commands
 	cmp.CLI.InstallName = "complete"
 	cmp.CLI.UninstallName = "uncomplete"
 	cmp.AddFlags(nil)

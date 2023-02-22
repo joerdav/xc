@@ -36,7 +36,11 @@ type Runner struct {
 func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
 	runner = Runner{
 		scriptRunner: func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
-			return runner.Run(ctx, node)
+			err := runner.Run(ctx, node)
+			if err != nil {
+				return fmt.Errorf("script error: %w", err)
+			}
+			return nil
 		},
 		tasks: ts,
 		dir:   dir,
@@ -121,14 +125,14 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	env = append(env, inp...)
 	var script bytes.Buffer
 	if _, err := script.Write([]byte(scriptHeader)); err != nil {
-		return err
+		return fmt.Errorf("failed to write script header: %w", err)
 	}
 	if _, err := script.Write([]byte(task.Script)); err != nil {
-		return err
+		return fmt.Errorf("failed to write script: %w", err)
 	}
 	file, err := syntax.NewParser().Parse(&script, "")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to parse task: %w", err)
 	}
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(env...)),
@@ -137,7 +141,7 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 		interp.Params(inputs...),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to compose script: %w", err)
 	}
 	return r.scriptRunner(ctx, runner, file)
 }
