@@ -76,6 +76,14 @@ Test the project.
 go test ./...
 ```
 
+## lint
+
+Run linters.
+
+```
+golangci-lint run
+```
+
 ## build
 
 Builds the `xc` binary.

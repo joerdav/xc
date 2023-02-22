@@ -11,11 +11,10 @@ import (
 	"github.com/joerdav/xc/models"
 )
 
-// ErrNoTaskTitle is returned if the markdown contains no title named Tasks
+// ErrNoTasksTitle is returned if the markdown contains no title named Tasks
 var ErrNoTasksTitle = errors.New("no tasks title found")
 
-// TRIM_VALUES are the characters that should be ignored in titles and attributes
-const TRIM_VALUES = "_*` "
+const trimValues = "_*` "
 
 type parser struct {
 	scanner               *bufio.Scanner
@@ -128,51 +127,49 @@ var attMap = map[string]AttributeType{
 	"inputs":      AttributeTypeInp,
 }
 
-func (p *parser) parseAttribute() (ok bool, err error) {
+func (p *parser) parseAttribute() (bool, error) {
 	a, rest, found := strings.Cut(p.currentLine, ":")
 	if !found {
-		return
+		return false, nil
 	}
-	ty, ok := attMap[strings.ToLower(strings.Trim(a, TRIM_VALUES))]
+	ty, ok := attMap[strings.ToLower(strings.Trim(a, trimValues))]
 	if !ok {
-		return
+		return false, nil
 	}
 	switch ty {
 	case AttributeTypeInp:
 		vs := strings.Split(rest, ",")
 		for _, v := range vs {
-			p.currTask.Inputs = append(p.currTask.Inputs, strings.Trim(v, TRIM_VALUES))
+			p.currTask.Inputs = append(p.currTask.Inputs, strings.Trim(v, trimValues))
 		}
 	case AttributeTypeReq:
 		vs := strings.Split(rest, ",")
 		for _, v := range vs {
-			p.currTask.DependsOn = append(p.currTask.DependsOn, strings.Trim(v, TRIM_VALUES))
+			p.currTask.DependsOn = append(p.currTask.DependsOn, strings.Trim(v, trimValues))
 		}
 	case AttributeTypeEnv:
 		vs := strings.Split(rest, ",")
 		for _, v := range vs {
-			p.currTask.Env = append(p.currTask.Env, strings.Trim(v, TRIM_VALUES))
+			p.currTask.Env = append(p.currTask.Env, strings.Trim(v, trimValues))
 		}
 	case AttributeTypeDir:
 		if p.currTask.Dir != "" {
-			err = fmt.Errorf("directory appears more than once for %s", p.currTask.Name)
-			return
+			return false, fmt.Errorf("directory appears more than once for %s", p.currTask.Name)
 		}
-		s := strings.Trim(rest, TRIM_VALUES)
+		s := strings.Trim(rest, trimValues)
 		p.currTask.Dir = s
 	}
 	p.scan()
-	return
+	return true, nil
 }
 
-func (p *parser) parseCodeBlock() (ok bool, err error) {
+func (p *parser) parseCodeBlock() error {
 	t := p.currentLine
 	if len(t) < 3 || t[:3] != "```" {
-		return
+		return nil
 	}
 	if len(p.currTask.Script) > 0 {
-		err = fmt.Errorf("command block already exists for task %s", p.currTask.Name)
-		return
+		return fmt.Errorf("command block already exists for task %s", p.currTask.Name)
 	}
 	var ended bool
 	for p.scan() {
@@ -185,11 +182,10 @@ func (p *parser) parseCodeBlock() (ok bool, err error) {
 		}
 	}
 	if !ended {
-		err = fmt.Errorf("command block in task %s was not ended", p.currTask.Name)
-		return
+		return fmt.Errorf("command block in task %s was not ended", p.currTask.Name)
 	}
 	p.scan()
-	return
+	return nil
 }
 
 func (p *parser) findTaskTitle() (title string, done bool, err error) {
@@ -197,14 +193,14 @@ func (p *parser) findTaskTitle() (title string, done bool, err error) {
 		tok, level, text := p.parseTitle(true)
 		if !tok || level > p.tasksLevel+1 {
 			if !p.scan() {
-				return "", false, p.scanner.Err()
+				return "", false, fmt.Errorf("failed to read file: %w", p.scanner.Err())
 			}
 			continue
 		}
 		if level <= p.tasksLevel {
 			return "", true, nil
 		}
-		return strings.Trim(text, TRIM_VALUES), false, nil
+		return strings.Trim(text, trimValues), false, nil
 	}
 }
 
@@ -217,10 +213,7 @@ func (p *parser) parseTaskBody() (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		ok, err = p.parseCodeBlock()
-		if ok {
-			continue
-		}
+		err = p.parseCodeBlock()
 		if err != nil {
 			return false, err
 		}
@@ -232,7 +225,7 @@ func (p *parser) parseTaskBody() (bool, error) {
 			return true, nil
 		}
 		if strings.TrimSpace(p.currentLine) != "" {
-			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.currentLine, TRIM_VALUES))
+			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.currentLine, trimValues))
 		}
 		if !p.scan() {
 			return false, nil
