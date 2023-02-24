@@ -22,6 +22,11 @@ brew tap joerdav/xc
 brew install xc
 ```
 {{% /details %}}
+{{% details "MacPorts" %}}
+```sh
+sudo port install xc
+```
+{{% /details %}}
 {{% details "tea" %}}
 With `tea` just type `xc`.
 ```sh
