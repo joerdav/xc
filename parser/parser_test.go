@@ -1,8 +1,10 @@
 package parser
 
 import (
+	"bytes"
 	_ "embed"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -258,5 +260,39 @@ func TestParseAttribute(t *testing.T) {
 				t.Fatalf("Dir=%s, want=%s", p.currTask.Dir, tt.expectDir)
 			}
 		})
+	}
+}
+
+func BenchmarkParse10_000Tasks(b *testing.B) {
+	var buf bytes.Buffer
+	buf.WriteString(`
+## Tasks
+		`)
+	for i := 0; i < 100; i++ {
+		buf.WriteString(`
+### task-` + fmt.Sprint(i) + `
+
+Print a message
+
+Requires: list, list2
+
+` + "Env: `somevar=val`" + `
+Inputs: FOO, BAR
+
+` + "```" + `
+echo "Hello, world!"
+echo "Hello, world2!"
+` + "```")
+	}
+	file := buf.String()
+	for i := 0; i < b.N; i++ {
+		p, err := NewParser(strings.NewReader(file))
+		if err != nil {
+			b.Fatal(err)
+		}
+		_, err = p.Parse()
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }

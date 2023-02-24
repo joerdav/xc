@@ -16,6 +16,11 @@ var ErrNoTasksTitle = errors.New("no tasks title found")
 
 const trimValues = "_*` "
 
+var (
+	altTitle2Regex = regexp.MustCompile("^-+$")
+	altTitle1Regex = regexp.MustCompile("^=+$")
+)
+
 type parser struct {
 	scanner               *bufio.Scanner
 	tasks                 models.Tasks
@@ -53,12 +58,12 @@ func (p *parser) scan() bool {
 func (p *parser) parseAltTitle(advance bool) (ok bool, level int, text string) {
 	t := strings.TrimSpace(p.currentLine)
 	n := strings.TrimSpace(p.nextLine)
-	if regexp.MustCompile("^-+$").MatchString(n) {
+	if altTitle2Regex.MatchString(n) {
 		ok = true
 		level = 2
 		text = t
 	}
-	if regexp.MustCompile("^=+$").MatchString(n) {
+	if altTitle1Regex.MatchString(n) {
 		ok = true
 		level = 1
 		text = t
@@ -245,7 +250,7 @@ func (p *parser) parseTask() (ok bool, err error) {
 		return
 	}
 	if len(p.currTask.Script) < 1 && len(p.currTask.DependsOn) < 1 {
-		err = fmt.Errorf("task %s has no commands or required tasks %v", p.currTask.Name, p.currTask)
+		err = fmt.Errorf("task %s has no commands or required tasks", p.currTask.Name)
 		return
 	}
 	p.tasks = append(p.tasks, p.currTask)

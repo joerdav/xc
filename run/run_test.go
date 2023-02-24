@@ -3,7 +3,6 @@ package run
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"testing"
 
@@ -125,7 +124,6 @@ func TestRun(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			runner, err := NewRunner(tt.tasks, "")
-			fmt.Println("results", err, tt.expectedParseError)
 			if (err != nil) != tt.expectedParseError {
 				t.Fatalf("expected error %v, got %v", tt.expectedParseError, err)
 			}
