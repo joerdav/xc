@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 
 	"github.com/joerdav/xc/models"
@@ -15,11 +14,6 @@ import (
 var ErrNoTasksTitle = errors.New("no tasks title found")
 
 const trimValues = "_*` "
-
-var (
-	altTitle2Regex = regexp.MustCompile("^-+$")
-	altTitle1Regex = regexp.MustCompile("^=+$")
-)
 
 type parser struct {
 	scanner               *bufio.Scanner
@@ -55,15 +49,27 @@ func (p *parser) scan() bool {
 	return true
 }
 
+func stringOnlyContains(input string, matcher rune) bool {
+	if len(input) == 0 {
+		return false
+	}
+	for i := range input {
+		if []rune(input)[i] != matcher {
+			return false
+		}
+	}
+	return true
+}
+
 func (p *parser) parseAltTitle(advance bool) (ok bool, level int, text string) {
 	t := strings.TrimSpace(p.currentLine)
 	n := strings.TrimSpace(p.nextLine)
-	if altTitle2Regex.MatchString(n) {
+	if stringOnlyContains(n, '-') {
 		ok = true
 		level = 2
 		text = t
 	}
-	if altTitle1Regex.MatchString(n) {
+	if stringOnlyContains(n, '=') {
 		ok = true
 		level = 1
 		text = t
