@@ -10,8 +10,8 @@ import (
 	"github.com/joerdav/xc/models"
 )
 
-// ErrNoTasksTitle is returned if the markdown contains no title named Tasks
-var ErrNoTasksTitle = errors.New("no tasks title found")
+// ErrNoTasksHeading is returned if the markdown contains no xc block
+var ErrNoTasksHeading = errors.New("no xc block found")
 
 const trimValues = "_*` "
 
@@ -19,7 +19,7 @@ type parser struct {
 	scanner               *bufio.Scanner
 	tasks                 models.Tasks
 	currTask              models.Task
-	tasksLevel            int
+	rootHeadingLevel      int
 	nextLine, currentLine string
 	reachedEnd            bool
 }
@@ -61,7 +61,7 @@ func stringOnlyContains(input string, matcher rune) bool {
 	return true
 }
 
-func (p *parser) parseAltTitle(advance bool) (ok bool, level int, text string) {
+func (p *parser) parseAltHeading(advance bool) (ok bool, level int, text string) {
 	t := strings.TrimSpace(p.currentLine)
 	n := strings.TrimSpace(p.nextLine)
 	if stringOnlyContains(n, '-') {
@@ -82,8 +82,8 @@ func (p *parser) parseAltTitle(advance bool) (ok bool, level int, text string) {
 	return
 }
 
-func (p *parser) parseTitle(advance bool) (ok bool, level int, text string) {
-	ok, level, text = p.parseAltTitle(advance)
+func (p *parser) parseHeading(advance bool) (ok bool, level int, text string) {
+	ok, level, text = p.parseAltHeading(advance)
 	if ok {
 		return
 	}
@@ -199,16 +199,16 @@ func (p *parser) parseCodeBlock() error {
 	return nil
 }
 
-func (p *parser) findTaskTitle() (title string, done bool, err error) {
+func (p *parser) findTaskHeading() (heading string, done bool, err error) {
 	for {
-		tok, level, text := p.parseTitle(true)
-		if !tok || level > p.tasksLevel+1 {
+		tok, level, text := p.parseHeading(true)
+		if !tok || level > p.rootHeadingLevel+1 {
 			if !p.scan() {
 				return "", false, fmt.Errorf("failed to read file: %w", p.scanner.Err())
 			}
 			continue
 		}
-		if level <= p.tasksLevel {
+		if level <= p.rootHeadingLevel {
 			return "", true, nil
 		}
 		return strings.Trim(text, trimValues), false, nil
@@ -228,11 +228,11 @@ func (p *parser) parseTaskBody() (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		tok, level, _ := p.parseTitle(false)
-		if tok && level <= p.tasksLevel {
+		tok, level, _ := p.parseHeading(false)
+		if tok && level <= p.rootHeadingLevel {
 			return false, nil
 		}
-		if tok && level == p.tasksLevel+1 {
+		if tok && level == p.rootHeadingLevel+1 {
 			return true, nil
 		}
 		if strings.TrimSpace(p.currentLine) != "" {
@@ -246,11 +246,11 @@ func (p *parser) parseTaskBody() (bool, error) {
 
 func (p *parser) parseTask() (ok bool, err error) {
 	p.currTask = models.Task{}
-	title, done, err := p.findTaskTitle()
+	heading, done, err := p.findTaskHeading()
 	if err != nil || done {
 		return
 	}
-	p.currTask.Name = title
+	p.currTask.Name = heading
 	ok, err = p.parseTaskBody()
 	if err != nil {
 		return
@@ -263,18 +263,18 @@ func (p *parser) parseTask() (ok bool, err error) {
 	return
 }
 
-// NewParser will read from r until it finds a valid `tasks` block.
+// NewParser will read from r until it finds a valid xc heading block.
 // If no block is found an error is returned.
-func NewParser(r io.Reader) (p parser, err error) {
+func NewParser(r io.Reader, heading string) (p parser, err error) {
 	p.scanner = bufio.NewScanner(r)
 	for p.scan() {
-		ok, level, text := p.parseTitle(true)
-		if !ok || strings.ToLower(text) != "tasks" {
+		ok, level, text := p.parseHeading(true)
+		if !ok || strings.ToLower(text) != heading {
 			continue
 		}
-		p.tasksLevel = level
+		p.rootHeadingLevel = level
 		return
 	}
-	err = ErrNoTasksTitle
+	err = ErrNoTasksHeading
 	return
 }
