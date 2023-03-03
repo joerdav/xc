@@ -51,8 +51,8 @@ xc will return an error if `Inputs` are not passed:
 ```sh
 $ xc greet
 Task has required inputs:
-        xc greet [FORENAME] [SURNAME]
-        FORENAME=[FORENAME] SURNAME=[SURNAME] xc greet
+        xc greet <forename> <surname>
+        FORENAME=<forename> SURNAME=<surname> xc greet
 exit status 1
 ```
 
