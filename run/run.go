@@ -62,11 +62,11 @@ const scriptHeader = ` #!/bin/bash
 func taskUsage(task models.Task) string {
 	argUsage := fmt.Sprintf("xc %s", task.Name)
 	for _, n := range task.Inputs {
-		argUsage += fmt.Sprintf(" [%s]", n)
+		argUsage += fmt.Sprintf(" <%s>", strings.ToLower(n))
 	}
 	envUsage := ""
 	for _, n := range task.Inputs {
-		envUsage += fmt.Sprintf("%s=[%s] ", n, n)
+		envUsage += fmt.Sprintf("%s=<%s> ", n, strings.ToLower(n))
 	}
 	envUsage += fmt.Sprintf("xc %s", task.Name)
 	return fmt.Sprintf("Task has required inputs:\n\t%s\n\t%s", argUsage, envUsage)
