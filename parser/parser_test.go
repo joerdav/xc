@@ -40,7 +40,7 @@ func assertTask(t *testing.T, expected, actual models.Task) {
 }
 
 func TestParseFile(t *testing.T) {
-	p, err := NewParser(strings.NewReader(s))
+	p, err := NewParser(strings.NewReader(s), "tasks")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -81,14 +81,14 @@ echo "Hello, world2!"
 }
 
 func TestParseFileNoTasks(t *testing.T) {
-	_, err := NewParser(strings.NewReader(e))
-	if !errors.Is(err, ErrNoTasksTitle) {
+	_, err := NewParser(strings.NewReader(e), "tasks")
+	if !errors.Is(err, ErrNoTasksHeading) {
 		t.Fatalf("expected error %v got: %v", "no Tasks section found", err)
 	}
 }
 
 func TestMultipleDirs(t *testing.T) {
-	p, _ := NewParser(strings.NewReader("dir: some dir"))
+	p, _ := NewParser(strings.NewReader("dir: some dir"), "tasks")
 	p.currTask.Dir = "an existing dir"
 	_, err := p.parseAttribute()
 	if err == nil {
@@ -101,7 +101,7 @@ func TestCommandlessTask(t *testing.T) {
 # Tasks
 ## a task
 ## another task
-`))
+`), "tasks")
 	_, err := p.parseTask()
 	if err == nil {
 		t.Fatal("expected error got nil")
@@ -112,9 +112,9 @@ func TestUnTerminatedCodeBlock(t *testing.T) {
 	p, _ := NewParser(strings.NewReader(`
 # Tasks
 ## a task
-` + "```" + `
+`+"```"+`
 some code
-`))
+`), "tasks")
 	_, err := p.parseTask()
 	if err == nil {
 		t.Fatal("expected error got nil")
@@ -122,7 +122,7 @@ some code
 }
 
 func TestMultipleCodeBlocks(t *testing.T) {
-	p, _ := NewParser(strings.NewReader("```\ncode\n```"))
+	p, _ := NewParser(strings.NewReader("```\ncode\n```"), "tasks")
 	p.currTask.Script = "an existing script"
 	err := p.parseCodeBlock()
 	if err == nil {
@@ -239,7 +239,7 @@ func TestParseAttribute(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			p, _ := NewParser(strings.NewReader(tt.in))
+			p, _ := NewParser(strings.NewReader(tt.in), "tasks")
 			ok, err := p.parseAttribute()
 			if err != nil {
 				t.Fatal(err)
@@ -286,7 +286,7 @@ echo "Hello, world2!"
 	}
 	file := buf.String()
 	for i := 0; i < b.N; i++ {
-		p, err := NewParser(strings.NewReader(file))
+		p, err := NewParser(strings.NewReader(file), "tasks")
 		if err != nil {
 			b.Fatal(err)
 		}

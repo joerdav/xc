@@ -24,7 +24,7 @@ var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
 
 type config struct {
 	version, help, short, md bool
-	filename                 string
+	filename, heading        string
 }
 
 //go:embed usage.txt
@@ -50,6 +50,8 @@ func flags() config {
 	flag.BoolVar(&cfg.version, "version", false, "show xc version")
 	flag.BoolVar(&cfg.help, "help", false, "shows xc usage")
 	flag.BoolVar(&cfg.help, "h", false, "shows xc usage")
+	flag.StringVar(&cfg.heading, "heading", "tasks", "specify xc heading")
+	flag.StringVar(&cfg.heading, "H", "tasks", "specify xc heading")
 	flag.StringVar(&cfg.filename, "file", "", "specify markdown file that contains tasks")
 	flag.StringVar(&cfg.filename, "f", "", "specify markdown file that contains tasks")
 	flag.BoolVar(&cfg.short, "short", false, "list task names in a short format")
@@ -59,24 +61,24 @@ func flags() config {
 	return cfg
 }
 
-func parse(filename string) (models.Tasks, string, error) {
+func parse(filename, heading string) (models.Tasks, string, error) {
 	if filename != "" {
-		return tryParse(filename)
+		return tryParse(filename, heading)
 	}
 	curr, err := filepath.Abs(filepath.Dir("."))
 	if err != nil {
 		return nil, "", fmt.Errorf("error getting current directory: %w", err)
 	}
-	return searchUpForFile(curr)
+	return searchUpForFile(curr, heading)
 }
 
-func searchUpForFile(curr string) (models.Tasks, string, error) {
+func searchUpForFile(curr, heading string) (models.Tasks, string, error) {
 	rm := filepath.Join(curr, "README.md")
-	tasks, directory, err := tryParse(rm)
+	tasks, directory, err := tryParse(rm, heading)
 	if err == nil {
 		return tasks, directory, nil
 	}
-	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parser.ErrNoTasksTitle) {
+	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parser.ErrNoTasksHeading) {
 		return nil, "", err
 	}
 	git := filepath.Join(curr, ".git")
@@ -88,16 +90,16 @@ func searchUpForFile(curr string) (models.Tasks, string, error) {
 	if strings.HasSuffix(next, string([]rune{filepath.Separator})) {
 		return nil, "", ErrNoMarkdownFile
 	}
-	return searchUpForFile(next)
+	return searchUpForFile(next, heading)
 }
 
-func tryParse(path string) (models.Tasks, string, error) {
+func tryParse(path, heading string) (models.Tasks, string, error) {
 	directory := filepath.Dir(path)
 	b, err := os.Open(path)
 	if err != nil {
 		return nil, "", fmt.Errorf("xc error opening file: %w", err)
 	}
-	p, err := parser.NewParser(b)
+	p, err := parser.NewParser(b, heading)
 	if err != nil {
 		return nil, "", fmt.Errorf("xc parse error: %w", err)
 	}
@@ -142,7 +144,7 @@ func printTask(task models.Task, maxLen int) {
 
 func runMain() error {
 	cfg := flags()
-	tasks, dir, err := parse(cfg.filename)
+	tasks, dir, err := parse(cfg.filename, cfg.heading)
 	if completion(tasks) {
 		return nil
 	}

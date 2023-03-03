@@ -15,6 +15,8 @@ An xc compatible markdown file needs to define a heading of any level called `Ta
 
 The tasks within a `Tasks` section will need to be one heading level lower than `Tasks`.
 
+The xc heading can be overridden with the flags `-H` or `-heading`.
+
 ```markdown
 ## Tasks
 
