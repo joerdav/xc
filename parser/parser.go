@@ -269,7 +269,7 @@ func NewParser(r io.Reader, heading string) (p parser, err error) {
 	p.scanner = bufio.NewScanner(r)
 	for p.scan() {
 		ok, level, text := p.parseHeading(true)
-		if !ok || strings.ToLower(text) != heading {
+		if !ok || strings.ToLower(text) != strings.ToLower(heading) {
 			continue
 		}
 		p.rootHeadingLevel = level
