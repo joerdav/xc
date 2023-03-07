@@ -40,7 +40,7 @@ func assertTask(t *testing.T, expected, actual models.Task) {
 }
 
 func TestParseFile(t *testing.T) {
-	p, err := NewParser(strings.NewReader(s), "tasks")
+	p, err := NewParser(strings.NewReader(s), "Tasks")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
