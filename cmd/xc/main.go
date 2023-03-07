@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime/debug"
 	"strings"
@@ -143,6 +144,14 @@ func printTask(task models.Task, maxLen int) {
 }
 
 func runMain() error {
+	ctx, cancel := context.WithCancel(context.Background())
+	// handle SIGINT (control+c)
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		<-c
+		cancel()
+	}()
 	cfg := flags()
 	tasks, dir, err := parse(cfg.filename, cfg.heading)
 	if completion(tasks) {
@@ -181,7 +190,7 @@ func runMain() error {
 	if err != nil {
 		return fmt.Errorf("xc parse error: %w", err)
 	}
-	err = runner.Run(context.Background(), tav[0], tav[1:])
+	err = runner.Run(ctx, tav[0], tav[1:])
 	if err != nil {
 		return fmt.Errorf("xc: %w", err)
 	}
