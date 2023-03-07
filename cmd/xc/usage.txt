@@ -1,16 +1,16 @@
 xc <task> [inputs...]
-  Run a task from an xc compatible markdown file.
+  Run a task from an xc-compatible markdown file.
   If -file is not specified and no README.md is found in the current directory,
     xc will search in parent files for convenience.
   -f -file <string>
-        Specify a markdown file that contains tasks (default "README.md").
+        Specify a markdown file that contains tasks (default: "README.md").
   -md
         Print the markdown for a task rather than running it.
   -H -heading <string>
-        Specify the heading for xc tasks. (default "Tasks")
+        Specify the heading for xc tasks (default: "Tasks").
 
 xc
-  List tasks from an xc compatible markdown file.
+  List tasks from an xc-compatible markdown file.
   If -file is not specified and no README.md is found in the current directory,
     xc will search in parent files for convenience.
   -s -short
@@ -18,9 +18,9 @@ xc
   -h -help
         Print this help text.
   -f -file <string>
-        Specify a markdown file that contains tasks (default "README.md").
+        Specify a markdown file that contains tasks (default: "README.md").
   -H -heading <string>
-        Specify the heading for xc tasks. (default "Tasks")
+        Specify the heading for xc tasks (default: "Tasks").
   -version
         Show xc version.
   -complete
