@@ -1,30 +1,30 @@
 xc <task> [inputs...]
-  Run a task from an xc compatible markdown file.
+  Run a task from an xc-compatible markdown file.
   If -file is not specified and no README.md is found in the current directory,
-    xc will search in parent files for convenience.
+    xc will search in parent directories for convenience.
   -f -file <string>
-        Specify a markdown file that contains tasks (default "README.md").
+        Specify a markdown file that contains tasks (default: "README.md").
   -md
-        Print the markdown for a task rather than running it.
+        Print the markdown code of a task rather than running it.
   -H -heading <string>
-        Specify the heading for xc tasks. (default "Tasks")
+        Specify the heading for xc tasks (default: "Tasks").
 
 xc
-  List tasks from an xc compatible markdown file.
+  List tasks from an xc-compatible markdown file.
   If -file is not specified and no README.md is found in the current directory,
-    xc will search in parent files for convenience.
+    xc will search in parent directories for convenience.
   -s -short
         List task names in a short format.
   -h -help
         Print this help text.
   -f -file <string>
-        Specify a markdown file that contains tasks (default "README.md").
+        Specify a markdown file that contains tasks (default: "README.md").
   -H -heading <string>
-        Specify the heading for xc tasks. (default "Tasks")
+        Specify the heading for xc tasks (default: "Tasks").
   -version
         Show xc version.
   -complete
-        Install completion for xc.
+        Install shell completion for xc.
   -uncomplete
-        Uninstall completion for xc.
+        Uninstall shell completion for xc.
   -y    Don't prompt user for typing 'yes' when installing completion.
