@@ -24,8 +24,8 @@ import (
 var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
 
 type config struct {
-	version, help, short, md bool
-	filename, heading        string
+	version, help, short, display bool
+	filename, heading             string
 }
 
 //go:embed usage.txt
@@ -49,15 +49,22 @@ func flags() config {
 		fmt.Print(usage)
 	}
 	flag.BoolVar(&cfg.version, "version", false, "show xc version")
+	flag.BoolVar(&cfg.version, "V", false, "show xc version")
+
 	flag.BoolVar(&cfg.help, "help", false, "shows xc usage")
 	flag.BoolVar(&cfg.help, "h", false, "shows xc usage")
+
 	flag.StringVar(&cfg.heading, "heading", "Tasks", "specify xc heading")
 	flag.StringVar(&cfg.heading, "H", "Tasks", "specify xc heading")
+
 	flag.StringVar(&cfg.filename, "file", "", "specify markdown file that contains tasks")
 	flag.StringVar(&cfg.filename, "f", "", "specify markdown file that contains tasks")
+
 	flag.BoolVar(&cfg.short, "short", false, "list task names in a short format")
 	flag.BoolVar(&cfg.short, "s", false, "list task names in a short format")
-	flag.BoolVar(&cfg.md, "md", false, "print the markdown for a task rather than running it")
+
+	flag.BoolVar(&cfg.display, "d", false, "print the markdown for a task rather than running it")
+	flag.BoolVar(&cfg.display, "display", false, "print the markdown for a task rather than running it")
 	flag.Parse()
 	return cfg
 }
@@ -180,8 +187,8 @@ func runMain() error {
 	if !ok {
 		fmt.Printf("task \"%s\" not found\n", tav[0])
 	}
-	// xc -md task1
-	if cfg.md {
+	// xc -display task1
+	if cfg.display {
 		ta.Display(os.Stdout)
 		return nil
 	}
@@ -219,11 +226,17 @@ func completion(tasks models.Tasks) bool {
 	cmp := complete.New("xc", complete.Command{
 		GlobalFlags: complete.Flags{
 			"-version": complete.PredictNothing,
+			"-V":       complete.PredictNothing,
 			"-h":       complete.PredictNothing,
-			"-short":   complete.PredictNothing,
 			"-help":    complete.PredictNothing,
 			"-f":       complete.PredictFiles("*.md"),
 			"-file":    complete.PredictFiles("*.md"),
+			"-s":       complete.PredictNothing,
+			"-short":   complete.PredictNothing,
+			"-d":       complete.PredictNothing,
+			"-display": complete.PredictNothing,
+			"-H":       complete.PredictNothing,
+			"-heading": complete.PredictNothing,
 		},
 		Sub:   nil,
 		Flags: nil,
