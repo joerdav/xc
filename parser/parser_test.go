@@ -108,6 +108,42 @@ func TestCommandlessTask(t *testing.T) {
 	}
 }
 
+func TestHeadingCaseInsensitive(t *testing.T) {
+	tests := []struct {
+		mdHeading, parserHeading string
+	}{
+		{"Tasks", "Tasks"},
+		{"Tasks", "tasks"},
+		{"tasks", "Tasks"},
+		{"tasks", "tasks"},
+		{" Tasks", "Tasks"},
+		{" Tasks", "tasks"},
+		{" tasks", "Tasks"},
+		{" tasks", "tasks"},
+		{"Tasks", " Tasks"},
+		{"Tasks", " tasks"},
+		{"tasks", " Tasks"},
+		{"tasks", " tasks"},
+	}
+	for _, tt := range tests {
+		p, _ := NewParser(strings.NewReader(fmt.Sprintf(`
+# %s
+## a task
+`+"```"+`
+some code
+`+"```"+`
+`, tt.mdHeading)), tt.parserHeading)
+		_, err := p.parseTask()
+		if err != nil {
+			t.Fatal(err)
+		}
+		assertTask(t, models.Task{
+			Name:   "a task",
+			Script: "some code\n",
+		}, p.currTask)
+	}
+}
+
 func TestUnTerminatedCodeBlock(t *testing.T) {
 	p, _ := NewParser(strings.NewReader(`
 # Tasks
