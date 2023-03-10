@@ -4,7 +4,7 @@ xc <task> [inputs...]
     xc will search in parent directories for convenience.
   -f -file <string>
         Specify a markdown file that contains tasks (default: "README.md").
-  -md
+  -d -display
         Print the markdown code of a task rather than running it.
   -H -heading <string>
         Specify the heading for xc tasks (default: "Tasks").
@@ -21,10 +21,11 @@ xc
         Specify a markdown file that contains tasks (default: "README.md").
   -H -heading <string>
         Specify the heading for xc tasks (default: "Tasks").
-  -version
+  -V -version
         Show xc version.
   -complete
         Install shell completion for xc.
   -uncomplete
         Uninstall shell completion for xc.
-  -y    Don't prompt user for typing 'yes' when installing completion.
+  -y
+        Don't prompt user for typing 'yes' when installing completion.
