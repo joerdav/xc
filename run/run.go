@@ -106,6 +106,12 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	if !ok {
 		return fmt.Errorf("task %s not found", name)
 	}
+	env := os.Environ()
+	env = append(env, task.Env...)
+	inp, err := getInputs(task, inputs, env)
+	if err != nil {
+		return err
+	}
 	for _, t := range task.DependsOn {
 		ta := strings.Fields(t)
 		err := r.Run(ctx, ta[0], ta[1:])
@@ -115,12 +121,6 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	}
 	if len(task.Script) == 0 {
 		return nil
-	}
-	env := os.Environ()
-	env = append(env, task.Env...)
-	inp, err := getInputs(task, inputs, env)
-	if err != nil {
-		return err
 	}
 	env = append(env, inp...)
 	var script bytes.Buffer
