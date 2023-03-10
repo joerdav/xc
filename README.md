@@ -97,10 +97,16 @@ Deploys a new tag for the repo.
 
 Requires: test
 ```
-export VERSION=`git rev-list --count HEAD`
-echo Adding git tag with version v0.0.${VERSION}
-git tag v0.0.${VERSION}
-git push origin v0.0.${VERSION}
+VERSION=`git describe --abbrev=0 --tags`
+VERSION_BITS=(${VERSION//./ })
+VNUM1=${VERSION_BITS[0]}
+VNUM2=${VERSION_BITS[1]}
+VNUM3=${VERSION_BITS[2]}
+VNUM3=$((VNUM3+1))
+NEW_TAG="$VNUM1.$VNUM2.$VNUM3"
+echo Adding git tag with version ${NEW_TAG}
+git tag ${NEW_TAG}
+git push origin ${NEW_TAG}
 ```
 
 ## update-nix
