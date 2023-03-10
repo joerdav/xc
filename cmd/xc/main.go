@@ -51,20 +51,20 @@ func flags() config {
 	flag.BoolVar(&cfg.version, "version", false, "show xc version")
 	flag.BoolVar(&cfg.version, "V", false, "show xc version")
 
-	flag.BoolVar(&cfg.help, "help", false, "shows xc usage")
-	flag.BoolVar(&cfg.help, "h", false, "shows xc usage")
+	flag.BoolVar(&cfg.help, "help", false, "show xc usage")
+	flag.BoolVar(&cfg.help, "h", false, "show xc usage")
 
-	flag.StringVar(&cfg.heading, "heading", "Tasks", "specify xc heading")
-	flag.StringVar(&cfg.heading, "H", "Tasks", "specify xc heading")
+	flag.StringVar(&cfg.heading, "heading", "Tasks", "specify the heading for xc tasks")
+	flag.StringVar(&cfg.heading, "H", "Tasks", "specify the heading for xc tasks")
 
-	flag.StringVar(&cfg.filename, "file", "", "specify markdown file that contains tasks")
-	flag.StringVar(&cfg.filename, "f", "", "specify markdown file that contains tasks")
+	flag.StringVar(&cfg.filename, "file", "", "specify a markdown file that contains tasks")
+	flag.StringVar(&cfg.filename, "f", "", "specify a markdown file that contains tasks")
 
 	flag.BoolVar(&cfg.short, "short", false, "list task names in a short format")
 	flag.BoolVar(&cfg.short, "s", false, "list task names in a short format")
 
-	flag.BoolVar(&cfg.display, "d", false, "print the markdown for a task rather than running it")
-	flag.BoolVar(&cfg.display, "display", false, "print the markdown for a task rather than running it")
+	flag.BoolVar(&cfg.display, "d", false, "print the markdown code of a task rather than running it")
+	flag.BoolVar(&cfg.display, "display", false, "print the markdown code of a task rather than running it")
 	flag.Parse()
 	return cfg
 }
