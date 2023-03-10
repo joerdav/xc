@@ -97,8 +97,11 @@ go build ./cmd/xc
 Deploys a new tag for the repo.
 
 Specify major/minor/patch with VERSION
+
 Inputs: VERSION
+
 Requires: test
+
 ```
 # https://github.com/unegma/bash-functions/blob/main/update.sh
 
