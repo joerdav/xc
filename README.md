@@ -158,3 +158,13 @@ Directory: doc
 ```sh
 hugo serve
 ```
+
+## build-docs
+
+Build production docs site.
+
+Directory: doc
+
+```sh
+./build.sh
+```

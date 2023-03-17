@@ -22,9 +22,12 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.19
-      -
-        name: Tests
-        run: go test ./...
+
+      - name: Test
+        uses: joerdav/run-xc@v1.0.0
+        with:
+          task: test
+
       -
         name: Import GPG key
         id: import_gpg
@@ -55,9 +58,10 @@ jobs:
         uses: cachix/install-nix-action@v18
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      -
-        name: Generate flake file
-        run: ./update-nix.sh
+      - name: Update Flake
+        uses: joerdav/run-xc@v1.0.0
+        with:
+          task: update-nix
       -
         name: Add and Commit
         run: |
