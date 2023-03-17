@@ -22,7 +22,7 @@ jobs:
           hugo-version: '0.91.2'
 
       - name: Build
-        uses: joerdav/run-xc@v1.0.0
+        uses: joerdav/run-xc@v1.1.0
         with:
           task: build-docs
 
