@@ -1,5 +1,4 @@
-# xc - Simple, Convenient, Markdown defined task runner. 
-
+# xc - Simple, Convenient, Markdown-based task runner.
 
 [![test](https://github.com/joerdav/xc/actions/workflows/test.yaml/badge.svg)](https://github.com/joerdav/xc/actions/workflows/test.yaml) 
 [![docs](https://github.com/joerdav/xc/actions/workflows/docs.yml/badge.svg)](https://github.com/joerdav/xc/actions/workflows/docs.yml)
@@ -12,22 +11,24 @@
 
 [Docs](https://xcfile.dev/) | [Getting Started](https://xcfile.dev/getting-started/) | [Github](https://github.com/joerdav/xc)
 
-`xc` is a task runner designed to maximise convenience, and minimise complexity.
+`xc` is a task runner similar to `Make` or `npm run`, that aims to be more discoverable and approachable.
 
-Each `xc` task is defined in simple, human-readable Markdown. Meaning that for people without the `xc` tool installed there is a clear source of useful commands in the README.md file.
+`xc` is designed to maximise convenience, and minimise complexity.
+Each `xc` task is defined in simple, human-readable Markdown.
+This means that even people without the `xc` tool installed can use the README.md (or whatever Markdown file contains the tasks) as a source of useful commands for the project.
 
 # Installation
 
-Installation instructions are defined at <https://xcfile.dev/getting-started/#installation>.
+Installation instructions are described at <https://xcfile.dev/getting-started/#installation>.
 
 # Features
 
 ![vscode demo](https://user-images.githubusercontent.com/19927761/214538057-963f9a47-ff95-486c-8856-b90bd358be3f.png)
 
-- Markdown defined tasks.
+- Tasks defined in Markdown files as code blocks.
 - Editor tools:
-	- VSCode (list and run xc tasks)
-	- Vim (recommended config for listing and running xc tasks)
+	- VSCode (list and run `xc` tasks)
+	- Vim (recommended config for listing and running `xc` tasks)
 
 # Example
 
