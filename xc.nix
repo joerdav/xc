@@ -2,13 +2,13 @@
 
 pkgs.buildGoModule rec {
   pname = "xc";
-  version = "v0.1.181";
+  version = "v0.2.0";
   subPackages = ["cmd/xc"];
   src = pkgs.fetchFromGitHub {
     owner = "joerdav";
     repo = "xc";
     rev = version;
-    sha256 = "C6qZdO6+n9BWm69y09kvnEBF45sB6bfOfmteNO2x68I=";
+    sha256 = "ACOi9MdsHZ7Td8pcYGj6Oy7uE/g/Mx7B+Uqw6K9hIrE=";
   };
-  vendorSha256 = "cySflcTuAzbFZbtXmzZ98nfY8HUq1UedONTtKP4EICs=";
+  vendorSha256 = "YETiKG8/+DFd9paqy58YYzCKZ47cWlhnUWHjrw5CrDI=";
 }
