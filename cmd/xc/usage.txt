@@ -27,5 +27,3 @@ xc
         Install shell completion for xc.
   -uncomplete
         Uninstall shell completion for xc.
-  -y
-        Don't prompt user for typing 'yes' when installing completion.
