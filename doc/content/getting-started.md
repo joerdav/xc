@@ -83,6 +83,12 @@ TODO
 Run `xc -version` to verify the installation.
 If installed via `go install` the version will be `devel`.
 
+## Install completion
+
+Run `xc -complete` to install auto completion.
+
+Run `xc -uncomplete` to uninstall auto completion.
+
 ## Create some tasks.
 
 Create a file named README.md:
