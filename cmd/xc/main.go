@@ -17,15 +17,17 @@ import (
 	"github.com/joerdav/xc/models"
 	"github.com/joerdav/xc/parser"
 	"github.com/joerdav/xc/run"
-	"github.com/posener/complete"
+	"github.com/posener/complete/v2"
+	"github.com/posener/complete/v2/install"
+	"github.com/posener/complete/v2/predict"
 )
 
 // ErrNoMarkdownFile will be returned if no markdown file is found in the cwd or any parent directories.
 var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
 
 type config struct {
-	version, help, short, display bool
-	filename, heading             string
+	version, help, short, display, complete, uncomplete bool
+	filename, heading                                   string
 }
 
 //go:embed usage.txt
@@ -65,6 +67,9 @@ func flags() config {
 
 	flag.BoolVar(&cfg.display, "d", false, "print the markdown code of a task rather than running it")
 	flag.BoolVar(&cfg.display, "display", false, "print the markdown code of a task rather than running it")
+
+	flag.BoolVar(&cfg.complete, "complete", false, "install shell completion for xc")
+	flag.BoolVar(&cfg.uncomplete, "uncomplete", false, "uninstall shell completion for xc")
 	flag.Parse()
 	return cfg
 }
@@ -160,10 +165,14 @@ func runMain() error {
 		cancel()
 	}()
 	cfg := flags()
-	tasks, dir, err := parse(cfg.filename, cfg.heading)
-	if completion(tasks) {
-		return nil
+	if cfg.uncomplete {
+		return install.Uninstall("xc")
 	}
+	if cfg.complete {
+		return install.Install("xc")
+	}
+	tasks, dir, err := parse(cfg.filename, cfg.heading)
+	completion(tasks).Complete("xc")
 	// xc -version
 	if cfg.version {
 		fmt.Printf("xc version: %s\n", getVersion())
@@ -222,38 +231,32 @@ func getVersion() string {
 	return version
 }
 
-func completion(tasks models.Tasks) bool {
-	cmp := complete.New("xc", complete.Command{
-		GlobalFlags: complete.Flags{
-			"-version": complete.PredictNothing,
-			"-V":       complete.PredictNothing,
-			"-h":       complete.PredictNothing,
-			"-help":    complete.PredictNothing,
-			"-f":       complete.PredictFiles("*.md"),
-			"-file":    complete.PredictFiles("*.md"),
-			"-s":       complete.PredictNothing,
-			"-short":   complete.PredictNothing,
-			"-d":       complete.PredictNothing,
-			"-display": complete.PredictNothing,
-			"-H":       complete.PredictNothing,
-			"-heading": complete.PredictNothing,
+func completion(tasks models.Tasks) *complete.Command {
+	return &complete.Command{
+		Flags: map[string]complete.Predictor{
+			"-version": predict.Nothing,
+			"-V":       predict.Nothing,
+			"-h":       predict.Nothing,
+			"-help":    predict.Nothing,
+			"-f":       predict.Files("*.md"),
+			"-file":    predict.Files("*.md"),
+			"-s":       predict.Nothing,
+			"-short":   predict.Nothing,
+			"-d":       predict.Nothing,
+			"-display": predict.Nothing,
+			"-H":       predict.Nothing,
+			"-heading": predict.Nothing,
 		},
-		Sub:   nil,
-		Flags: nil,
-		Args:  nil,
-	})
-	commands := make(map[string]complete.Command)
-	for _, ta := range tasks {
-		commands[ta.Name] = complete.Command{
-			Sub:         nil,
-			Flags:       nil,
-			GlobalFlags: nil,
-			Args:        nil,
+		Sub: completeTasks(tasks),
+	}
+}
+
+func completeTasks(tasks models.Tasks) map[string]*complete.Command {
+	result := map[string]*complete.Command{}
+	for _, t := range tasks {
+		result[t.Name] = &complete.Command{
+			Args: predict.Something,
 		}
 	}
-	cmp.Command.Sub = commands
-	cmp.CLI.InstallName = "complete"
-	cmp.CLI.UninstallName = "uncomplete"
-	cmp.AddFlags(nil)
-	return cmp.Complete()
+	return result
 }
