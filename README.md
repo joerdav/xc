@@ -1,4 +1,7 @@
-# xc - Simple, Convenient, Markdown-based task runner.
+<div align="center">
+
+![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
+[Docs](https://xcfile.dev/) | [Getting Started](https://xcfile.dev/getting-started/) | [Github](https://github.com/joerdav/xc)
 
 [![test](https://github.com/joerdav/xc/actions/workflows/test.yaml/badge.svg)](https://github.com/joerdav/xc/actions/workflows/test.yaml) 
 [![docs](https://github.com/joerdav/xc/actions/workflows/docs.yml/badge.svg)](https://github.com/joerdav/xc/actions/workflows/docs.yml)
@@ -7,11 +10,16 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/joerdav/xc)](https://goreportcard.com/report/github.com/joerdav/xc)
 [![Coverage Status](https://coveralls.io/repos/github/joerdav/xc/badge.svg?branch=main)](https://coveralls.io/github/joerdav/xc?branch=main)
 
-![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
+# xc - Simple, Convenient, Markdown-based task runner.
 
-[Docs](https://xcfile.dev/) | [Getting Started](https://xcfile.dev/getting-started/) | [Github](https://github.com/joerdav/xc)
+</div>
+
 
 `xc` is a task runner similar to `Make` or `npm run`, that aims to be more discoverable and approachable.
+
+The problem `xc` is intended to solve is scripts maintained separately from their documentation.
+Often a `Makefile` or a `package.json` will contain some useful scripts for developing on a project, then the `README.md` will surface and describe these scripts.
+Since the documentation is separate it may not be updated when scripts are changed or added, `xc` aims to solve this by defining the scripts inline with the documentation.
 
 `xc` is designed to maximise convenience, and minimise complexity.
 Each `xc` task is defined in simple, human-readable Markdown.
