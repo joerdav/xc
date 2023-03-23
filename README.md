@@ -36,9 +36,9 @@ Installation instructions are described at <https://xcfile.dev/getting-started/#
 
 - Tasks defined in Markdown files as code blocks.
 - Editor integration:
-	- VSCode (list and run `xc` tasks)
+	- [VSCode](https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode) (list and run `xc` tasks)
 	  ![vscode demo](https://user-images.githubusercontent.com/19927761/214538057-963f9a47-ff95-486c-8856-b90bd358be3f.png)
-	- Vim (recommended config for listing and running `xc` tasks)
+	- [Vim](https://xcfile.dev/ide-support/#vim) (recommended config for listing and running `xc` tasks)
 
 # Example
 
