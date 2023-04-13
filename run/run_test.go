@@ -119,6 +119,52 @@ func TestRun(t *testing.T) {
 			taskName:         "mytask2",
 			expectedTasksRun: 2,
 		},
+		{
+			name: "given a valid command with run always set, should only run always",
+			tasks: []models.Task{
+				{
+					Name:              "setup",
+					Script:            "somecmd",
+					RequiredBehaviour: models.RequiredBehaviourAlways,
+				},
+				{
+					Name:      "mytask",
+					Script:    "somecmd",
+					DependsOn: []string{"setup"},
+				},
+				{
+					Name:      "mytask2",
+					Script:    "somecmd2",
+					Dir:       ".",
+					DependsOn: []string{"mytask", "setup"},
+				},
+			},
+			taskName:         "mytask2",
+			expectedTasksRun: 4,
+		},
+		{
+			name: "given a valid command with run once set, should only run once",
+			tasks: []models.Task{
+				{
+					Name:              "setup",
+					Script:            "somecmd",
+					RequiredBehaviour: models.RequiredBehaviourOnce,
+				},
+				{
+					Name:      "mytask",
+					Script:    "somecmd",
+					DependsOn: []string{"setup"},
+				},
+				{
+					Name:      "mytask2",
+					Script:    "somecmd2",
+					Dir:       ".",
+					DependsOn: []string{"mytask", "setup"},
+				},
+			},
+			taskName:         "mytask2",
+			expectedTasksRun: 3,
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

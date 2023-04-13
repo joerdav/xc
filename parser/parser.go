@@ -126,6 +126,9 @@ const (
 	// AttributeTypeInp sets the required inputs for a Task, inputs can be provided
 	// as commandline arguments or environment variables.
 	AttributeTypeInp
+	// AttrubuteTypeRun sets the tasks requiredBehaviour, can be always or once.
+	// Default is always
+	AttributeTypeRun
 )
 
 var attMap = map[string]AttributeType{
@@ -136,6 +139,7 @@ var attMap = map[string]AttributeType{
 	"dir":         AttributeTypeDir,
 	"directory":   AttributeTypeDir,
 	"inputs":      AttributeTypeInp,
+	"run":         AttributeTypeRun,
 }
 
 func (p *parser) parseAttribute() (bool, error) {
@@ -169,6 +173,13 @@ func (p *parser) parseAttribute() (bool, error) {
 		}
 		s := strings.Trim(rest, trimValues)
 		p.currTask.Dir = s
+	case AttributeTypeRun:
+		s := strings.Trim(rest, trimValues)
+		r, ok := models.ParseRequiredBehaviour(s)
+		if !ok {
+			return false, fmt.Errorf("run contains invalid behaviour %q should be (always, once): %s", s, p.currTask.Name)
+		}
+		p.currTask.RequiredBehaviour = r
 	}
 	p.scan()
 	return true, nil
