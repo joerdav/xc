@@ -109,7 +109,7 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 		return fmt.Errorf("task %s not found", name)
 	}
 	if task.RequiredBehaviour == models.RequiredBehaviourOnce && r.alreadyRan[task.Name] {
-		fmt.Printf("task %s already run: skipping\n", task.Name)
+		fmt.Printf("task %q ran already: skipping\n", task.Name)
 		return nil
 	}
 	r.alreadyRan[task.Name] = true
