@@ -31,6 +31,9 @@ func assertTask(t *testing.T, expected, actual models.Task) {
 	if expected.Dir != actual.Dir {
 		t.Fatalf("dir want=%q got=%q", expected.Dir, actual.Dir)
 	}
+	if expected.RequiredBehaviour != actual.RequiredBehaviour {
+		t.Fatalf("Run want=%q got=%q", expected.RequiredBehaviour, actual.RequiredBehaviour)
+	}
 	if strings.Join(expected.DependsOn, ",") != strings.Join(actual.DependsOn, ",") {
 		t.Fatalf("requires want=%v got=%v", expected.DependsOn, actual.DependsOn)
 	}
@@ -90,6 +93,14 @@ func TestParseFileNoTasks(t *testing.T) {
 func TestMultipleDirs(t *testing.T) {
 	p, _ := NewParser(strings.NewReader("dir: some dir"), "tasks")
 	p.currTask.Dir = "an existing dir"
+	_, err := p.parseAttribute()
+	if err == nil {
+		t.Fatal("expected error got nil")
+	}
+}
+
+func TestInvalidRun(t *testing.T) {
+	p, _ := NewParser(strings.NewReader("run: never"), "tasks")
 	_, err := p.parseAttribute()
 	if err == nil {
 		t.Fatal("expected error got nil")
@@ -175,6 +186,7 @@ func TestParseAttribute(t *testing.T) {
 		expectDir       string
 		expectDependsOn string
 		expectInputs    string
+		expectBehaviour models.RequiredBehaviour
 	}{
 		{
 			name:      "given a basic Env, should parse",
@@ -257,6 +269,21 @@ func TestParseAttribute(t *testing.T) {
 			expectDir: "my:attribute",
 		},
 		{
+			name:            "given run always, should parse",
+			in:              "run: always",
+			expectBehaviour: models.RequiredBehaviourAlways,
+		},
+		{
+			name:            "given run once, should parse",
+			in:              "run: once",
+			expectBehaviour: models.RequiredBehaviourOnce,
+		},
+		{
+			name:            "given run once with formatting, should parse",
+			in:              "run: _*`once`*_",
+			expectBehaviour: models.RequiredBehaviourOnce,
+		},
+		{
 			name:        "given env with no colon, should not parse",
 			in:          "env _*`my:attribute_*`",
 			expectNotOk: true,
@@ -294,6 +321,9 @@ func TestParseAttribute(t *testing.T) {
 			}
 			if tt.expectDir != "" && p.currTask.Dir != tt.expectDir {
 				t.Fatalf("Dir=%s, want=%s", p.currTask.Dir, tt.expectDir)
+			}
+			if p.currTask.RequiredBehaviour != tt.expectBehaviour {
+				t.Fatalf("got=%q, want=%q", p.currTask.RequiredBehaviour, tt.expectBehaviour)
 			}
 		})
 	}

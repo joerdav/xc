@@ -1,7 +1,7 @@
 ---
-title: "Dependencies"
+title: "Requires"
 description:
-linkTitle: "Dependencies"
+linkTitle: "Requires"
 menu: { main: { parent: 'task-syntax', weight: 10 } }
 ---
 
@@ -72,3 +72,7 @@ TASK 3
 ```
 
 Running in the order of `Task1` -> `Task2` -> `Task`
+
+## Modifying required task behaviour
+
+See [Run](/task-syntax/run/)

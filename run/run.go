@@ -23,6 +23,7 @@ type Runner struct {
 	scriptRunner ScriptRunner
 	tasks        models.Tasks
 	dir          string
+	alreadyRan   map[string]bool
 }
 
 // NewRunner takes Tasks and returns a Runner.
@@ -42,8 +43,9 @@ func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
 			}
 			return nil
 		},
-		tasks: ts,
-		dir:   dir,
+		tasks:      ts,
+		dir:        dir,
+		alreadyRan: map[string]bool{},
 	}
 	for _, t := range ts {
 		err = runner.ValidateDependencies(t.Name, []string{})
@@ -106,6 +108,11 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	if !ok {
 		return fmt.Errorf("task %s not found", name)
 	}
+	if task.RequiredBehaviour == models.RequiredBehaviourOnce && r.alreadyRan[task.Name] {
+		fmt.Printf("task %q ran already: skipping\n", task.Name)
+		return nil
+	}
+	r.alreadyRan[task.Name] = true
 	env := os.Environ()
 	env = append(env, task.Env...)
 	inp, err := getInputs(task, inputs, env)
