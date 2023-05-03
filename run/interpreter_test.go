@@ -96,4 +96,21 @@ func TestIsShell(t *testing.T) {
 			}
 		}
 	})
+	t.Run("shell shebang with invalid bash script should fail", func(t *testing.T) {
+		she := `#!/usr/bin/env bash
+
+		func main() {
+			print("hang on this isn't shell")
+		}`
+		ti := newTestInterpreter()
+		if err := ti.Execute(context.Background(), she, nil, nil, ""); err == nil {
+			t.Fatal("expected an error")
+		}
+		if ti.shellRunnerCalled {
+			t.Fatal("expected shell call")
+		}
+		if ti.shebangRunnerCalled {
+			t.Fatal("expected no shebang")
+		}
+	})
 }
