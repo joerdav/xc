@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	shellShebangRe          = regexp.MustCompile(`^#!\s?/(usr/)?bin/(env\s+)?(sh|bash|mksh|bats|zsh)\s`)
+	shellShebangRe          = regexp.MustCompile(`^#!\s?/(usr/)?bin/(env\s+)?(sh|bash|mksh|bats|zsh)`)
 	otherSupportedShebangRe = regexp.MustCompile(`^#!(.+)`)
 )
 
@@ -88,10 +88,11 @@ func executeShell(ctx context.Context, text string, env []string, args []string,
 }
 
 func isShell(script string) bool {
-	lines := strings.Split(strings.TrimSpace(script), "\n")
-	if len(lines) == 0 {
+	if script == "" {
 		return true
 	}
+	lines := strings.Split(strings.TrimSpace(script), "\n")
+	fmt.Println(lines[0])
 	if shellShebangRe.MatchString(lines[0]) {
 		return true
 	}
