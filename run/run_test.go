@@ -7,9 +7,17 @@ import (
 	"testing"
 
 	"github.com/joerdav/xc/models"
-	"mvdan.cc/sh/v3/interp"
-	"mvdan.cc/sh/v3/syntax"
 )
+
+type mockScriptRunner struct {
+	calls   int
+	returns error
+}
+
+func (r *mockScriptRunner) Execute(ctx context.Context, text string, env []string, args []string, dir string) error {
+	r.calls++
+	return r.returns
+}
 
 func TestRun(t *testing.T) {
 	tests := []struct {
@@ -56,17 +64,6 @@ func TestRun(t *testing.T) {
 			},
 			taskName:           "mytask",
 			expectedParseError: true,
-		},
-		{
-			name: "given invalid script should fail",
-			tasks: []models.Task{
-				{
-					Name:   "mytask",
-					Script: "[[ ]]",
-				},
-			},
-			taskName:         "mytask",
-			expectedRunError: true,
 		},
 		{
 			name: "given a valid command with deps only should run",
@@ -176,17 +173,14 @@ func TestRun(t *testing.T) {
 			if err != nil {
 				return
 			}
-			runs := 0
-			runner.scriptRunner = func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
-				runs++
-				return tt.err
-			}
+			scriptRunner := &mockScriptRunner{returns: tt.err}
+			runner.scriptRunner = scriptRunner
 			err = runner.Run(context.Background(), tt.taskName, nil)
 			if (err != nil) != tt.expectedRunError {
 				t.Fatalf("expected error %v, got %v", tt.expectedRunError, err)
 			}
-			if runs != tt.expectedTasksRun {
-				t.Fatalf("expected %d task runs got %d", tt.expectedTasksRun, runs)
+			if scriptRunner.calls != tt.expectedTasksRun {
+				t.Fatalf("expected %d task runs got %d", tt.expectedTasksRun, scriptRunner.calls)
 			}
 		})
 	}
@@ -220,16 +214,13 @@ func TestRunWithInputs(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		var taskWasRan bool
-		runner.scriptRunner = func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
-			taskWasRan = true
-			return nil
-		}
+		scriptRunner := &mockScriptRunner{}
+		runner.scriptRunner = scriptRunner
 		err = runner.Run(context.Background(), "task", []string{"bar"})
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !taskWasRan {
+		if scriptRunner.calls != 1 {
 			t.Fatal("task was not run")
 		}
 	})
@@ -246,16 +237,13 @@ func TestRunWithInputs(t *testing.T) {
 		}
 		os.Setenv("FOO", "BAR")
 		defer os.Unsetenv("FOO")
-		var taskWasRan bool
-		runner.scriptRunner = func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
-			taskWasRan = true
-			return nil
-		}
+		scriptRunner := &mockScriptRunner{}
+		runner.scriptRunner = scriptRunner
 		err = runner.Run(context.Background(), "task", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !taskWasRan {
+		if scriptRunner.calls != 1 {
 			t.Fatal("task was not run")
 		}
 	})

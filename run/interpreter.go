@@ -33,7 +33,9 @@ func executeShebang(ctx context.Context, text string, env []string, args []strin
 	lines := strings.Split(strings.TrimSpace(text), "\n")
 	shebang := lines[0]
 	interpreter := strings.TrimPrefix(shebang, "#!")
-	interpreter = strings.TrimPrefix(interpreter, "/usr/bin/env ")
+	interpreterParts := strings.Fields(strings.TrimPrefix(interpreter, "/usr/bin/env "))
+	interpreterCmd := interpreterParts[0]
+	interpreterArgs := interpreterParts[1:]
 	text = strings.Join(lines[1:], "\n")
 	d, err := ioutil.TempDir("", "xc_")
 	if err != nil {
@@ -48,7 +50,8 @@ func executeShebang(ctx context.Context, text string, env []string, args []strin
 	if _, err = f.WriteString(text); err != nil {
 		return fmt.Errorf("failed to write execution file")
 	}
-	cmd := exec.CommandContext(ctx, interpreter, append([]string{f.Name()}, args...)...)
+	interpreterArgs = append(interpreterArgs, f.Name())
+	cmd := exec.CommandContext(ctx, interpreterCmd, append(interpreterArgs, args...)...)
 	cmd.Dir = dir
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
