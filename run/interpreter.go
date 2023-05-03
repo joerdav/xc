@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -37,12 +36,12 @@ func executeShebang(ctx context.Context, text string, env []string, args []strin
 	interpreterCmd := interpreterParts[0]
 	interpreterArgs := interpreterParts[1:]
 	text = strings.Join(lines[1:], "\n")
-	d, err := ioutil.TempDir("", "xc_")
+	d, err := os.MkdirTemp("", "xc_")
 	if err != nil {
 		return fmt.Errorf("failed to create execution dir")
 	}
 	defer os.Remove(d)
-	f, err := ioutil.TempFile(d, "xc_")
+	f, err := os.CreateTemp(d, "xc_")
 	if err != nil {
 		return fmt.Errorf("failed to create execution file")
 	}
