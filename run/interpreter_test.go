@@ -1,11 +1,58 @@
 package run
 
-import "testing"
+import (
+	"context"
+	"os/exec"
+	"testing"
+
+	"mvdan.cc/sh/v3/interp"
+	"mvdan.cc/sh/v3/syntax"
+)
+
+type testInterpreter struct {
+	interpreter
+	shellRunnerCalled   bool
+	shebangRunnerCalled bool
+}
+
+func newTestInterpreter() *testInterpreter {
+	inter := &testInterpreter{}
+	inter.interpreter = interpreter{
+		shellRunner: func(context.Context, *interp.Runner, *syntax.File) error {
+			inter.shellRunnerCalled = true
+			return nil
+		},
+		shebangRunner: func(*exec.Cmd) error {
+			inter.shebangRunnerCalled = true
+			return nil
+		},
+	}
+	return inter
+}
 
 func TestIsShell(t *testing.T) {
+	t.Run("empty assume shell", func(t *testing.T) {
+		ti := newTestInterpreter()
+		if err := ti.Execute(context.Background(), "", nil, nil, ""); err != nil {
+			t.Fatal(err)
+		}
+		if !ti.shellRunnerCalled {
+			t.Fatal("expected shell call")
+		}
+		if ti.shebangRunnerCalled {
+			t.Fatal("expected no shebang")
+		}
+	})
 	t.Run("no shebang assume shell", func(t *testing.T) {
-		if !isShell("") {
-			t.Fatal("expected true")
+		ti := newTestInterpreter()
+		if err := ti.Execute(context.Background(), "echo", nil, nil, ""); err != nil {
+			t.Fatal(err)
+		}
+		if !ti.shellRunnerCalled {
+			t.Fatal("expected shell call")
+		}
+		if ti.shebangRunnerCalled {
+			t.Fatal("expected no shebang")
 		}
 	})
 	t.Run("shell shebang should result in shell", func(t *testing.T) {
@@ -18,8 +65,15 @@ func TestIsShell(t *testing.T) {
 		}
 		for _, s := range shells {
 			she := "#!/usr/bin/env " + s + " "
-			if !isShell(she) {
-				t.Errorf("%q expected true", she)
+			ti := newTestInterpreter()
+			if err := ti.Execute(context.Background(), she, nil, nil, ""); err != nil {
+				t.Fatal(err)
+			}
+			if !ti.shellRunnerCalled {
+				t.Fatal("expected shell call")
+			}
+			if ti.shebangRunnerCalled {
+				t.Fatal("expected no shebang")
 			}
 		}
 	})
@@ -30,8 +84,15 @@ func TestIsShell(t *testing.T) {
 		}
 		for _, s := range shells {
 			she := "#!/usr/bin/env " + s + " "
-			if isShell(she) {
-				t.Errorf("%q expected false", she)
+			ti := newTestInterpreter()
+			if err := ti.Execute(context.Background(), she, nil, nil, ""); err != nil {
+				t.Fatal(err)
+			}
+			if ti.shellRunnerCalled {
+				t.Fatal("expected no shell call")
+			}
+			if !ti.shebangRunnerCalled {
+				t.Fatal("expected shebang")
 			}
 		}
 	})

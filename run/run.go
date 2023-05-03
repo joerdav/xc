@@ -34,7 +34,7 @@ type Runner struct {
 // invalid or at a larger depth than 50.
 func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
 	runner = Runner{
-		scriptRunner: interpreter{},
+		scriptRunner: newInterpreter(),
 		tasks:        ts,
 		dir:          dir,
 		alreadyRan:   map[string]bool{},

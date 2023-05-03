@@ -19,16 +19,34 @@ var (
 	otherSupportedShebangRe = regexp.MustCompile(`^#!(.+)`)
 )
 
-type interpreter struct{}
-
-func (interpreter) Execute(ctx context.Context, script string, env []string, args []string, dir string) error {
-	if isShell(script) {
-		return executeShell(ctx, script, env, args, dir)
-	}
-	return executeShebang(ctx, script, env, args, dir)
+type interpreter struct {
+	shellRunner   func(context.Context, *interp.Runner, *syntax.File) error
+	shebangRunner func(*exec.Cmd) error
 }
 
-func executeShebang(ctx context.Context, text string, env []string, args []string, dir string) error {
+func interpShellRunner(ctx context.Context, runner *interp.Runner, file *syntax.File) error {
+	return runner.Run(ctx, file)
+}
+
+func cmdShebangRunner(cmd *exec.Cmd) error {
+	return cmd.Run()
+}
+
+func newInterpreter() interpreter {
+	return interpreter{
+		shellRunner:   interpShellRunner,
+		shebangRunner: cmdShebangRunner,
+	}
+}
+
+func (i interpreter) Execute(ctx context.Context, script string, env []string, args []string, dir string) error {
+	if isShell(script) {
+		return i.executeShell(ctx, script, env, args, dir)
+	}
+	return i.executeShebang(ctx, script, env, args, dir)
+}
+
+func (i interpreter) executeShebang(ctx context.Context, text string, env []string, args []string, dir string) error {
 	lines := strings.Split(strings.TrimSpace(text), "\n")
 	shebang := lines[0]
 	interpreter := strings.TrimPrefix(shebang, "#!")
@@ -56,10 +74,10 @@ func executeShebang(ctx context.Context, text string, env []string, args []strin
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	return i.shebangRunner(cmd)
 }
 
-func executeShell(ctx context.Context, text string, env []string, args []string, dir string) error {
+func (i interpreter) executeShell(ctx context.Context, text string, env []string, args []string, dir string) error {
 	if shellShebangRe.MatchString(text) {
 		text = strings.Join(strings.Split(text, "\n")[1:], "\n")
 	}
@@ -83,7 +101,7 @@ func executeShell(ctx context.Context, text string, env []string, args []string,
 	if err != nil {
 		return fmt.Errorf("failed to compose script: %w", err)
 	}
-	return runner.Run(ctx, file)
+	return i.shellRunner(ctx, runner, file)
 }
 
 func isShell(script string) bool {
