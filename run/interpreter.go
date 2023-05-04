@@ -20,8 +20,9 @@ var (
 )
 
 type interpreter struct {
-	shellRunner   func(context.Context, *interp.Runner, *syntax.File) error
-	shebangRunner func(*exec.Cmd) error
+	shellRunner    func(context.Context, *interp.Runner, *syntax.File) error
+	shebangRunner  func(*exec.Cmd) error
+	tempFilePrefix string
 }
 
 func interpShellRunner(ctx context.Context, runner *interp.Runner, file *syntax.File) error {
@@ -34,8 +35,9 @@ func cmdShebangRunner(cmd *exec.Cmd) error {
 
 func newInterpreter() interpreter {
 	return interpreter{
-		shellRunner:   interpShellRunner,
-		shebangRunner: cmdShebangRunner,
+		shellRunner:    interpShellRunner,
+		shebangRunner:  cmdShebangRunner,
+		tempFilePrefix: "xc_",
 	}
 }
 
@@ -54,12 +56,7 @@ func (i interpreter) executeShebang(ctx context.Context, text string, env []stri
 	interpreterCmd := interpreterParts[0]
 	interpreterArgs := interpreterParts[1:]
 	text = strings.Join(lines[1:], "\n")
-	d, err := os.MkdirTemp("", "xc_")
-	if err != nil {
-		return fmt.Errorf("failed to create execution dir")
-	}
-	defer os.Remove(d)
-	f, err := os.CreateTemp(d, "xc_")
+	f, err := os.CreateTemp("", i.tempFilePrefix)
 	if err != nil {
 		return fmt.Errorf("failed to create execution file")
 	}

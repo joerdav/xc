@@ -107,7 +107,21 @@ func TestIsShell(t *testing.T) {
 			t.Fatal("expected an error")
 		}
 		if ti.shellRunnerCalled {
-			t.Fatal("expected shell call")
+			t.Fatal("expected no shell call")
+		}
+		if ti.shebangRunnerCalled {
+			t.Fatal("expected no shebang")
+		}
+	})
+	t.Run("error creating file should not execute", func(t *testing.T) {
+		she := "#!/usr/bin/env python "
+		ti := newTestInterpreter()
+		ti.tempFilePrefix = "invalid/prefix"
+		if err := ti.Execute(context.Background(), she, nil, nil, ""); err == nil {
+			t.Fatal("expected an error")
+		}
+		if ti.shellRunnerCalled {
+			t.Fatal("expected no shell call")
 		}
 		if ti.shebangRunnerCalled {
 			t.Fatal("expected no shebang")
