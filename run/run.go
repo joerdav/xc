@@ -1,7 +1,6 @@
 package run
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -9,14 +8,13 @@ import (
 	"strings"
 
 	"github.com/joerdav/xc/models"
-	"mvdan.cc/sh/v3/expand"
-	"mvdan.cc/sh/v3/interp"
-	"mvdan.cc/sh/v3/syntax"
 )
 
 const maxDeps = 50
 
-type ScriptRunner func(ctx context.Context, runner *interp.Runner, node syntax.Node) error
+type ScriptRunner interface {
+	Execute(ctx context.Context, text string, env []string, args []string, dir string) error
+}
 
 // Runner is responsible for running Tasks.
 type Runner struct {
@@ -36,16 +34,10 @@ type Runner struct {
 // invalid or at a larger depth than 50.
 func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
 	runner = Runner{
-		scriptRunner: func(ctx context.Context, runner *interp.Runner, node syntax.Node) error {
-			err := runner.Run(ctx, node)
-			if err != nil {
-				return fmt.Errorf("script error: %w", err)
-			}
-			return nil
-		},
-		tasks:      ts,
-		dir:        dir,
-		alreadyRan: map[string]bool{},
+		scriptRunner: newInterpreter(),
+		tasks:        ts,
+		dir:          dir,
+		alreadyRan:   map[string]bool{},
 	}
 	for _, t := range ts {
 		err = runner.ValidateDependencies(t.Name, []string{})
@@ -130,27 +122,7 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 		return nil
 	}
 	env = append(env, inp...)
-	var script bytes.Buffer
-	if _, err := script.Write([]byte(scriptHeader)); err != nil {
-		return fmt.Errorf("failed to write script header: %w", err)
-	}
-	if _, err := script.Write([]byte(task.Script)); err != nil {
-		return fmt.Errorf("failed to write script: %w", err)
-	}
-	file, err := syntax.NewParser().Parse(&script, "")
-	if err != nil {
-		return fmt.Errorf("failed to parse task: %w", err)
-	}
-	runner, err := interp.New(
-		interp.Env(expand.ListEnviron(env...)),
-		interp.StdIO(os.Stdin, os.Stdout, os.Stderr),
-		interp.Dir(r.getExecutionPath(task)),
-		interp.Params(inputs...),
-	)
-	if err != nil {
-		return fmt.Errorf("failed to compose script: %w", err)
-	}
-	return r.scriptRunner(ctx, runner, file)
+	return r.scriptRunner.Execute(ctx, task.Script, env, inputs, r.getExecutionPath(task))
 }
 
 func (r *Runner) getExecutionPath(task models.Task) string {

@@ -22,6 +22,9 @@ import (
 	"github.com/posener/complete/v2/predict"
 )
 
+//go:embed usage.txt
+var usage string
+
 // ErrNoMarkdownFile will be returned if no markdown file is found in the cwd or any parent directories.
 var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
 
@@ -29,9 +32,6 @@ type config struct {
 	version, help, short, display, complete, uncomplete bool
 	filename, heading                                   string
 }
-
-//go:embed usage.txt
-var usage string
 
 var version = ""
 
