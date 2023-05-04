@@ -42,20 +42,14 @@ func newInterpreter() interpreter {
 }
 
 func (i interpreter) Execute(ctx context.Context, script string, env []string, args []string, dir string) error {
-	if isShell(script) {
+	interpreterCmd, interpreterArgs, text, ok := parseShebang(script)
+	if !ok {
 		return i.executeShell(ctx, script, env, args, dir)
 	}
-	return i.executeShebang(ctx, script, env, args, dir)
+	return i.executeShebang(ctx, interpreterCmd, interpreterArgs, text, env, args, dir)
 }
 
-func (i interpreter) executeShebang(ctx context.Context, text string, env []string, args []string, dir string) error {
-	lines := strings.Split(strings.TrimSpace(text), "\n")
-	shebang := lines[0]
-	interpreter := strings.TrimPrefix(shebang, "#!")
-	interpreterParts := strings.Fields(strings.TrimPrefix(interpreter, "/usr/bin/env "))
-	interpreterCmd := interpreterParts[0]
-	interpreterArgs := interpreterParts[1:]
-	text = strings.Join(lines[1:], "\n")
+func (i interpreter) executeShebang(ctx context.Context, interpreterCmd string, interpreterArgs []string, text string, env []string, args []string, dir string) error {
 	f, err := os.CreateTemp("", i.tempFilePrefix)
 	if err != nil {
 		return fmt.Errorf("failed to create execution file")
@@ -101,17 +95,21 @@ func (i interpreter) executeShell(ctx context.Context, text string, env []string
 	return i.shellRunner(ctx, runner, file)
 }
 
-func isShell(script string) bool {
+func parseShebang(script string) (interpreterCmd string, interpreterArgs []string, text string, ok bool) {
 	if script == "" {
-		return true
+		return "", nil, "", false
 	}
 	lines := strings.Split(strings.TrimSpace(script), "\n")
-	fmt.Println(lines[0])
 	if shellShebangRe.MatchString(lines[0]) {
-		return true
+		return "", nil, "", false
 	}
 	if !otherSupportedShebangRe.MatchString(lines[0]) {
-		return true
+		return "", nil, "", false
 	}
-	return false
+	shebang := lines[0]
+	interpreter := strings.TrimPrefix(shebang, "#!")
+	interpreterParts := strings.Fields(strings.TrimPrefix(interpreter, "/usr/bin/env "))
+	interpreterCmd = interpreterParts[0]
+	interpreterArgs = interpreterParts[1:]
+	return interpreterCmd, interpreterArgs, strings.Join(lines[1:], "\n"), true
 }
