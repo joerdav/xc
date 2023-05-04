@@ -49,7 +49,16 @@ func (i interpreter) Execute(ctx context.Context, script string, env []string, a
 	return i.executeShebang(ctx, interpreterCmd, interpreterArgs, text, env, args, dir)
 }
 
-func (i interpreter) executeShebang(ctx context.Context, interpreterCmd string, interpreterArgs []string, text string, env []string, args []string, dir string) error {
+//nolint:gosec // accept that command is being executed here from outside of xc
+func (i interpreter) executeShebang(
+	ctx context.Context,
+	interpreterCmd string,
+	interpreterArgs []string,
+	text string,
+	env []string,
+	args []string,
+	dir string,
+) error {
 	f, err := os.CreateTemp("", i.tempFilePrefix)
 	if err != nil {
 		return fmt.Errorf("failed to create execution file")
