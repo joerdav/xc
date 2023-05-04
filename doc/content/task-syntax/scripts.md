@@ -22,3 +22,18 @@ echo "Hello العالمية!"
 echo "Hello ертөнц!"
 ```
 ````
+
+## Shebangs
+
+To define an alternative interpreter such as python, then include a shebang, similar to the unix style.
+
+xc will parse this and create a temporary file that will be executed using the specified interpreter.
+
+````markdown
+## Tasks
+### python-task
+```
+#!/usr/bin/env python
+print("foo")
+```
+````
