@@ -229,11 +229,14 @@ func (p *parser) findTaskHeading() (heading string, done bool, err error) {
 func (p *parser) parseTaskBody() (bool, error) {
 	for {
 		ok, err := p.parseAttribute()
-		if ok {
-			continue
-		}
 		if err != nil {
 			return false, err
+		}
+		if p.reachedEnd {
+			return false, nil
+		}
+		if ok {
+			continue
 		}
 		err = p.parseCodeBlock()
 		if err != nil {

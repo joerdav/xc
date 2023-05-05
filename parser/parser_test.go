@@ -119,6 +119,18 @@ func TestCommandlessTask(t *testing.T) {
 	}
 }
 
+func TestRequiresOnlyTask(t *testing.T) {
+	p, _ := NewParser(strings.NewReader(`
+# Tasks
+## a-task
+requires: some-task
+`), "tasks")
+	_, err := p.parseTask()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestHeadingCaseInsensitive(t *testing.T) {
 	tests := []struct {
 		mdHeading, parserHeading string
