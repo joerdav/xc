@@ -3,6 +3,7 @@ module github.com/joerdav/xc
 go 1.20
 
 require (
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/posener/complete/v2 v2.0.1-alpha.13
 	mvdan.cc/sh/v3 v3.6.0
 )
