@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/shlex"
 	"github.com/joerdav/xc/models"
 )
 
@@ -112,7 +113,7 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 		return err
 	}
 	for _, t := range task.DependsOn {
-		ta := strings.Fields(t)
+		ta, _ := shlex.Split(t)
 		err := r.Run(ctx, ta[0], ta[1:])
 		if err != nil {
 			return err
@@ -152,6 +153,7 @@ func (r *Runner) ValidateDependencies(task string, prevTasks []string) error {
 		return fmt.Errorf("task %s has a parsing error: %s", task, t.ParsingError)
 	}
 	for _, t := range t.DependsOn {
+		t, _, _ := strings.Cut(t, " ")
 		st, ok := r.tasks.Get(t)
 		if !ok {
 			return fmt.Errorf("task %s not found", t)
