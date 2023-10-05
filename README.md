@@ -5,6 +5,7 @@
 ![xc](https://user-images.githubusercontent.com/19927761/156772881-10065864-ff4d-4225-ab2b-5adbbe628845.png)
 [Docs](https://xcfile.dev/) | [Getting Started](https://xcfile.dev/getting-started/) | [Github](https://github.com/joerdav/xc)
 
+[![xc compatible](https://xcfile.dev/badge.svg)](https://xcfile.dev)
 [![test](https://github.com/joerdav/xc/actions/workflows/test.yaml/badge.svg)](https://github.com/joerdav/xc/actions/workflows/test.yaml) 
 [![docs](https://github.com/joerdav/xc/actions/workflows/docs.yml/badge.svg)](https://github.com/joerdav/xc/actions/workflows/docs.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/joerdav/xc.svg)](https://pkg.go.dev/github.com/joerdav/xc)

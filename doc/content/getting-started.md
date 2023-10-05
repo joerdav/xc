@@ -130,6 +130,17 @@ echo world
 world
 ```
 
+## Let people know you use xc.
+
+Add the following badge to your `README.md` so that people know it's xc compatible.
+
+```
+[![xc compatible](https://xcfile.dev/badge.svg)](https://xcfile.dev)
+```
+
+<a href="https://xcfile.dev" alt="xc compatible">
+        <img src="/badge.svg" /></a>
+
 ## RTFM!
 
 Now that you have a simple task working, [RTFM](/task-syntax/) to learn what else `xc` is capable of.
