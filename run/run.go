@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/joerdav/xc/models"
+	"golang.org/x/sync/errgroup"
 )
 
 const maxDeps = 50
@@ -112,18 +113,46 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	if err != nil {
 		return err
 	}
-	for _, t := range task.DependsOn {
-		ta, _ := shlex.Split(t)
-		err := r.Run(ctx, ta[0], ta[1:])
-		if err != nil {
-			return err
-		}
+	runFunc := r.runDepsSync
+	if task.DepsBehaviour == models.DependencyBehaviourAsync {
+		runFunc = r.runDepsAsync
+	}
+	if err := runFunc(ctx, task.DependsOn...); err != nil {
+		return err
 	}
 	if len(task.Script) == 0 {
 		return nil
 	}
 	env = append(env, inp...)
 	return r.scriptRunner.Execute(ctx, task.Script, env, inputs, r.getExecutionPath(task))
+}
+
+func (r *Runner) runDepsSync(ctx context.Context, dependencies ...string) error {
+	for _, t := range dependencies {
+		ta, err := shlex.Split(t)
+		if err != nil {
+			return err
+		}
+		if err := r.Run(ctx, ta[0], ta[1:]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *Runner) runDepsAsync(ctx context.Context, dependencies ...string) error {
+	group, groupCtx := errgroup.WithContext(ctx)
+	for _, t := range dependencies {
+		t := t // do not capture loop variable
+		group.Go(func() error {
+			ta, err := shlex.Split(t)
+			if err != nil {
+				return err
+			}
+			return r.Run(groupCtx, ta[0], ta[1:])
+		})
+	}
+	return group.Wait()
 }
 
 func (r *Runner) getExecutionPath(task models.Task) string {

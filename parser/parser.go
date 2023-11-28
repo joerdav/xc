@@ -130,17 +130,21 @@ const (
 	// AttrubuteTypeRun sets the tasks requiredBehaviour, can be always or once.
 	// Default is always
 	AttributeTypeRun
+	// AttributeTypeRunDeps sets the tasks dependenciesBehaviour, can be sync or async.
+	AttributeTypeRunDeps
 )
 
 var attMap = map[string]AttributeType{
-	"req":         AttributeTypeReq,
-	"requires":    AttributeTypeReq,
-	"env":         AttributeTypeEnv,
-	"environment": AttributeTypeEnv,
-	"dir":         AttributeTypeDir,
-	"directory":   AttributeTypeDir,
-	"inputs":      AttributeTypeInp,
-	"run":         AttributeTypeRun,
+	"req":             AttributeTypeReq,
+	"requires":        AttributeTypeReq,
+	"env":             AttributeTypeEnv,
+	"environment":     AttributeTypeEnv,
+	"dir":             AttributeTypeDir,
+	"directory":       AttributeTypeDir,
+	"inputs":          AttributeTypeInp,
+	"run":             AttributeTypeRun,
+	"rundeps":         AttributeTypeRunDeps,
+	"rundependencies": AttributeTypeRunDeps,
 }
 
 func (p *parser) parseAttribute() (bool, error) {
@@ -181,6 +185,13 @@ func (p *parser) parseAttribute() (bool, error) {
 			return false, fmt.Errorf("run contains invalid behaviour %q should be (always, once): %s", s, p.currTask.Name)
 		}
 		p.currTask.RequiredBehaviour = r
+	case AttributeTypeRunDeps:
+		s := strings.Trim(rest, trimValues)
+		r, ok := models.ParseDepsBehaviour(s)
+		if !ok {
+			return false, fmt.Errorf("runDeps contains invalid behaviour %q should be (sync, async): %s", s, p.currTask.Name)
+		}
+		p.currTask.DepsBehaviour = r
 	}
 	p.scan()
 	return true, nil

@@ -191,14 +191,15 @@ func TestMultipleCodeBlocks(t *testing.T) {
 
 func TestParseAttribute(t *testing.T) {
 	tests := []struct {
-		name            string
-		in              string
-		expectNotOk     bool
-		expectEnv       string
-		expectDir       string
-		expectDependsOn string
-		expectInputs    string
-		expectBehaviour models.RequiredBehaviour
+		name                string
+		in                  string
+		expectNotOk         bool
+		expectEnv           string
+		expectDir           string
+		expectDependsOn     string
+		expectInputs        string
+		expectBehaviour     models.RequiredBehaviour
+		expectDepsBehaviour models.DepsBehaviour
 	}{
 		{
 			name:      "given a basic Env, should parse",
@@ -296,6 +297,21 @@ func TestParseAttribute(t *testing.T) {
 			expectBehaviour: models.RequiredBehaviourOnce,
 		},
 		{
+			name:                "given runDeps sync, should parse",
+			in:                  "runDeps: sync",
+			expectDepsBehaviour: models.DependencyBehaviourSync,
+		},
+		{
+			name:                "given runDeps async, should parse",
+			in:                  "runDeps: async",
+			expectDepsBehaviour: models.DependencyBehaviourAsync,
+		},
+		{
+			name:                "given runDeps sync with formatting, should parse",
+			in:                  "runDeps: _*`sync`*_",
+			expectDepsBehaviour: models.DependencyBehaviourSync,
+		},
+		{
 			name:        "given env with no colon, should not parse",
 			in:          "env _*`my:attribute_*`",
 			expectNotOk: true,
@@ -336,6 +352,9 @@ func TestParseAttribute(t *testing.T) {
 			}
 			if p.currTask.RequiredBehaviour != tt.expectBehaviour {
 				t.Fatalf("got=%q, want=%q", p.currTask.RequiredBehaviour, tt.expectBehaviour)
+			}
+			if p.currTask.DepsBehaviour != tt.expectDepsBehaviour {
+				t.Fatalf("got=%q, want=%q", p.currTask.DepsBehaviour, tt.expectDepsBehaviour)
 			}
 		})
 	}
