@@ -5,7 +5,7 @@ description:
 linkTitle: "Task Syntax"
 ---
 
-## The anatomy of an `xc` task.
+## The anatomy of an `xc` task
 
 ### Structure
 
@@ -14,6 +14,7 @@ linkTitle: "Task Syntax"
     - [Scripts](/task-syntax/scripts/)
     - [Requires](/task-syntax/requires/)
     - [Run](/task-syntax/run/)
+    - [RunDeps](/task-syntax/run-deps/)
     - [Directory](/task-syntax/directory/)
     - [Environment Variables](/task-syntax/environment-variables/)
     - [Inputs](/task-syntax/inputs/)
@@ -22,10 +23,13 @@ linkTitle: "Task Syntax"
 
 ````md
 ## Tasks
+
 ### deploy
+
 Requires: test
 Directory: ./deployment
 Env: ENVIRONMENT=STAGING
+
 ```
 sh deploy.sh
 ```
