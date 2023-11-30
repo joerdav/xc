@@ -152,9 +152,9 @@ func TestHeadingCaseInsensitive(t *testing.T) {
 		p, _ := NewParser(strings.NewReader(fmt.Sprintf(`
 # %s
 ## a task
-`+"```"+`
+`+codeBlockStarter+`
 some code
-`+"```"+`
+`+codeBlockStarter+`
 `, tt.mdHeading)), tt.parserHeading)
 		_, err := p.parseTask()
 		if err != nil {
@@ -171,7 +171,7 @@ func TestUnTerminatedCodeBlock(t *testing.T) {
 	p, _ := NewParser(strings.NewReader(`
 # Tasks
 ## a task
-`+"```"+`
+`+codeBlockStarter+`
 some code
 `), "tasks")
 	_, err := p.parseTask()
@@ -357,10 +357,10 @@ Requires: list, list2
 ` + "Env: `somevar=val`" + `
 Inputs: FOO, BAR
 
-` + "```" + `
+` + codeBlockStarter + `
 echo "Hello, world!"
 echo "Hello, world2!"
-` + "```")
+` + codeBlockStarter)
 	}
 	file := buf.String()
 	for i := 0; i < b.N; i++ {

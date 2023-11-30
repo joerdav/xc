@@ -14,6 +14,7 @@ import (
 var ErrNoTasksHeading = errors.New("no xc block found")
 
 const trimValues = "_*` "
+const codeBlockStarter = "```"
 
 type parser struct {
 	scanner               *bufio.Scanner
@@ -187,7 +188,7 @@ func (p *parser) parseAttribute() (bool, error) {
 
 func (p *parser) parseCodeBlock() error {
 	t := p.currentLine
-	if len(t) < 3 || t[:3] != "```" {
+	if len(t) < 3 || t[:3] != codeBlockStarter {
 		return nil
 	}
 	if len(p.currTask.Script) > 0 {
@@ -195,7 +196,7 @@ func (p *parser) parseCodeBlock() error {
 	}
 	var ended bool
 	for p.scan() {
-		if len(p.currentLine) >= 3 && p.currentLine[:3] == "```" {
+		if len(p.currentLine) >= 3 && p.currentLine[:3] == codeBlockStarter {
 			ended = true
 			break
 		}
