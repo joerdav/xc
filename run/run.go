@@ -2,14 +2,15 @@ package run
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/google/shlex"
 	"github.com/joerdav/xc/models"
-	"golang.org/x/sync/errgroup"
 )
 
 const maxDeps = 50
@@ -141,18 +142,24 @@ func (r *Runner) runDepsSync(ctx context.Context, dependencies ...string) error 
 }
 
 func (r *Runner) runDepsAsync(ctx context.Context, dependencies ...string) error {
-	group, groupCtx := errgroup.WithContext(ctx)
-	for _, t := range dependencies {
-		t := t // do not capture loop variable
-		group.Go(func() error {
-			ta, err := shlex.Split(t)
+	var wg sync.WaitGroup
+	errs := make([]error, len(dependencies))
+	for i, t := range dependencies {
+		wg.Add(1)
+		go func(index int, task string) {
+			defer wg.Done()
+			ta, err := shlex.Split(task)
 			if err != nil {
-				return err
+				errs[index] = err
+				return
 			}
-			return r.Run(groupCtx, ta[0], ta[1:])
-		})
+
+			errs[index] = r.Run(ctx, ta[0], ta[1:])
+		}(i, t)
 	}
-	return group.Wait()
+
+	wg.Wait()
+	return errors.Join(errs...)
 }
 
 func (r *Runner) getExecutionPath(task models.Task) string {
