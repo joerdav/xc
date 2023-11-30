@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -41,12 +42,12 @@ func newInterpreter() interpreter {
 	}
 }
 
-func (i interpreter) Execute(ctx context.Context, script string, env []string, args []string, dir string) error {
+func (i interpreter) Execute(ctx context.Context, script string, env []string, args []string, dir, logPrefix string) error {
 	interpreterCmd, interpreterArgs, text, ok := parseShebang(script)
 	if !ok {
-		return i.executeShell(ctx, script, env, args, dir)
+		return i.executeShell(ctx, script, env, args, dir, logPrefix)
 	}
-	return i.executeShebang(ctx, interpreterCmd, interpreterArgs, text, env, args, dir)
+	return i.executeShebang(ctx, interpreterCmd, interpreterArgs, text, env, args, dir, logPrefix)
 }
 
 //nolint:gosec // accept that command is being executed here from outside of xc
@@ -58,6 +59,7 @@ func (i interpreter) executeShebang(
 	env []string,
 	args []string,
 	dir string,
+	logPrefix string,
 ) error {
 	f, err := os.CreateTemp("", i.tempFilePrefix)
 	if err != nil {
@@ -71,13 +73,14 @@ func (i interpreter) executeShebang(
 	cmd := exec.CommandContext(ctx, interpreterCmd, append(interpreterArgs, args...)...)
 	cmd.Dir = dir
 	cmd.Env = env
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	stdin, stdout, stderr := stdFiles(logPrefix)
+	cmd.Stdin = stdin
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 	return i.shebangRunner(cmd)
 }
 
-func (i interpreter) executeShell(ctx context.Context, text string, env []string, args []string, dir string) error {
+func (i interpreter) executeShell(ctx context.Context, text string, env []string, args []string, dir, logPrefix string) error {
 	if shellShebangRe.MatchString(text) {
 		text = strings.Join(strings.Split(text, "\n")[1:], "\n")
 	}
@@ -94,7 +97,7 @@ func (i interpreter) executeShell(ctx context.Context, text string, env []string
 	}
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(env...)),
-		interp.StdIO(os.Stdin, os.Stdout, os.Stderr),
+		interp.StdIO(stdFiles(logPrefix)),
 		interp.Dir(dir),
 		interp.Params(args...),
 	)
@@ -121,4 +124,8 @@ func parseShebang(script string) (interpreterCmd string, interpreterArgs []strin
 	interpreterCmd = interpreterParts[0]
 	interpreterArgs = interpreterParts[1:]
 	return interpreterCmd, interpreterArgs, strings.Join(lines[1:], "\n"), true
+}
+
+func stdFiles(prefix string) (io.Reader, io.Writer, io.Writer) {
+	return os.Stdin, newPrefixLogger(os.Stdout, prefix), newPrefixLogger(os.Stderr, prefix)
 }

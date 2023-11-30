@@ -33,7 +33,7 @@ func newTestInterpreter() *testInterpreter {
 func TestIsShell(t *testing.T) {
 	t.Run("empty assume shell", func(t *testing.T) {
 		ti := newTestInterpreter()
-		if err := ti.Execute(context.Background(), "", nil, nil, ""); err != nil {
+		if err := ti.Execute(context.Background(), "", nil, nil, "", ""); err != nil {
 			t.Fatal(err)
 		}
 		if !ti.shellRunnerCalled {
@@ -45,7 +45,7 @@ func TestIsShell(t *testing.T) {
 	})
 	t.Run("no shebang assume shell", func(t *testing.T) {
 		ti := newTestInterpreter()
-		if err := ti.Execute(context.Background(), "echo", nil, nil, ""); err != nil {
+		if err := ti.Execute(context.Background(), "echo", nil, nil, "", ""); err != nil {
 			t.Fatal(err)
 		}
 		if !ti.shellRunnerCalled {
@@ -66,7 +66,7 @@ func TestIsShell(t *testing.T) {
 		for _, s := range shells {
 			she := "#!/usr/bin/env " + s + " "
 			ti := newTestInterpreter()
-			if err := ti.Execute(context.Background(), she, nil, nil, ""); err != nil {
+			if err := ti.Execute(context.Background(), she, nil, nil, "", ""); err != nil {
 				t.Fatal(err)
 			}
 			if !ti.shellRunnerCalled {
@@ -85,7 +85,7 @@ func TestIsShell(t *testing.T) {
 		for _, s := range shells {
 			she := "#!/usr/bin/env " + s + " "
 			ti := newTestInterpreter()
-			if err := ti.Execute(context.Background(), she, nil, nil, ""); err != nil {
+			if err := ti.Execute(context.Background(), she, nil, nil, "", ""); err != nil {
 				t.Fatal(err)
 			}
 			if ti.shellRunnerCalled {
@@ -103,7 +103,7 @@ func TestIsShell(t *testing.T) {
 			print("hang on this isn't shell")
 		}`
 		ti := newTestInterpreter()
-		if err := ti.Execute(context.Background(), she, nil, nil, ""); err == nil {
+		if err := ti.Execute(context.Background(), she, nil, nil, "", ""); err == nil {
 			t.Fatal("expected an error")
 		}
 		if ti.shellRunnerCalled {
@@ -117,7 +117,7 @@ func TestIsShell(t *testing.T) {
 		she := "#!/usr/bin/env python "
 		ti := newTestInterpreter()
 		ti.tempFilePrefix = "invalid/prefix"
-		if err := ti.Execute(context.Background(), she, nil, nil, ""); err == nil {
+		if err := ti.Execute(context.Background(), she, nil, nil, "", ""); err == nil {
 			t.Fatal("expected an error")
 		}
 		if ti.shellRunnerCalled {

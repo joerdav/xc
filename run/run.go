@@ -16,7 +16,7 @@ import (
 const maxDeps = 50
 
 type ScriptRunner interface {
-	Execute(ctx context.Context, text string, env []string, args []string, dir string) error
+	Execute(ctx context.Context, text string, env []string, args []string, dir, logPrefix string) error
 }
 
 // Runner is responsible for running Tasks.
@@ -99,6 +99,14 @@ func getInputs(task models.Task, inputs []string, env []string) ([]string, error
 // Task dependencies will be run first, an error will return if any fail.
 // Task commands are run next, in case of a non zero result an error will return.
 func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
+	padding, err := r.getLogPadding(name)
+	if err != nil {
+		return err
+	}
+	return r.runWithPadding(ctx, name, inputs, padding)
+}
+
+func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []string, padding int) error {
 	task, ok := r.tasks.Get(name)
 	if !ok {
 		return fmt.Errorf("task %s not found", name)
@@ -118,30 +126,32 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	if task.DepsBehaviour == models.DependencyBehaviourAsync {
 		runFunc = r.runDepsAsync
 	}
-	if err := runFunc(ctx, task.DependsOn...); err != nil {
+	if err := runFunc(ctx, padding, task.DependsOn...); err != nil {
 		return err
 	}
 	if len(task.Script) == 0 {
 		return nil
 	}
 	env = append(env, inp...)
-	return r.scriptRunner.Execute(ctx, task.Script, env, inputs, r.getExecutionPath(task))
+
+	prefix := fmt.Sprintf("%*s", padding, strings.TrimSpace(task.Name))
+	return r.scriptRunner.Execute(ctx, task.Script, env, inputs, r.getExecutionPath(task), prefix)
 }
 
-func (r *Runner) runDepsSync(ctx context.Context, dependencies ...string) error {
+func (r *Runner) runDepsSync(ctx context.Context, padding int, dependencies ...string) error {
 	for _, t := range dependencies {
 		ta, err := shlex.Split(t)
 		if err != nil {
 			return err
 		}
-		if err := r.Run(ctx, ta[0], ta[1:]); err != nil {
+		if err := r.runWithPadding(ctx, ta[0], ta[1:], padding); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *Runner) runDepsAsync(ctx context.Context, dependencies ...string) error {
+func (r *Runner) runDepsAsync(ctx context.Context, padding int, dependencies ...string) error {
 	var wg sync.WaitGroup
 	errs := make([]error, len(dependencies))
 	for i, t := range dependencies {
@@ -154,12 +164,32 @@ func (r *Runner) runDepsAsync(ctx context.Context, dependencies ...string) error
 				return
 			}
 
-			errs[index] = r.Run(ctx, ta[0], ta[1:])
+			errs[index] = r.runWithPadding(ctx, ta[0], ta[1:], padding)
 		}(i, t)
 	}
 
 	wg.Wait()
 	return errors.Join(errs...)
+}
+
+func (r *Runner) getLogPadding(name string) (int, error) {
+	task, ok := r.tasks.Get(name)
+	if !ok {
+		return 0, fmt.Errorf("task %s not found", name)
+	}
+
+	maxLen := len(task.Name)
+
+	for _, depName := range task.DependsOn {
+		depLen, err := r.getLogPadding(depName)
+		if err != nil {
+			return maxLen, err
+		}
+		if depLen > maxLen {
+			maxLen = depLen
+		}
+	}
+	return maxLen, nil
 }
 
 func (r *Runner) getExecutionPath(task models.Task) string {
