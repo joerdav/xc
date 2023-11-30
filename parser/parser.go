@@ -245,7 +245,9 @@ func (p *parser) parseTaskBody() (bool, error) {
 			return false, err
 		}
 		if p.reachedEnd {
-			return false, nil
+			// parse attribute again in case it is on the last line
+			_, err = p.parseAttribute()
+			return false, err
 		}
 		if ok {
 			continue

@@ -14,6 +14,9 @@ import (
 //go:embed testdata/example.md
 var s string
 
+//go:embed testdata/till-eof.md
+var tillEOF string
+
 //go:embed testdata/notasks.md
 var e string
 
@@ -33,6 +36,9 @@ func assertTask(t *testing.T, expected, actual models.Task) {
 	}
 	if expected.RequiredBehaviour != actual.RequiredBehaviour {
 		t.Fatalf("Run want=%q got=%q", expected.RequiredBehaviour, actual.RequiredBehaviour)
+	}
+	if expected.DepsBehaviour != actual.DepsBehaviour {
+		t.Fatalf("Run want=%q got=%q", expected.DepsBehaviour, actual.DepsBehaviour)
 	}
 	if strings.Join(expected.DependsOn, ",") != strings.Join(actual.DependsOn, ",") {
 		t.Fatalf("requires want=%v got=%v", expected.DependsOn, actual.DependsOn)
@@ -73,6 +79,41 @@ echo "Hello, world2!"
 			Name:        "all-lists",
 			Description: []string{"An example of a commandless task."},
 			DependsOn:   []string{"list", "list2"},
+		},
+	}
+	if len(result) != len(expected) {
+		t.Fatalf("want %d tasks got %d", len(expected), len(result))
+	}
+	for i := range result {
+		assertTask(t, expected[i], result[i])
+	}
+}
+
+func TestParseFileToEOF(t *testing.T) {
+	p, err := NewParser(strings.NewReader(tillEOF), "Tasks")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := p.Parse()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	expected := models.Tasks{
+		{
+			Name:   "generate-templ",
+			Script: "go run -mod=mod github.com/a-h/templ/cmd/templ generate\ngo mod tidy\n",
+		},
+		{
+			Name:   "generate-translations",
+			Script: "go run ./i18n/generate\n",
+		},
+		{
+			Name: "generate-all",
+			DependsOn: []string{
+				"generate-templ",
+				"generate-translations",
+			},
+			DepsBehaviour: models.DependencyBehaviourAsync,
 		},
 	}
 	if len(result) != len(expected) {
