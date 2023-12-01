@@ -16,9 +16,11 @@ type prefixLogger struct {
 
 func newPrefixLogger(w io.Writer, prefix string) *prefixLogger {
 	streamer := &prefixLogger{
-		w:      w,
-		buf:    bytes.NewBuffer([]byte("")),
-		prefix: []byte(fmt.Sprintf("%s｜ ", prefix)),
+		w:   w,
+		buf: bytes.NewBuffer([]byte("")),
+	}
+	if prefix != "" {
+		streamer.prefix = []byte(fmt.Sprintf("%s｜ ", prefix))
 	}
 
 	return streamer
