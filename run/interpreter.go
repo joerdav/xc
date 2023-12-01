@@ -42,7 +42,9 @@ func newInterpreter() interpreter {
 	}
 }
 
-func (i interpreter) Execute(ctx context.Context, script string, env []string, args []string, dir, logPrefix string) error {
+func (i interpreter) Execute(
+	ctx context.Context, script string, env []string, args []string, dir, logPrefix string,
+) error {
 	interpreterCmd, interpreterArgs, text, ok := parseShebang(script)
 	if !ok {
 		return i.executeShell(ctx, script, env, args, dir, logPrefix)
@@ -80,7 +82,9 @@ func (i interpreter) executeShebang(
 	return i.shebangRunner(cmd)
 }
 
-func (i interpreter) executeShell(ctx context.Context, text string, env []string, args []string, dir, logPrefix string) error {
+func (i interpreter) executeShell(
+	ctx context.Context, text string, env []string, args []string, dir, logPrefix string,
+) error {
 	if shellShebangRe.MatchString(text) {
 		text = strings.Join(strings.Split(text, "\n")[1:], "\n")
 	}

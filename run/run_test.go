@@ -14,7 +14,9 @@ type mockScriptRunner struct {
 	returns error
 }
 
-func (r *mockScriptRunner) Execute(ctx context.Context, text string, env []string, args []string, dir, logPrefix string) error {
+func (r *mockScriptRunner) Execute(
+	ctx context.Context, text string, env []string, args []string, dir, logPrefix string,
+) error {
 	r.calls++
 	return r.returns
 }
