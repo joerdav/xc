@@ -44,6 +44,7 @@ func (t Task) Display(w io.Writer) {
 		fmt.Fprintln(w)
 	}
 	fmt.Fprintln(w, "Run:", t.RequiredBehaviour)
+	fmt.Fprintln(w, "RunDeps:", t.DepsBehaviour)
 	fmt.Fprintln(w)
 	if len(t.Script) > 0 {
 		fmt.Fprintln(w, "```")
