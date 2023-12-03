@@ -131,5 +131,8 @@ func parseShebang(script string) (interpreterCmd string, interpreterArgs []strin
 }
 
 func stdFiles(prefix string) (io.Reader, io.Writer, io.Writer) {
+	if prefix == "" {
+		return os.Stdin, os.Stdout, os.Stderr
+	}
 	return os.Stdin, newPrefixLogger(os.Stdout, prefix), newPrefixLogger(os.Stderr, prefix)
 }

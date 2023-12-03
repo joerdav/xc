@@ -18,6 +18,7 @@ type Task struct {
 	ParsingError      string
 	RequiredBehaviour RequiredBehaviour
 	DepsBehaviour     DepsBehaviour
+	Interactive       bool
 }
 
 // Display writes a Task as Markdown.
@@ -29,6 +30,7 @@ func (t Task) Display(w io.Writer) {
 	}
 	if len(t.DependsOn) > 0 {
 		fmt.Fprintln(w, "Requires:", strings.Join(t.DependsOn, ", "))
+		fmt.Fprintln(w, "RunDeps:", t.DepsBehaviour)
 		fmt.Fprintln(w)
 	}
 	if t.Dir != "" {
@@ -44,7 +46,9 @@ func (t Task) Display(w io.Writer) {
 		fmt.Fprintln(w)
 	}
 	fmt.Fprintln(w, "Run:", t.RequiredBehaviour)
-	fmt.Fprintln(w, "RunDeps:", t.DepsBehaviour)
+	if t.Interactive {
+		fmt.Fprintln(w, "Interactive: true")
+	}
 	fmt.Fprintln(w)
 	if len(t.Script) > 0 {
 		fmt.Fprintln(w, "```")

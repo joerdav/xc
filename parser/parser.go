@@ -13,8 +13,10 @@ import (
 // ErrNoTasksHeading is returned if the markdown contains no xc block
 var ErrNoTasksHeading = errors.New("no xc block found")
 
-const trimValues = "_*` "
-const codeBlockStarter = "```"
+const (
+	trimValues       = "_*` "
+	codeBlockStarter = "```"
+)
 
 type parser struct {
 	scanner               *bufio.Scanner
@@ -132,6 +134,10 @@ const (
 	AttributeTypeRun
 	// AttributeTypeRunDeps sets the tasks dependenciesBehaviour, can be sync or async.
 	AttributeTypeRunDeps
+	// AttributeTypeInteractive indicates if this is an interactive task
+	// if it is, then logs are not prefixed and the stdout/stderr are passed directly
+	// from the OS
+	AttributeTypeInteractive
 )
 
 var attMap = map[string]AttributeType{
@@ -145,6 +151,7 @@ var attMap = map[string]AttributeType{
 	"run":             AttributeTypeRun,
 	"rundeps":         AttributeTypeRunDeps,
 	"rundependencies": AttributeTypeRunDeps,
+	"interactive":     AttributeTypeInteractive,
 }
 
 func (p *parser) parseAttribute() (bool, error) {
@@ -192,6 +199,9 @@ func (p *parser) parseAttribute() (bool, error) {
 			return false, fmt.Errorf("runDeps contains invalid behaviour %q should be (sync, async): %s", s, p.currTask.Name)
 		}
 		p.currTask.DepsBehaviour = r
+	case AttributeTypeInteractive:
+		s := strings.Trim(rest, trimValues)
+		p.currTask.Interactive = s == "true"
 	}
 	p.scan()
 	return true, nil

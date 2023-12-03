@@ -134,7 +134,10 @@ func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []strin
 	}
 	env = append(env, inp...)
 
-	prefix := fmt.Sprintf("%*s", padding, strings.TrimSpace(task.Name))
+	var prefix string
+	if !task.Interactive {
+		prefix = fmt.Sprintf("%*s", padding, strings.TrimSpace(task.Name))
+	}
 	return r.scriptRunner.Execute(ctx, task.Script, env, inputs, r.getExecutionPath(task), prefix)
 }
 
@@ -179,7 +182,6 @@ func (r *Runner) getLogPadding(name string) (int, error) {
 	}
 
 	maxLen := len(task.Name)
-
 	for _, depName := range task.DependsOn {
 		depLen, err := r.getLogPadding(depName)
 		if err != nil {
