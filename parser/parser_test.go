@@ -14,6 +14,9 @@ import (
 //go:embed testdata/example.md
 var s string
 
+//go:embed testdata/till-eof.md
+var tillEOF string
+
 //go:embed testdata/notasks.md
 var e string
 
@@ -33,6 +36,9 @@ func assertTask(t *testing.T, expected, actual models.Task) {
 	}
 	if expected.RequiredBehaviour != actual.RequiredBehaviour {
 		t.Fatalf("Run want=%q got=%q", expected.RequiredBehaviour, actual.RequiredBehaviour)
+	}
+	if expected.DepsBehaviour != actual.DepsBehaviour {
+		t.Fatalf("Run want=%q got=%q", expected.DepsBehaviour, actual.DepsBehaviour)
 	}
 	if strings.Join(expected.DependsOn, ",") != strings.Join(actual.DependsOn, ",") {
 		t.Fatalf("requires want=%v got=%v", expected.DependsOn, actual.DependsOn)
@@ -73,6 +79,41 @@ echo "Hello, world2!"
 			Name:        "all-lists",
 			Description: []string{"An example of a commandless task."},
 			DependsOn:   []string{"list", "list2"},
+		},
+	}
+	if len(result) != len(expected) {
+		t.Fatalf("want %d tasks got %d", len(expected), len(result))
+	}
+	for i := range result {
+		assertTask(t, expected[i], result[i])
+	}
+}
+
+func TestParseFileToEOF(t *testing.T) {
+	p, err := NewParser(strings.NewReader(tillEOF), "Tasks")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := p.Parse()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	expected := models.Tasks{
+		{
+			Name:   "generate-templ",
+			Script: "go run -mod=mod github.com/a-h/templ/cmd/templ generate\ngo mod tidy\n",
+		},
+		{
+			Name:   "generate-translations",
+			Script: "go run ./i18n/generate\n",
+		},
+		{
+			Name: "generate-all",
+			DependsOn: []string{
+				"generate-templ",
+				"generate-translations",
+			},
+			DepsBehaviour: models.DependencyBehaviourAsync,
 		},
 	}
 	if len(result) != len(expected) {
@@ -191,14 +232,15 @@ func TestMultipleCodeBlocks(t *testing.T) {
 
 func TestParseAttribute(t *testing.T) {
 	tests := []struct {
-		name            string
-		in              string
-		expectNotOk     bool
-		expectEnv       string
-		expectDir       string
-		expectDependsOn string
-		expectInputs    string
-		expectBehaviour models.RequiredBehaviour
+		name                string
+		in                  string
+		expectNotOk         bool
+		expectEnv           string
+		expectDir           string
+		expectDependsOn     string
+		expectInputs        string
+		expectBehaviour     models.RequiredBehaviour
+		expectDepsBehaviour models.DepsBehaviour
 	}{
 		{
 			name:      "given a basic Env, should parse",
@@ -296,6 +338,21 @@ func TestParseAttribute(t *testing.T) {
 			expectBehaviour: models.RequiredBehaviourOnce,
 		},
 		{
+			name:                "given runDeps sync, should parse",
+			in:                  "runDeps: sync",
+			expectDepsBehaviour: models.DependencyBehaviourSync,
+		},
+		{
+			name:                "given runDeps async, should parse",
+			in:                  "runDeps: async",
+			expectDepsBehaviour: models.DependencyBehaviourAsync,
+		},
+		{
+			name:                "given runDeps sync with formatting, should parse",
+			in:                  "runDeps: _*`sync`*_",
+			expectDepsBehaviour: models.DependencyBehaviourSync,
+		},
+		{
 			name:        "given env with no colon, should not parse",
 			in:          "env _*`my:attribute_*`",
 			expectNotOk: true,
@@ -336,6 +393,9 @@ func TestParseAttribute(t *testing.T) {
 			}
 			if p.currTask.RequiredBehaviour != tt.expectBehaviour {
 				t.Fatalf("got=%q, want=%q", p.currTask.RequiredBehaviour, tt.expectBehaviour)
+			}
+			if p.currTask.DepsBehaviour != tt.expectDepsBehaviour {
+				t.Fatalf("got=%q, want=%q", p.currTask.DepsBehaviour, tt.expectDepsBehaviour)
 			}
 		})
 	}

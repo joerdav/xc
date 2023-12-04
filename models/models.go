@@ -17,6 +17,8 @@ type Task struct {
 	Inputs            []string
 	ParsingError      string
 	RequiredBehaviour RequiredBehaviour
+	DepsBehaviour     DepsBehaviour
+	Interactive       bool
 }
 
 // Display writes a Task as Markdown.
@@ -28,6 +30,7 @@ func (t Task) Display(w io.Writer) {
 	}
 	if len(t.DependsOn) > 0 {
 		fmt.Fprintln(w, "Requires:", strings.Join(t.DependsOn, ", "))
+		fmt.Fprintln(w, "RunDeps:", t.DepsBehaviour)
 		fmt.Fprintln(w)
 	}
 	if t.Dir != "" {
@@ -43,6 +46,9 @@ func (t Task) Display(w io.Writer) {
 		fmt.Fprintln(w)
 	}
 	fmt.Fprintln(w, "Run:", t.RequiredBehaviour)
+	if t.Interactive {
+		fmt.Fprintln(w, "Interactive: true")
+	}
 	fmt.Fprintln(w)
 	if len(t.Script) > 0 {
 		fmt.Fprintln(w, "```")
@@ -91,6 +97,35 @@ func ParseRequiredBehaviour(s string) (RequiredBehaviour, bool) {
 		return RequiredBehaviourOnce, true
 	case "always":
 		return RequiredBehaviourAlways, true
+	default:
+		return 0, false
+	}
+}
+
+// DepsBehaviour represents how a tasks dependencies are run.
+// The default is DependencyBehaviourSync
+type DepsBehaviour int
+
+const (
+	// DependencyBehaviourSync should be used if the dependencies are to be run synchronously.
+	DependencyBehaviourSync DepsBehaviour = iota
+	// DependencyBehaviourAsync should be used if the dependencies are to be run asynchronously.
+	DependencyBehaviourAsync
+)
+
+func (b DepsBehaviour) String() string {
+	if b == DependencyBehaviourSync {
+		return "sync"
+	}
+	return "async"
+}
+
+func ParseDepsBehaviour(s string) (DepsBehaviour, bool) {
+	switch strings.ToLower(s) {
+	case "sync":
+		return DependencyBehaviourSync, true
+	case "async":
+		return DependencyBehaviourAsync, true
 	default:
 		return 0, false
 	}
