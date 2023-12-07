@@ -10,13 +10,14 @@ menu: { main: { parent: "task-syntax", weight: 11 } }
 By default, the dependencies of a task are run sequentially, in the order they are listed.  
 However we may prefer for all the dependencies of a task to be run in paralled.
 
-The solution would be to set the `runDeps` attribute to `async` (defaults to `sync`).
+The solution would be to set the `RunDeps` attribute to `async` (defaults to `sync`).
 
 ```markdown
 ### build-all
 
-requires: build-js, build-css
-runDeps: async
+Requires: build-js, build-css
+
+RunDeps: async
 ```
 
 This will result in both `build-js` and `build-css` being run in parallel.
@@ -26,8 +27,9 @@ The default is `sync`, which can be omitted or specified.
 ```markdown
 ### build-all
 
-requires: build-js, build-css
-runDeps: sync
+Requires: build-js, build-css
+
+RunDeps: sync
 ```
 
 is the same as
@@ -35,6 +37,5 @@ is the same as
 ```markdown
 ### build-all
 
-requires: build-js, build-css
-runDeps: sync
+Requires: build-js, build-css
 ```
