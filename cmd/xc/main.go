@@ -29,7 +29,7 @@ var usage string
 var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
 
 type config struct {
-	version, help, short, display, complete, uncomplete bool
+	version, help, short, display, noTTY, complete, uncomplete bool
 	filename, heading                                   string
 }
 
@@ -70,6 +70,9 @@ func flags() config {
 
 	flag.BoolVar(&cfg.complete, "complete", false, "install shell completion for xc")
 	flag.BoolVar(&cfg.uncomplete, "uncomplete", false, "uninstall shell completion for xc")
+
+	flag.BoolVar(&cfg.noTTY, "no-tty", false, "disable interactive picker")
+
 	flag.Parse()
 	return cfg
 }
@@ -123,7 +126,7 @@ func tryParse(path, heading string) (models.Tasks, string, error) {
 	return tasks, directory, nil
 }
 
-func printTasks(tasks models.Tasks, short bool) {
+func printTasks(tasks models.Tasks, short bool)  {
 	print := printTask
 	if short {
 		print = func(t models.Task, maxLen int) { fmt.Println(t.Name) }
@@ -137,6 +140,14 @@ func printTasks(tasks models.Tasks, short bool) {
 	for _, n := range tasks {
 		print(n, maxLen)
 	}
+}
+
+func displayAndRunTasks(ctx context.Context, tasks models.Tasks, dir string, cfg config) error {
+	if cfg.noTTY {
+		printTasks(tasks, cfg.short)
+		return nil
+	}
+	return interactivePicker(ctx, tasks, dir, cfg)
 }
 
 func printTask(task models.Task, maxLen int) {
@@ -189,8 +200,7 @@ func runMain() error {
 	tav := flag.Args()
 	// xc
 	if len(tav) == 0 {
-		printTasks(tasks, cfg.short)
-		return nil
+		return displayAndRunTasks(ctx, tasks, dir, cfg)
 	}
 	ta, ok := tasks.Get(tav[0])
 	if !ok {
