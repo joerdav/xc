@@ -143,7 +143,7 @@ func printTasks(tasks models.Tasks, short bool)  {
 }
 
 func displayAndRunTasks(ctx context.Context, tasks models.Tasks, dir string, cfg config) error {
-	if cfg.noTTY {
+	if cfg.noTTY || cfg.short {
 		printTasks(tasks, cfg.short)
 		return nil
 	}
