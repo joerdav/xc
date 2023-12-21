@@ -43,7 +43,7 @@ func newInterpreter() interpreter {
 }
 
 func (i interpreter) Execute(
-	ctx context.Context, script string, env []string, args []string, dir, logPrefix string,
+	ctx context.Context, script string, env, args []string, dir, logPrefix string,
 ) error {
 	interpreterCmd, interpreterArgs, text, ok := parseShebang(script)
 	if !ok {
@@ -83,7 +83,7 @@ func (i interpreter) executeShebang(
 }
 
 func (i interpreter) executeShell(
-	ctx context.Context, text string, env []string, args []string, dir, logPrefix string,
+	ctx context.Context, text string, env, args []string, dir, logPrefix string,
 ) error {
 	if shellShebangRe.MatchString(text) {
 		text = strings.Join(strings.Split(text, "\n")[1:], "\n")

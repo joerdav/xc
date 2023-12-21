@@ -10,11 +10,13 @@ xc <task> [inputs...]
         Specify the heading for xc tasks (default: "Tasks").
 
 xc
-  List tasks from an xc-compatible markdown file.
+  Interactive picker for xc tasks.
   If -file is not specified and no README.md is found in the current directory,
     xc will search in parent directories for convenience.
   -s -short
         List task names in a short format.
+  -no-tty
+	Disable interactive mode.
   -h -help
         Print this help text.
   -f -file <string>

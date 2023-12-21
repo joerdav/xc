@@ -16,7 +16,7 @@ import (
 const maxDeps = 50
 
 type ScriptRunner interface {
-	Execute(ctx context.Context, text string, env []string, args []string, dir, logPrefix string) error
+	Execute(ctx context.Context, text string, env, args []string, dir, logPrefix string) error
 }
 
 // Runner is responsible for running Tasks.
@@ -78,7 +78,7 @@ func environmentContainsInput(env []string, input string) bool {
 	return false
 }
 
-func getInputs(task models.Task, inputs []string, env []string) ([]string, error) {
+func getInputs(task models.Task, inputs, env []string) ([]string, error) {
 	result := []string{}
 	for i, n := range task.Inputs {
 		// Do the command args contain the input?
