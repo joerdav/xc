@@ -30,7 +30,7 @@ var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
 
 type config struct {
 	version, help, short, display, noTTY, complete, uncomplete bool
-	filename, heading                                   string
+	filename, heading                                          string
 }
 
 var version = ""
@@ -126,7 +126,7 @@ func tryParse(path, heading string) (models.Tasks, string, error) {
 	return tasks, directory, nil
 }
 
-func printTasks(tasks models.Tasks, short bool)  {
+func printTasks(tasks models.Tasks, short bool) {
 	print := printTask
 	if short {
 		print = func(t models.Task, maxLen int) { fmt.Println(t.Name) }
@@ -147,7 +147,7 @@ func displayAndRunTasks(ctx context.Context, tasks models.Tasks, dir string, cfg
 		printTasks(tasks, cfg.short)
 		return nil
 	}
-	return interactivePicker(ctx, tasks, dir, cfg)
+	return interactivePicker(ctx, tasks, dir)
 }
 
 func printTask(task models.Task, maxLen int) {

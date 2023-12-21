@@ -13,14 +13,22 @@ import (
 	"github.com/joerdav/xc/run"
 )
 
-
 var (
-	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
-	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
-	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
-	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
-	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
-	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
+	titleStyle        = lipgloss.NewStyle().MarginLeft(titleMargin)
+	itemStyle         = lipgloss.NewStyle().PaddingLeft(itemPadding)
+	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(selectedItemPadding).Foreground(lipgloss.Color("170"))
+	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(paginationPadding)
+	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(helpPadding).PaddingBottom(1)
+)
+
+const (
+	titleMargin         = 2
+	itemPadding         = 4
+	selectedItemPadding = 2
+	paginationPadding   = 4
+	helpPadding         = 4
+	listItemWidth       = 20
+	listItemHeight      = 6
 )
 
 type taskItem struct {
@@ -53,6 +61,7 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 
 	fmt.Fprint(w, fn(str))
 }
+
 type model struct {
 	list     list.Model
 	choice   *models.Task
@@ -97,12 +106,12 @@ func (m model) View() string {
 	return "\n" + m.list.View()
 }
 
-func interactivePicker(ctx context.Context, tasks []models.Task, dir string, cfg config) (error) {
+func interactivePicker(ctx context.Context, tasks []models.Task, dir string) error {
 	var items []list.Item
 	for _, t := range tasks {
 		items = append(items, taskItem{t})
 	}
-	l := list.New(items, itemDelegate{}, 20, 6+len(tasks))
+	l := list.New(items, itemDelegate{}, listItemWidth, listItemHeight+len(tasks))
 	l.Title = "xc: Choose a task"
 	l.SetShowStatusBar(false)
 	l.DisableQuitKeybindings()
