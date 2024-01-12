@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"golang.org/x/term"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
@@ -98,6 +99,9 @@ func (i interpreter) executeShell(
 	file, err := syntax.NewParser().Parse(&script, "")
 	if err != nil {
 		return fmt.Errorf("failed to parse task: %w", err)
+	}
+	if os.Getenv("NO_COLOR") != "1" && term.IsTerminal(int(os.Stdout.Fd())) {
+		env = append(env, "CLICOLOR_FORCE=1", "FORCE_COLOR=1")
 	}
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(env...)),
