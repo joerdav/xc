@@ -4,33 +4,39 @@ import (
 	"context"
 	"errors"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/joerdav/xc/models"
 )
 
 type mockScriptRunner struct {
-	calls   int
-	returns error
+	calls       int
+	returns     error
+	runnerMutex sync.Mutex
 }
 
 func (r *mockScriptRunner) Execute(
 	ctx context.Context, text string, env, args []string, dir, logPrefix string,
 ) error {
+	r.runnerMutex.Lock()
+	defer r.runnerMutex.Unlock()
 	r.calls++
 	return r.returns
 }
 
-func TestRun(t *testing.T) {
-	tests := []struct {
-		name               string
-		tasks              models.Tasks
-		taskName           string
-		err                error
-		expectedRunError   bool
-		expectedParseError bool
-		expectedTasksRun   int
-	}{
+type testCase struct {
+	name               string
+	tasks              models.Tasks
+	taskName           string
+	err                error
+	expectedRunError   bool
+	expectedParseError bool
+	expectedTasksRun   int
+}
+
+func testCases() []testCase {
+	return []testCase{
 		{
 			name: "given an invalid task should not run command",
 			tasks: []models.Task{
@@ -165,7 +171,36 @@ func TestRun(t *testing.T) {
 			expectedTasksRun: 3,
 		},
 	}
-	for _, tt := range tests {
+}
+
+func TestRunAsync(t *testing.T) {
+	for _, tt := range testCases() {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			for i := range tt.tasks {
+				tt.tasks[i].DepsBehaviour = models.DependencyBehaviourAsync
+			}
+			runner, err := NewRunner(tt.tasks, "")
+			if (err != nil) != tt.expectedParseError {
+				t.Fatalf("expected error %v, got %v", tt.expectedParseError, err)
+			}
+			if err != nil {
+				return
+			}
+			scriptRunner := &mockScriptRunner{returns: tt.err}
+			runner.scriptRunner = scriptRunner
+			err = runner.Run(context.Background(), tt.taskName, nil)
+			if (err != nil) != tt.expectedRunError {
+				t.Fatalf("expected error %v, got %v", tt.expectedRunError, err)
+			}
+			if scriptRunner.calls != tt.expectedTasksRun {
+				t.Fatalf("expected %d task runs got %d", tt.expectedTasksRun, scriptRunner.calls)
+			}
+		})
+	}
+}
+func TestRun(t *testing.T) {
+	for _, tt := range testCases() {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			runner, err := NewRunner(tt.tasks, "")
