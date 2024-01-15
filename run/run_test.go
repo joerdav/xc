@@ -11,8 +11,8 @@ import (
 )
 
 type mockScriptRunner struct {
-	calls   int
-	returns error
+	calls       int
+	returns     error
 	runnerMutex sync.Mutex
 }
 
