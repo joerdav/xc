@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/joerdav/xc/models"
@@ -12,11 +13,14 @@ import (
 type mockScriptRunner struct {
 	calls   int
 	returns error
+	runnerMutex sync.Mutex
 }
 
 func (r *mockScriptRunner) Execute(
 	ctx context.Context, text string, env, args []string, dir, logPrefix string,
 ) error {
+	r.runnerMutex.Lock()
+	defer r.runnerMutex.Unlock()
 	r.calls++
 	return r.returns
 }

@@ -25,6 +25,7 @@ type Runner struct {
 	tasks        models.Tasks
 	dir          string
 	alreadyRan   map[string]bool
+	alreadRanMu  sync.Mutex
 }
 
 // NewRunner takes Tasks and returns a Runner.
@@ -111,11 +112,14 @@ func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []strin
 	if !ok {
 		return fmt.Errorf("task %s not found", name)
 	}
+	r.alreadRanMu.Lock()
 	if task.RequiredBehaviour == models.RequiredBehaviourOnce && r.alreadyRan[task.Name] {
+		r.alreadRanMu.Unlock()
 		fmt.Printf("task %q ran already: skipping\n", task.Name)
 		return nil
 	}
 	r.alreadyRan[task.Name] = true
+	r.alreadRanMu.Unlock()
 	env := os.Environ()
 	env = append(env, task.Env...)
 	inp, err := getInputs(task, inputs, env)
