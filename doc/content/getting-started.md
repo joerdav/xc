@@ -69,7 +69,7 @@ in
 {{% /details %}}
 {{% details "Scoop" %}}
 ```sh
-TODO
+scoop install xc
 ```
 {{% /details %}}
 {{% details "AUR" %}}
