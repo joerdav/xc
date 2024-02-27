@@ -27,12 +27,12 @@ jobs:
           task: build-docs
 
       - id: 'auth'
-        uses: 'google-github-actions/auth@v0'
+        uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
       - id: 'deploy'
-        uses: 'google-github-actions/deploy-appengine@v0'
+        uses: 'google-github-actions/deploy-appengine@v2'
         with:
           project_id: ${{ secrets.GCP_PROJECT }}
           working_directory: ./doc
