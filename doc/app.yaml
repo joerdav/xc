@@ -1,4 +1,4 @@
-runtime: python3
+runtime: python312
 api_version: 1
 
 handlers:
