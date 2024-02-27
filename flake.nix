@@ -1,20 +1,20 @@
 {
   inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/23.11";
     flake-utils.url = "github:numtide/flake-utils";
-    flake-utils.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-      let 
+      let
         pkgs = import nixpkgs {
           system = system;
         };
-        xc = pkgs.callPackage ./xc.nix {};
+        xc = pkgs.callPackage ./xc.nix { };
       in
       {
         defaultPackage = xc;
-        packages = { 
+        packages = {
           xc = xc;
         };
         devShells = {
