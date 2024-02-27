@@ -1,4 +1,4 @@
-{ config, lib, pkgs, fetchFromGitHub, ... }:
+{ config, pkgs, fetchFromGitHub, ... }:
 
 pkgs.buildGoModule rec {
   pname = "xc";

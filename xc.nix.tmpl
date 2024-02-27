@@ -1,14 +1,14 @@
-{ config, lib, pkgs, fetchFromGitHub, ... }:
+{ config, pkgs, fetchFromGitHub, ... }:
 
 pkgs.buildGoModule rec {
   pname = "xc";
   version = "__VERSION__";
-  subPackages = ["cmd/xc"];
+  subPackages = [ "cmd/xc" ];
   src = pkgs.fetchFromGitHub {
     owner = "joerdav";
     repo = "xc";
     rev = version;
-    sha256 = lib.fakeSha256;
+    sha256 = "";
   };
-  vendorHash = lib.fakeSha256;
+  vendorHash = "";
 }
