@@ -2,16 +2,22 @@ package run
 
 import (
 	"bytes"
-	"fmt"
 	"io"
+	"regexp"
 )
 
-var newLine = byte('\n')
+var (
+	prefixColor = []byte("\033[0m")
+	delimiter   = []byte("｜ ")
+	newLine     = byte('\n')
+	colorRegexp = regexp.MustCompile(`\033\[[0-9;]*m`)
+)
 
 type prefixLogger struct {
-	w      io.Writer
-	buf    *bytes.Buffer
-	prefix []byte
+	w            io.Writer
+	buf          *bytes.Buffer
+	prefix       []byte
+	currentColor []byte
 }
 
 func newPrefixLogger(w io.Writer, prefix string) *prefixLogger {
@@ -20,7 +26,12 @@ func newPrefixLogger(w io.Writer, prefix string) *prefixLogger {
 		buf: bytes.NewBuffer([]byte("")),
 	}
 	if prefix != "" {
-		streamer.prefix = []byte(fmt.Sprintf("%s｜ ", prefix))
+		p := make([]byte, 0, len(prefixColor)+len(prefix)+len(delimiter))
+		p = append(p, prefixColor...)
+		p = append(p, []byte(prefix)...)
+		p = append(p, delimiter...)
+
+		streamer.prefix = p
 	}
 
 	return streamer
@@ -49,7 +60,7 @@ func (l *prefixLogger) Flush() error {
 		return err
 	}
 
-	return l.out((p))
+	return l.out((p), []byte{})
 }
 
 func (l *prefixLogger) outputLines() error {
@@ -58,8 +69,13 @@ func (l *prefixLogger) outputLines() error {
 
 		if len(line) > 0 {
 			if bytes.HasSuffix(line, []byte{newLine}) {
-				if err := l.out(line); err != nil {
+				if err := l.out(line, l.currentColor); err != nil {
 					return err
+				}
+
+				colors := colorRegexp.FindAll(line, -1)
+				if len(colors) > 0 {
+					l.currentColor = colors[len(colors)-1]
 				}
 			} else {
 				// put back into buffer, it's not a complete line yet
@@ -83,11 +99,16 @@ func (l *prefixLogger) outputLines() error {
 	return nil
 }
 
-func (l *prefixLogger) out(p []byte) error {
+func (l *prefixLogger) out(p []byte, currentColor []byte) error {
 	if len(p) < 1 {
 		return nil
 	}
 
-	_, err := l.w.Write(append(l.prefix, p...))
+	s := make([]byte, 0, len(l.prefix)+len(currentColor)+len(p))
+	s = append(s, l.prefix...)
+	s = append(s, currentColor...)
+	s = append(s, p...)
+
+	_, err := l.w.Write(s)
 	return err
 }
