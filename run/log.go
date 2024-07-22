@@ -21,17 +21,18 @@ type prefixLogger struct {
 }
 
 func newPrefixLogger(w io.Writer, prefix string) *prefixLogger {
-	streamer := &prefixLogger{
-		w:   w,
-		buf: bytes.NewBuffer([]byte("")),
-	}
+	p := make([]byte, 0, len(prefixColor)+len(prefix)+len(delimiter))
 	if prefix != "" {
-		p := make([]byte, 0, len(prefixColor)+len(prefix)+len(delimiter))
 		p = append(p, prefixColor...)
 		p = append(p, []byte(prefix)...)
 		p = append(p, delimiter...)
+	}
 
-		streamer.prefix = p
+	streamer := &prefixLogger{
+		w:            w,
+		buf:          bytes.NewBuffer([]byte("")),
+		prefix:       p,
+		currentColor: []byte{},
 	}
 
 	return streamer
@@ -60,7 +61,7 @@ func (l *prefixLogger) Flush() error {
 		return err
 	}
 
-	return l.out((p), []byte{})
+	return l.out((p))
 }
 
 func (l *prefixLogger) outputLines() error {
@@ -69,7 +70,7 @@ func (l *prefixLogger) outputLines() error {
 
 		if len(line) > 0 {
 			if bytes.HasSuffix(line, []byte{newLine}) {
-				if err := l.out(line, l.currentColor); err != nil {
+				if err := l.out(line); err != nil {
 					return err
 				}
 
@@ -99,14 +100,14 @@ func (l *prefixLogger) outputLines() error {
 	return nil
 }
 
-func (l *prefixLogger) out(p []byte, currentColor []byte) error {
+func (l *prefixLogger) out(p []byte) error {
 	if len(p) < 1 {
 		return nil
 	}
 
-	s := make([]byte, 0, len(l.prefix)+len(currentColor)+len(p))
+	s := make([]byte, 0, len(l.prefix)+len(l.currentColor)+len(p))
 	s = append(s, l.prefix...)
-	s = append(s, currentColor...)
+	s = append(s, l.currentColor...)
 	s = append(s, p...)
 
 	_, err := l.w.Write(s)
