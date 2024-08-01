@@ -2,25 +2,37 @@ package run
 
 import (
 	"bytes"
-	"fmt"
 	"io"
+	"regexp"
 )
 
-var newLine = byte('\n')
+var (
+	prefixColor = []byte("\033[0m")
+	delimiter   = []byte("｜ ")
+	newLine     = byte('\n')
+	colorRegexp = regexp.MustCompile(`\033\[[0-9;]*m`)
+)
 
 type prefixLogger struct {
-	w      io.Writer
-	buf    *bytes.Buffer
-	prefix []byte
+	w            io.Writer
+	buf          *bytes.Buffer
+	prefix       []byte
+	currentColor []byte
 }
 
 func newPrefixLogger(w io.Writer, prefix string) *prefixLogger {
-	streamer := &prefixLogger{
-		w:   w,
-		buf: bytes.NewBuffer([]byte("")),
-	}
+	p := make([]byte, 0, len(prefixColor)+len(prefix)+len(delimiter))
 	if prefix != "" {
-		streamer.prefix = []byte(fmt.Sprintf("%s｜ ", prefix))
+		p = append(p, prefixColor...)
+		p = append(p, []byte(prefix)...)
+		p = append(p, delimiter...)
+	}
+
+	streamer := &prefixLogger{
+		w:            w,
+		buf:          bytes.NewBuffer([]byte("")),
+		prefix:       p,
+		currentColor: []byte{},
 	}
 
 	return streamer
@@ -61,6 +73,11 @@ func (l *prefixLogger) outputLines() error {
 				if err := l.out(line); err != nil {
 					return err
 				}
+
+				colors := colorRegexp.FindAll(line, -1)
+				if len(colors) > 0 {
+					l.currentColor = colors[len(colors)-1]
+				}
 			} else {
 				// put back into buffer, it's not a complete line yet
 				//  Close() or Flush() have to be used to flush out
@@ -88,6 +105,11 @@ func (l *prefixLogger) out(p []byte) error {
 		return nil
 	}
 
-	_, err := l.w.Write(append(l.prefix, p...))
+	s := make([]byte, 0, len(l.prefix)+len(l.currentColor)+len(p))
+	s = append(s, l.prefix...)
+	s = append(s, l.currentColor...)
+	s = append(s, p...)
+
+	_, err := l.w.Write(s)
 	return err
 }

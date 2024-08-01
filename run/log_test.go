@@ -3,24 +3,8 @@ package run
 
 import (
 	"bytes"
-	"strings"
 	"testing"
 )
-
-func setExpect(prefixB []byte, s string) string {
-	prefix := string(prefixB)
-	if len(prefix) == 0 {
-		return s
-	}
-	if s == "" {
-		return s
-	}
-
-	s = strings.ReplaceAll(s, "\n", "\n"+prefix)
-	s = strings.TrimSuffix(s, prefix)
-
-	return prefix + s
-}
 
 func TestPrefixLogger_Write(t *testing.T) {
 	tests := map[string]string{"empty": "", "prefix": "prefix"}
@@ -35,21 +19,38 @@ func TestPrefixLogger_Write(t *testing.T) {
 			l.Write([]byte("hello world"))
 
 			// No new line so it should be empty
-			expect := setExpect(l.prefix, "")
+			expect := ""
 			if w.String() != expect {
 				t.Errorf("got %v, want %v", w.String(), expect)
 			}
 
 			// Write a new line
 			l.Write([]byte("\n"))
-			expect = setExpect(l.prefix, "hello world\n")
+			expect += string(l.prefix) + "hello world\n"
 			if w.String() != expect {
 				t.Errorf("got %v, want %v", w.String(), expect)
 			}
 
 			// Write a line with a new line
 			l.Write([]byte("foo bar\n"))
-			expect = setExpect(l.prefix, "hello world\nfoo bar\n")
+			// Each line is prefixed
+			expect += string(l.prefix) + "foo bar\n"
+			if w.String() != expect {
+				t.Errorf("got %v, want %v", w.String(), expect)
+			}
+
+			// Write a line with a new line with a red color
+			red := "\033[31m"
+			reset := "\033[m"
+			l.Write([]byte(
+				red + "this line is red\n" +
+					"this line is still red" + reset + "\n" +
+					"this line is reset\n",
+			))
+			// Each line specifies the output color
+			expect += string(l.prefix) + red + "this line is red\n"
+			expect += string(l.prefix) + red + "this line is still red" + reset + "\n"
+			expect += string(l.prefix) + reset + "this line is reset\n"
 			if w.String() != expect {
 				t.Errorf("got %v, want %v", w.String(), expect)
 			}
