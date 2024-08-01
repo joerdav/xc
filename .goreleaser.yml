@@ -27,7 +27,7 @@ brews:
     ids:
       - brew
     goarm: 7
-    tap:
+    repository:
       owner: joerdav
       name: homebrew-xc
     description: Self documenting task runner
