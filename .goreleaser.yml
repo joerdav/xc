@@ -1,4 +1,5 @@
 # See documentation at http://goreleaser.com
+version: 2
 builds:
   - main: ./cmd/xc
     id: xc
