@@ -100,7 +100,9 @@ func (i interpreter) executeShell(
 	if err != nil {
 		return fmt.Errorf("failed to parse task: %w", err)
 	}
-	if os.Getenv("NO_COLOR") != "1" && term.IsTerminal(int(os.Stdout.Fd())) {
+	// Ignore G115: Potential integer overflow when converting between integer types
+	// "Fd()" ultimately returns a SysFd value, which is an int.
+	if os.Getenv("NO_COLOR") != "1" && term.IsTerminal(int(os.Stdout.Fd())) { //#nosec G115
 		env = append(env, "CLICOLOR_FORCE=1", "FORCE_COLOR=1")
 	}
 	runner, err := interp.New(
