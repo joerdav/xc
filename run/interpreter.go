@@ -102,7 +102,8 @@ func (i interpreter) executeShell(
 	}
 	// Ignore G115: Potential integer overflow when converting between integer types
 	// "Fd()" ultimately returns a SysFd value, which is an int.
-	if os.Getenv("NO_COLOR") != "1" && term.IsTerminal(int(os.Stdout.Fd())) { //#nosec G115
+	//nolint:gosec
+	if os.Getenv("NO_COLOR") != "1" && term.IsTerminal(int(os.Stdout.Fd())) {
 		env = append(env, "CLICOLOR_FORCE=1", "FORCE_COLOR=1")
 	}
 	runner, err := interp.New(
