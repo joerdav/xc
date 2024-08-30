@@ -91,7 +91,7 @@ func getInputs(task models.Task, inputs, env []string) ([]string, error) {
 		if environmentContainsInput(env, n) {
 			continue
 		}
-		return nil, fmt.Errorf(taskUsage(task))
+		return nil, errors.New(taskUsage(task))
 	}
 	return result, nil
 }
