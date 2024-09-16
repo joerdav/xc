@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bufio"
 	"bytes"
 	_ "embed"
 	"errors"
@@ -132,7 +133,10 @@ func TestParseFileNoTasks(t *testing.T) {
 }
 
 func TestMultipleDirs(t *testing.T) {
-	p, _ := NewParser(strings.NewReader("dir: some dir"), "tasks")
+	var p parser
+	p.scanner = bufio.NewScanner(strings.NewReader("dir: some dir"))
+	p.scan()
+	p.scan()
 	p.currTask.Dir = "an existing dir"
 	_, err := p.parseAttribute()
 	if err == nil {
@@ -141,7 +145,10 @@ func TestMultipleDirs(t *testing.T) {
 }
 
 func TestInvalidRun(t *testing.T) {
-	p, _ := NewParser(strings.NewReader("run: never"), "tasks")
+	var p parser
+	p.scanner = bufio.NewScanner(strings.NewReader("run: never"))
+	p.scan()
+	p.scan()
 	_, err := p.parseAttribute()
 	if err == nil {
 		t.Fatal("expected error got nil")
@@ -222,7 +229,10 @@ some code
 }
 
 func TestMultipleCodeBlocks(t *testing.T) {
-	p, _ := NewParser(strings.NewReader("```\ncode\n```"), "tasks")
+	var p parser
+	p.scanner = bufio.NewScanner(strings.NewReader("```\ncode\n```"))
+	p.scan()
+	p.scan()
 	p.currTask.Script = "an existing script"
 	err := p.parseCodeBlock()
 	if err == nil {
@@ -371,7 +381,10 @@ func TestParseAttribute(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			p, _ := NewParser(strings.NewReader(tt.in), "tasks")
+			var p parser
+			p.scanner = bufio.NewScanner(strings.NewReader(tt.in))
+			p.scan()
+			p.scan()
 			ok, err := p.parseAttribute()
 			if err != nil {
 				t.Fatal(err)

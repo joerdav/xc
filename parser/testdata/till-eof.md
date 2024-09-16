@@ -17,5 +17,6 @@ go run ./i18n/generate
 
 ### generate-all
 
-Requires: generate-templ, generate-translations
 RunDeps: async
+
+Requires: generate-templ, generate-translations

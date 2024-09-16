@@ -40,12 +40,13 @@ func (p *parser) Parse() (tasks models.Tasks, err error) {
 }
 
 func (p *parser) scan() bool {
+	p.currentLine = p.nextLine
 	if p.reachedEnd {
 		return false
 	}
-	p.currentLine = p.nextLine
 	if !p.scanner.Scan() {
 		p.reachedEnd = true
+		p.nextLine = ""
 		return true
 	}
 	p.nextLine = p.scanner.Text()
