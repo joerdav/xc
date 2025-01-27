@@ -10,6 +10,6 @@ handlers:
   upload: public/(.*)
 - url: /
   static_dir: public/
-- url: /.*
-  static_files: public/404.html
-  upload: public/404.html
+
+error_handlers:
+  - file: public/404.html
