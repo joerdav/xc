@@ -13,4 +13,3 @@ handlers:
 - url: /.*
   static_files: public/404.html
   upload: public/404.html
-  error_code: 404
