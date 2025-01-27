@@ -1,5 +1,13 @@
 {{ define "main" }}
-	<h1>Page not found</h1>
+<header>
+	<span class="content">
+		<h1>Page not found</h1>
+	</span>
+</header>
+<main>
 
-	I'm sorry, but the requested page wasn’t found on the server.
+<div class="content">
+	<p>I'm sorry, but the requested page wasn’t found on the server. Try going back to the <a href="{{ "" | relURL }}">home page</a>.</p>
+</div>
+</main>
 {{ end }}
