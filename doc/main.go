@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 func customFileServer(fs http.FileSystem) http.Handler {
@@ -27,14 +28,18 @@ func customFileServer(fs http.FileSystem) http.Handler {
 }
 
 func main() {
-	http.Handle("/", customFileServer(http.Dir("public")))
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 		log.Printf("Defaulting to port %s", port)
 	}
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	server := &http.Server{
+		Addr:         ":" + port,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		Handler:      customFileServer(http.Dir("public")),
+	}
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
