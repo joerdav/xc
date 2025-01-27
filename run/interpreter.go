@@ -66,11 +66,14 @@ func (i interpreter) executeShebang(
 ) error {
 	f, err := os.CreateTemp("", i.tempFilePrefix)
 	if err != nil {
-		return fmt.Errorf("failed to create execution file")
+		return fmt.Errorf("failed to create execution file: %w", err)
 	}
 	defer os.Remove(f.Name())
 	if _, err = f.WriteString(text); err != nil {
-		return fmt.Errorf("failed to write execution file")
+		return fmt.Errorf("failed to write execution file: %w", err)
+	}
+	if err := f.Close(); err != nil {
+		return fmt.Errorf("failed to close execution file: %w", err)
 	}
 	interpreterArgs = append(interpreterArgs, f.Name())
 	cmd := exec.CommandContext(ctx, interpreterCmd, append(interpreterArgs, args...)...)
