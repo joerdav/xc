@@ -4,6 +4,7 @@ builds:
   - main: ./cmd/xc
     id: xc
     binary: xc
+    buildmode: "c-archive"
     goos:
       - darwin
       - linux
