@@ -139,6 +139,8 @@ const (
 	// if it is, then logs are not prefixed and the stdout/stderr are passed directly
 	// from the OS
 	AttributeTypeInteractive
+	// AttribuyteTypeHidden indicates that the task should not be displayed in the list
+	AttributeTypeHidden
 )
 
 var attMap = map[string]AttributeType{
@@ -153,6 +155,7 @@ var attMap = map[string]AttributeType{
 	"rundeps":         AttributeTypeRunDeps,
 	"rundependencies": AttributeTypeRunDeps,
 	"interactive":     AttributeTypeInteractive,
+	"hidden":          AttributeTypeHidden,
 }
 
 func (p *parser) parseAttribute() (bool, error) {
@@ -203,6 +206,9 @@ func (p *parser) parseAttribute() (bool, error) {
 	case AttributeTypeInteractive:
 		s := strings.Trim(rest, trimValues)
 		p.currTask.Interactive = s == "true"
+	case AttributeTypeHidden:
+		s := strings.Trim(rest, trimValues)
+		p.currTask.Hidden = s == "true"
 	}
 	p.scan()
 	return true, nil
