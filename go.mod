@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.7.1
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/posener/complete/v2 v2.0.1-alpha.13
+	golang.org/x/term v0.8.0
 	mvdan.cc/sh/v3 v3.7.0
 )
 
@@ -30,6 +31,5 @@ require (
 	github.com/sahilm/fuzzy v0.1.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.3.8 // indirect
 )

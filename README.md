@@ -180,3 +180,12 @@ Directory: doc
 ```sh
 ./build.sh
 ```
+
+## build:linux-musl
+
+Build the static binary for linux
+
+
+```
+CC=/usr/local/musl/bin/musl-gcc go build --ldflags '-linkmode external -extldflags "-static"' ./cmd/xc
+```

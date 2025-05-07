@@ -19,6 +19,7 @@ type Task struct {
 	RequiredBehaviour RequiredBehaviour
 	DepsBehaviour     DepsBehaviour
 	Interactive       bool
+	Hidden            bool
 }
 
 // Display writes a Task as Markdown.

@@ -19,6 +19,7 @@ linkTitle: "Task Syntax"
     - [Environment Variables](/task-syntax/environment-variables/)
     - [Inputs](/task-syntax/inputs/)
     - [Interactive](/task-syntax/interactive/)
+    - [Hidden](/task-syntax/hidden/)
 
 ### Example
 

@@ -109,6 +109,10 @@ func (m model) View() string {
 func interactivePicker(ctx context.Context, tasks []models.Task, dir string) error {
 	var items []list.Item
 	for _, t := range tasks {
+		// Skip hidden tasks
+		if t.Hidden {
+			continue
+		}
 		items = append(items, taskItem{t})
 	}
 	l := list.New(items, itemDelegate{}, listItemWidth, listItemHeight+len(tasks))

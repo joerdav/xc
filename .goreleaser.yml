@@ -10,15 +10,27 @@ builds:
       - windows
     goarch:
       - 386
+      - arm
       - amd64
       - arm64
-      - arm
     goarm:
-      - 6
       - 7
+      - 6
+    ldflags:
+      - -s -w
+    gcflags:
+      - " -l -l -l"
+    env:
+      - CGO_ENABLED=0
     ignore:
       - goos: darwin
         goarch: 386
+      - goos: windows
+        goarch: 386
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: arm64
       - goos: linux
         goarch: arm
         goarm: 6
@@ -37,9 +49,9 @@ signs:
   - artifacts: checksum
     args: ["--batch", "-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
 archives:
-  - format: binary
+  - formats: [ 'binary' ]
     id: xc
-  - format: tar.gz
+  - formats: ['tar.gz']
     id: brew
 checksum:
   name_template: 'checksums.txt'
