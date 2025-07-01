@@ -100,7 +100,8 @@ func (p *parser) parseHeading(advance bool) (ok bool, level int, text string, ma
 	}
 
 	t := strings.TrimSpace(p.currentLine)
-	s := strings.SplitN(t, " ", 2)
+	maxSeps := 2
+	s := strings.SplitN(t, " ", maxSeps)
 	if len(s) != 2 || len(s[0]) < 1 || strings.Count(s[0], "#") != len(s[0]) {
 		return false, 0, "", false
 	}

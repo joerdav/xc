@@ -203,13 +203,14 @@ func TestHeadingCaseInsensitive(t *testing.T) {
 		{"tasks", " tasks"},
 	}
 	for _, tt := range tests {
+		parserHeading := tt.parserHeading
 		p, _ := NewParser(strings.NewReader(fmt.Sprintf(`
 # %s
 ## a task
 `+codeBlockStarter+`
 some code
 `+codeBlockStarter+`
-`, tt.mdHeading)), &tt.parserHeading)
+`, tt.mdHeading)), &parserHeading)
 		_, err := p.parseTask()
 		if err != nil {
 			t.Fatal(err)
