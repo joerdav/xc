@@ -15,8 +15,11 @@ import (
 //go:embed testdata/example.md
 var s string
 
-//go:embed testdata/marked-heading.md
-var markedHeading string
+//go:embed testdata/marked-heading-next-line.md
+var markedHeadingNextLine string
+
+//go:embed testdata/marked-heading-same-line.md
+var markedHeadingSameLine string
 
 //go:embed testdata/till-eof.md
 var tillEOF string
@@ -244,8 +247,32 @@ func TestCustomHeadingByFlag(t *testing.T) {
 	}
 }
 
-func TestCustomHeadingByMarker(t *testing.T) {
-	p, err := NewParser(strings.NewReader(markedHeading), nil)
+func TestCustomHeadingByNextLineMarker(t *testing.T) {
+	p, err := NewParser(strings.NewReader(markedHeadingNextLine), nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := p.Parse()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	expected := models.Tasks{
+		{
+			Name:        "hello",
+			Description: []string{"Print a message"},
+			Script:      "echo \"Hello, world!\"\n",
+		},
+	}
+	if len(result) != len(expected) {
+		t.Fatalf("want %d tasks got %d", len(expected), len(result))
+	}
+	for i := range result {
+		assertTask(t, expected[i], result[i])
+	}
+}
+
+func TestCustomHeadingBySameLineMarker(t *testing.T) {
+	p, err := NewParser(strings.NewReader(markedHeadingSameLine), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -89,19 +89,28 @@ func (p *parser) parseAltHeading(advance bool) (ok bool, level int, text string)
 }
 
 func (p *parser) parseHeading(advance bool) (ok bool, level int, text string, markerFound bool) {
+	if p.currentLine == headingMarkerComment {
+		markerFound = true
+		p.scan()
+	}
+
 	ok, level, text = p.parseAltHeading(advance)
 	if ok {
 		return
 	}
+
 	t := strings.TrimSpace(p.currentLine)
 	s := strings.SplitN(t, " ", 2)
 	if len(s) != 2 || len(s[0]) < 1 || strings.Count(s[0], "#") != len(s[0]) {
-		return
+		return false, 0, "", false
 	}
+
 	ok = true
 	level = len(s[0])
-	text, markerFound = strings.CutSuffix(s[1], headingMarkerComment)
-	text = strings.TrimSpace(text)
+	cutText, markerFoundAfterHeading := strings.CutSuffix(s[1], headingMarkerComment)
+	text = strings.TrimSpace(cutText)
+	markerFound = markerFound || markerFoundAfterHeading
+
 	if !advance {
 		return
 	}
