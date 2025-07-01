@@ -56,8 +56,8 @@ func flags() config {
 	flag.BoolVar(&cfg.help, "help", false, "show xc usage")
 	flag.BoolVar(&cfg.help, "h", false, "show xc usage")
 
-	flag.StringVar(&cfg.heading, "heading", "Tasks", "specify the heading for xc tasks")
-	flag.StringVar(&cfg.heading, "H", "Tasks", "specify the heading for xc tasks")
+	flag.StringVar(&cfg.heading, "heading", "", "specify the heading for xc tasks")
+	flag.StringVar(&cfg.heading, "H", "", "specify the heading for xc tasks")
 
 	flag.StringVar(&cfg.filename, "file", "", "specify a markdown file that contains tasks")
 	flag.StringVar(&cfg.filename, "f", "", "specify a markdown file that contains tasks")
@@ -78,17 +78,22 @@ func flags() config {
 }
 
 func parse(filename, heading string) (models.Tasks, string, error) {
+	var specifiedHeading *string = nil
+	if heading != "" {
+		specifiedHeading = &heading
+	}
+
 	if filename != "" {
-		return tryParse(filename, heading)
+		return tryParse(filename, specifiedHeading)
 	}
 	curr, err := filepath.Abs(filepath.Dir("."))
 	if err != nil {
 		return nil, "", fmt.Errorf("error getting current directory: %w", err)
 	}
-	return searchUpForFile(curr, heading)
+	return searchUpForFile(curr, specifiedHeading)
 }
 
-func searchUpForFile(curr, heading string) (models.Tasks, string, error) {
+func searchUpForFile(curr string, heading *string) (models.Tasks, string, error) {
 	rm := filepath.Join(curr, "README.md")
 	tasks, directory, err := tryParse(rm, heading)
 	if err == nil {
@@ -109,7 +114,7 @@ func searchUpForFile(curr, heading string) (models.Tasks, string, error) {
 	return searchUpForFile(next, heading)
 }
 
-func tryParse(path, heading string) (models.Tasks, string, error) {
+func tryParse(path string, heading *string) (models.Tasks, string, error) {
 	directory := filepath.Dir(path)
 	b, err := os.Open(path)
 	if err != nil {

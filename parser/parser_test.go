@@ -15,6 +15,9 @@ import (
 //go:embed testdata/example.md
 var s string
 
+//go:embed testdata/marked-heading.md
+var markedHeading string
+
 //go:embed testdata/till-eof.md
 var tillEOF string
 
@@ -50,7 +53,7 @@ func assertTask(t *testing.T, expected, actual models.Task) {
 }
 
 func TestParseFile(t *testing.T) {
-	p, err := NewParser(strings.NewReader(s), "Tasks")
+	p, err := NewParser(strings.NewReader(s), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -91,7 +94,7 @@ echo "Hello, world2!"
 }
 
 func TestParseFileToEOF(t *testing.T) {
-	p, err := NewParser(strings.NewReader(tillEOF), "Tasks")
+	p, err := NewParser(strings.NewReader(tillEOF), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -126,7 +129,7 @@ func TestParseFileToEOF(t *testing.T) {
 }
 
 func TestParseFileNoTasks(t *testing.T) {
-	_, err := NewParser(strings.NewReader(e), "tasks")
+	_, err := NewParser(strings.NewReader(e), nil)
 	if !errors.Is(err, ErrNoTasksHeading) {
 		t.Fatalf("expected error %v got: %v", "no Tasks section found", err)
 	}
@@ -160,7 +163,7 @@ func TestCommandlessTask(t *testing.T) {
 # Tasks
 ## a task
 ## another task
-`), "tasks")
+`), nil)
 	_, err := p.parseTask()
 	if err == nil {
 		t.Fatal("expected error got nil")
@@ -172,7 +175,7 @@ func TestRequiresOnlyTask(t *testing.T) {
 # Tasks
 ## a-task
 requires: some-task
-`), "tasks")
+`), nil)
 	_, err := p.parseTask()
 	if err != nil {
 		t.Fatal(err)
@@ -203,7 +206,7 @@ func TestHeadingCaseInsensitive(t *testing.T) {
 `+codeBlockStarter+`
 some code
 `+codeBlockStarter+`
-`, tt.mdHeading)), tt.parserHeading)
+`, tt.mdHeading)), &tt.parserHeading)
 		_, err := p.parseTask()
 		if err != nil {
 			t.Fatal(err)
@@ -215,13 +218,63 @@ some code
 	}
 }
 
+func TestCustomHeadingByFlag(t *testing.T) {
+	customHeading := "Out Of Scope"
+	p, err := NewParser(strings.NewReader(s), &customHeading)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := p.Parse()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	expected := models.Tasks{
+		{
+			Name:        "something",
+			Description: []string{"Print a message"},
+			Script:      "echo \"Hello, world!\"\n",
+			DependsOn:   []string{"list", "list2"},
+		},
+	}
+	if len(result) != len(expected) {
+		t.Fatalf("want %d tasks got %d", len(expected), len(result))
+	}
+	for i := range result {
+		assertTask(t, expected[i], result[i])
+	}
+}
+
+func TestCustomHeadingByMarker(t *testing.T) {
+	p, err := NewParser(strings.NewReader(markedHeading), nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := p.Parse()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	expected := models.Tasks{
+		{
+			Name:        "hello",
+			Description: []string{"Print a message"},
+			Script:      "echo \"Hello, world!\"\n",
+		},
+	}
+	if len(result) != len(expected) {
+		t.Fatalf("want %d tasks got %d", len(expected), len(result))
+	}
+	for i := range result {
+		assertTask(t, expected[i], result[i])
+	}
+}
+
 func TestUnTerminatedCodeBlock(t *testing.T) {
 	p, _ := NewParser(strings.NewReader(`
 # Tasks
 ## a task
 `+codeBlockStarter+`
 some code
-`), "tasks")
+`), nil)
 	_, err := p.parseTask()
 	if err == nil {
 		t.Fatal("expected error got nil")
@@ -437,7 +490,7 @@ echo "Hello, world2!"
 	}
 	file := buf.String()
 	for i := 0; i < b.N; i++ {
-		p, err := NewParser(strings.NewReader(file), "tasks")
+		p, err := NewParser(strings.NewReader(file), nil)
 		if err != nil {
 			b.Fatal(err)
 		}

@@ -14,8 +14,10 @@ import (
 var ErrNoTasksHeading = errors.New("no xc block found")
 
 const (
-	trimValues       = "_*` "
-	codeBlockStarter = "```"
+	trimValues           = "_*` "
+	codeBlockStarter     = "```"
+	defaultHeading       = "tasks"
+	headingMarkerComment = "<!-- xc-heading -->"
 )
 
 type parser struct {
@@ -86,19 +88,20 @@ func (p *parser) parseAltHeading(advance bool) (ok bool, level int, text string)
 	return
 }
 
-func (p *parser) parseHeading(advance bool) (ok bool, level int, text string) {
+func (p *parser) parseHeading(advance bool) (ok bool, level int, text string, markerFound bool) {
 	ok, level, text = p.parseAltHeading(advance)
 	if ok {
 		return
 	}
 	t := strings.TrimSpace(p.currentLine)
-	s := strings.Fields(t)
-	if len(s) < 2 || len(s[0]) < 1 || strings.Count(s[0], "#") != len(s[0]) {
+	s := strings.SplitN(t, " ", 2)
+	if len(s) != 2 || len(s[0]) < 1 || strings.Count(s[0], "#") != len(s[0]) {
 		return
 	}
 	ok = true
 	level = len(s[0])
-	text = strings.Join(s[1:], " ")
+	text, markerFound = strings.CutSuffix(s[1], headingMarkerComment)
+	text = strings.TrimSpace(text)
 	if !advance {
 		return
 	}
@@ -235,7 +238,7 @@ func (p *parser) parseCodeBlock() error {
 
 func (p *parser) findTaskHeading() (heading string, done bool, err error) {
 	for {
-		tok, level, text := p.parseHeading(true)
+		tok, level, text, markerFound := p.parseHeading(true)
 		if !tok || level > p.rootHeadingLevel+1 {
 			if !p.scan() {
 				return "", false, fmt.Errorf("failed to read file: %w", p.scanner.Err())
@@ -245,6 +248,11 @@ func (p *parser) findTaskHeading() (heading string, done bool, err error) {
 		if level <= p.rootHeadingLevel {
 			return "", true, nil
 		}
+
+		if markerFound {
+			fmt.Printf("%s found in %s, but this will not be used as a tasks heading.\n", headingMarkerComment, text)
+		}
+
 		return strings.Trim(text, trimValues), false, nil
 	}
 }
@@ -267,7 +275,7 @@ func (p *parser) parseTaskBody() (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		tok, level, _ := p.parseHeading(false)
+		tok, level, _, _ := p.parseHeading(false)
 		if tok && level <= p.rootHeadingLevel {
 			return false, nil
 		}
@@ -304,13 +312,21 @@ func (p *parser) parseTask() (ok bool, err error) {
 
 // NewParser will read from r until it finds a valid xc heading block.
 // If no block is found an error is returned.
-func NewParser(r io.Reader, heading string) (p parser, err error) {
+func NewParser(r io.Reader, heading *string) (p parser, err error) {
 	p.scanner = bufio.NewScanner(r)
 	for p.scan() {
-		ok, level, text := p.parseHeading(true)
-		if !ok || !strings.EqualFold(strings.TrimSpace(text), strings.TrimSpace(heading)) {
+		ok, level, text, markerFound := p.parseHeading(true)
+		if !ok {
 			continue
 		}
+
+		parsedHeading := strings.TrimSpace(text)
+		specifiedHeadingFound := heading != nil && strings.EqualFold(parsedHeading, strings.TrimSpace(*heading))
+		unspecifiedHeadingFound := heading == nil && (markerFound || strings.EqualFold(parsedHeading, defaultHeading))
+		if !specifiedHeadingFound && !unspecifiedHeadingFound {
+			continue
+		}
+
 		p.rootHeadingLevel = level
 		return
 	}
