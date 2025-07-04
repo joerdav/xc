@@ -46,3 +46,18 @@ Please note that the word `tasks` is not case sensitive.
 ## Constraints
 
 You cannot define two `Tasks` sections. If you do, the one that appears first in the markdown file will be used
+
+## The `<!-- xc-heading -->` Comment
+
+By putting the special comment `<!-- xc-heading -->` on the line before the heading, you can specify the xc heading without the `--heading` flag.
+
+```markdown
+<!-- xc-heading -->
+## Getting started
+
+### Task1
+
+### Task2
+
+## Next H2 Heading
+```
