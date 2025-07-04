@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"github.com/joerdav/xc/models"
-	"github.com/joerdav/xc/parser"
+	"github.com/joerdav/xc/parser/parsemd"
 	"github.com/joerdav/xc/run"
 	"github.com/posener/complete/v2"
 	"github.com/posener/complete/v2/install"
@@ -99,7 +99,7 @@ func searchUpForFile(curr string, heading *string) (models.Tasks, string, error)
 	if err == nil {
 		return tasks, directory, nil
 	}
-	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parser.ErrNoTasksHeading) {
+	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parsemd.ErrNoTasksHeading) {
 		return nil, "", err
 	}
 	git := filepath.Join(curr, ".git")
@@ -120,7 +120,7 @@ func tryParse(path string, heading *string) (models.Tasks, string, error) {
 	if err != nil {
 		return nil, "", fmt.Errorf("xc error opening file: %w", err)
 	}
-	p, err := parser.NewParser(b, heading)
+	p, err := parsemd.NewParser(b, heading)
 	if err != nil {
 		return nil, "", fmt.Errorf("xc parse error: %w", err)
 	}
