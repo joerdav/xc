@@ -26,7 +26,7 @@ import (
 var usage string
 
 // ErrNoMarkdownFile will be returned if no markdown file is found in the cwd or any parent directories.
-var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
+var ErrNoMarkdownFile = errors.New("no xc compatible documentation file found")
 
 type config struct {
 	version, help, short, display, noTTY, complete, uncomplete bool
@@ -59,14 +59,14 @@ func flags() config {
 	flag.StringVar(&cfg.heading, "heading", "", "specify the heading for xc tasks")
 	flag.StringVar(&cfg.heading, "H", "", "specify the heading for xc tasks")
 
-	flag.StringVar(&cfg.filename, "file", "", "specify a markdown file that contains tasks")
-	flag.StringVar(&cfg.filename, "f", "", "specify a markdown file that contains tasks")
+	flag.StringVar(&cfg.filename, "file", "", "specify a documentation file that contains tasks")
+	flag.StringVar(&cfg.filename, "f", "", "specify a documentation file that contains tasks")
 
 	flag.BoolVar(&cfg.short, "short", false, "list task names in a short format")
 	flag.BoolVar(&cfg.short, "s", false, "list task names in a short format")
 
-	flag.BoolVar(&cfg.display, "d", false, "print the markdown code of a task rather than running it")
-	flag.BoolVar(&cfg.display, "display", false, "print the markdown code of a task rather than running it")
+	flag.BoolVar(&cfg.display, "d", false, "print the plain text code of a task rather than running it")
+	flag.BoolVar(&cfg.display, "display", false, "print the plain text code of a task rather than running it")
 
 	flag.BoolVar(&cfg.complete, "complete", false, "install shell completion for xc")
 	flag.BoolVar(&cfg.uncomplete, "uncomplete", false, "uninstall shell completion for xc")
