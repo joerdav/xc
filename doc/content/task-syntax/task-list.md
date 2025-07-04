@@ -49,7 +49,7 @@ You cannot define two `Tasks` sections. If you do, the one that appears first in
 
 ## The `<!-- xc-heading -->` Comment
 
-By putting the special comment `<!-- xc-heading -->` right before or on the same line as the heading, you can specify the xc heading without the `--heading` flag.
+By putting the special comment `<!-- xc-heading -->` on the line before the heading, you can specify the xc heading without the `--heading` flag.
 
 ```markdown
 <!-- xc-heading -->
@@ -61,4 +61,3 @@ By putting the special comment `<!-- xc-heading -->` right before or on the same
 
 ## Next H2 Heading
 ```
-

@@ -108,9 +108,7 @@ func (p *parser) parseHeading(advance bool) (ok bool, level int, text string, ma
 
 	ok = true
 	level = len(s[0])
-	cutText, markerFoundAfterHeading := strings.CutSuffix(s[1], headingMarkerComment)
-	text = strings.TrimSpace(cutText)
-	markerFound = markerFound || markerFoundAfterHeading
+	text = strings.TrimSpace(s[1])
 
 	if !advance {
 		return
