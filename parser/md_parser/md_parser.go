@@ -1,4 +1,4 @@
-package parser
+package md_parser
 
 import (
 	"bufio"
