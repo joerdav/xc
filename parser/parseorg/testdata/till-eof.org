@@ -1,0 +1,22 @@
+* My readme
+
+** Tasks
+
+*** generate-templ
+
+#+begin_src bash
+go run -mod=mod github.com/a-h/templ/cmd/templ generate
+go mod tidy
+#+end_src
+
+*** generate-translations
+
+#+begin_src bash
+go run ./i18n/generate
+#+end_src
+
+*** generate-all
+
+RunDeps: async
+
+Requires: generate-templ, generate-translations
