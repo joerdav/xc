@@ -1,33 +1,37 @@
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
     - dogsled
     - dupl
     - errcheck
-    - copyloopvar
     - gochecknoinits
     - goconst
     - gocritic
     - gocyclo
-    - gofmt
-    - goimports
-    - mnd
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - lll
     - misspell
+    - mnd
     - nakedret
     - noctx
     - nolintlint
     - staticcheck
-    - stylecheck
-    - tenv
-    - typecheck
     - unconvert
     - unparam
     - unused
+    - usetesting
     - whitespace
+  exclusions:
+    presets:
+      - common-false-positives
+      - legacy
+      - std-error-handling
+formatters:
+  enable:
+    - gofmt
+    - goimports
