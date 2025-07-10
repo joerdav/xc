@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"github.com/joerdav/xc/models"
-	"github.com/joerdav/xc/parser"
+	"github.com/joerdav/xc/parser/parsemd"
 	"github.com/joerdav/xc/run"
 	"github.com/posener/complete/v2"
 	"github.com/posener/complete/v2/install"
@@ -26,7 +26,7 @@ import (
 var usage string
 
 // ErrNoMarkdownFile will be returned if no markdown file is found in the cwd or any parent directories.
-var ErrNoMarkdownFile = errors.New("no xc compatible markdown file found")
+var ErrNoMarkdownFile = errors.New("no xc compatible documentation file found")
 
 type config struct {
 	version, help, short, display, noTTY, complete, uncomplete bool
@@ -59,14 +59,14 @@ func flags() config {
 	flag.StringVar(&cfg.heading, "heading", "", "specify the heading for xc tasks")
 	flag.StringVar(&cfg.heading, "H", "", "specify the heading for xc tasks")
 
-	flag.StringVar(&cfg.filename, "file", "", "specify a markdown file that contains tasks")
-	flag.StringVar(&cfg.filename, "f", "", "specify a markdown file that contains tasks")
+	flag.StringVar(&cfg.filename, "file", "", "specify a documentation file that contains tasks")
+	flag.StringVar(&cfg.filename, "f", "", "specify a documentation file that contains tasks")
 
 	flag.BoolVar(&cfg.short, "short", false, "list task names in a short format")
 	flag.BoolVar(&cfg.short, "s", false, "list task names in a short format")
 
-	flag.BoolVar(&cfg.display, "d", false, "print the markdown code of a task rather than running it")
-	flag.BoolVar(&cfg.display, "display", false, "print the markdown code of a task rather than running it")
+	flag.BoolVar(&cfg.display, "d", false, "print the plain text code of a task rather than running it")
+	flag.BoolVar(&cfg.display, "display", false, "print the plain text code of a task rather than running it")
 
 	flag.BoolVar(&cfg.complete, "complete", false, "install shell completion for xc")
 	flag.BoolVar(&cfg.uncomplete, "uncomplete", false, "uninstall shell completion for xc")
@@ -99,7 +99,7 @@ func searchUpForFile(curr string, heading *string) (models.Tasks, string, error)
 	if err == nil {
 		return tasks, directory, nil
 	}
-	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parser.ErrNoTasksHeading) {
+	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parsemd.ErrNoTasksHeading) {
 		return nil, "", err
 	}
 	git := filepath.Join(curr, ".git")
@@ -120,7 +120,7 @@ func tryParse(path string, heading *string) (models.Tasks, string, error) {
 	if err != nil {
 		return nil, "", fmt.Errorf("xc error opening file: %w", err)
 	}
-	p, err := parser.NewParser(b, heading)
+	p, err := parsemd.NewParser(b, heading)
 	if err != nil {
 		return nil, "", fmt.Errorf("xc parse error: %w", err)
 	}

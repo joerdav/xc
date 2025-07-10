@@ -1,4 +1,4 @@
-package parser
+package parsemd
 
 import (
 	"bufio"
