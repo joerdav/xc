@@ -16,6 +16,7 @@ import (
 
 	"github.com/joerdav/xc/models"
 	"github.com/joerdav/xc/parser/parsemd"
+	"github.com/joerdav/xc/parser/parseorg"
 	"github.com/joerdav/xc/run"
 	"github.com/posener/complete/v2"
 	"github.com/posener/complete/v2/install"
@@ -25,12 +26,12 @@ import (
 //go:embed usage.txt
 var usage string
 
-// ErrNoMarkdownFile will be returned if no markdown file is found in the cwd or any parent directories.
-var ErrNoMarkdownFile = errors.New("no xc compatible documentation file found")
+// ErrNoTaskFile will be returned if no markdown file is found in the cwd or any parent directories.
+var ErrNoTaskFile = errors.New("no xc compatible documentation file found")
 
 type config struct {
 	version, help, short, display, noTTY, complete, uncomplete bool
-	filename, heading                                          string
+	filename, heading, filetype                                string
 }
 
 var version = ""
@@ -62,6 +63,8 @@ func flags() config {
 	flag.StringVar(&cfg.filename, "file", "", "specify a documentation file that contains tasks")
 	flag.StringVar(&cfg.filename, "f", "", "specify a documentation file that contains tasks")
 
+	flag.StringVar(&cfg.filetype, "type", "", "specify a file type (supported: md, org)")
+
 	flag.BoolVar(&cfg.short, "short", false, "list task names in a short format")
 	flag.BoolVar(&cfg.short, "s", false, "list task names in a short format")
 
@@ -77,56 +80,88 @@ func flags() config {
 	return cfg
 }
 
-func parse(filename, heading string) (models.Tasks, string, error) {
+func parse(filename, heading string, filetype string) (models.Tasks, string, error) {
 	var specifiedHeading *string = nil
 	if heading != "" {
 		specifiedHeading = &heading
 	}
 
 	if filename != "" {
-		return tryParse(filename, specifiedHeading)
+		return tryParse(filename, specifiedHeading, filetype)
 	}
 	curr, err := filepath.Abs(filepath.Dir("."))
 	if err != nil {
 		return nil, "", fmt.Errorf("error getting current directory: %w", err)
 	}
-	return searchUpForFile(curr, specifiedHeading)
+	return searchUpForFile(curr, specifiedHeading, filetype)
 }
 
-func searchUpForFile(curr string, heading *string) (models.Tasks, string, error) {
-	rm := filepath.Join(curr, "README.md")
-	tasks, directory, err := tryParse(rm, heading)
-	if err == nil {
-		return tasks, directory, nil
+func searchUpForFile(curr string, heading *string, filetype string) (tasks models.Tasks, directory string, err error) {
+	var rm string
+	if filetype == "md" || filetype == "" {
+		rm = filepath.Join(curr, "README.md")
+		tasks, directory, err = tryParse(rm, heading, filetype)
+		if err == nil {
+			return tasks, directory, nil
+		}
+		if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parseorg.ErrNoTasksHeading) {
+			return nil, "", err
+		}
 	}
-	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parsemd.ErrNoTasksHeading) {
-		return nil, "", err
+	if filetype == "org" || filetype == "" {
+		rm = filepath.Join(curr, "README.org")
+		tasks, directory, err = tryParse(rm, heading, filetype)
+		if err == nil {
+			return tasks, directory, nil
+		}
+		if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parseorg.ErrNoTasksHeading) {
+			return nil, "", err
+		}
 	}
 	git := filepath.Join(curr, ".git")
 	_, err = os.Stat(git)
 	if err == nil {
-		return nil, "", ErrNoMarkdownFile
+		return nil, "", ErrNoTaskFile
 	}
 	next := filepath.Dir(curr)
 	if strings.HasSuffix(next, string([]rune{filepath.Separator})) {
-		return nil, "", ErrNoMarkdownFile
+		return nil, "", ErrNoTaskFile
 	}
-	return searchUpForFile(next, heading)
+	return searchUpForFile(next, heading, filetype)
 }
 
-func tryParse(path string, heading *string) (models.Tasks, string, error) {
-	directory := filepath.Dir(path)
+func tryParse(path string, heading *string, filetype string) (tasks models.Tasks, directory string, err error) {
+	directory = filepath.Dir(path)
 	b, err := os.Open(path)
 	if err != nil {
 		return nil, "", fmt.Errorf("xc error opening file: %w", err)
 	}
-	p, err := parsemd.NewParser(b, heading)
-	if err != nil {
-		return nil, "", fmt.Errorf("xc parse error: %w", err)
-	}
-	tasks, err := p.Parse()
-	if err != nil {
-		return nil, "", fmt.Errorf("xc parse error: %w", err)
+	ext := strings.ToLower(filepath.Ext(path))
+	switch {
+	case filetype == "md" || (filetype == "" && ext == ".md"):
+		p, err := parsemd.NewParser(b, heading)
+		if err != nil {
+			return nil, "", fmt.Errorf("xc parse error: %w", err)
+		}
+		tasks, err = p.Parse()
+		if err != nil {
+			return nil, "", fmt.Errorf("xc parse error: %w", err)
+		}
+	case filetype == "org" || (filetype == "" && ext == ".org"):
+		p, err := parseorg.NewParser(b, heading)
+		if err != nil {
+			return nil, "", fmt.Errorf("xc parse error: %w", err)
+		}
+		tasks, err = p.Parse()
+		if err != nil {
+			return nil, "", fmt.Errorf("xc parse error: %w", err)
+		}
+	default:
+		if filetype == "" {
+			return nil, "", fmt.Errorf("xc parse error: no parser for file type %s", ext)
+		} else {
+			return nil, "", fmt.Errorf("xc parse error: no parser for file type %s", filetype)
+		}
 	}
 	return tasks, directory, nil
 }
@@ -187,7 +222,7 @@ func runMain() error {
 	if cfg.complete {
 		return install.Install("xc")
 	}
-	tasks, dir, err := parse(cfg.filename, cfg.heading)
+	tasks, dir, err := parse(cfg.filename, cfg.heading, cfg.filetype)
 	completion(tasks).Complete("xc")
 	// xc -version
 	if cfg.version {
