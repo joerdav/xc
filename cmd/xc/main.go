@@ -16,6 +16,7 @@ import (
 
 	"github.com/joerdav/xc/models"
 	"github.com/joerdav/xc/parser/parsemd"
+	"github.com/joerdav/xc/parser/parseorg"
 	"github.com/joerdav/xc/run"
 	"github.com/posener/complete/v2"
 	"github.com/posener/complete/v2/install"
@@ -99,7 +100,7 @@ func searchUpForFile(curr string, heading *string) (models.Tasks, string, error)
 	if err == nil {
 		return tasks, directory, nil
 	}
-	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parsemd.ErrNoTasksHeading) {
+	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parseorg.ErrNoTasksHeading) {
 		return nil, "", err
 	}
 	git := filepath.Join(curr, ".git")
@@ -114,19 +115,33 @@ func searchUpForFile(curr string, heading *string) (models.Tasks, string, error)
 	return searchUpForFile(next, heading)
 }
 
-func tryParse(path string, heading *string) (models.Tasks, string, error) {
-	directory := filepath.Dir(path)
+func tryParse(path string, heading *string) (tasks models.Tasks, directory string, err error) {
+	directory = filepath.Dir(path)
 	b, err := os.Open(path)
 	if err != nil {
 		return nil, "", fmt.Errorf("xc error opening file: %w", err)
 	}
-	p, err := parsemd.NewParser(b, heading)
-	if err != nil {
-		return nil, "", fmt.Errorf("xc parse error: %w", err)
-	}
-	tasks, err := p.Parse()
-	if err != nil {
-		return nil, "", fmt.Errorf("xc parse error: %w", err)
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext == ".md" {
+		p, err := parsemd.NewParser(b, heading)
+		if err != nil {
+			return nil, "", fmt.Errorf("xc parse error: %w", err)
+		}
+		tasks, err = p.Parse()
+		if err != nil {
+			return nil, "", fmt.Errorf("xc parse error: %w", err)
+		}
+	} else if ext == ".org" {
+		p, err := parseorg.NewParser(b, heading)
+		if err != nil {
+			return nil, "", fmt.Errorf("xc parse error: %w", err)
+		}
+		tasks, err = p.Parse()
+		if err != nil {
+			return nil, "", fmt.Errorf("xc parse error: %w", err)
+		}
+	} else {
+		return nil, "", fmt.Errorf("xc parse error: no parser for file type %s", ext)
 	}
 	return tasks, directory, nil
 }
