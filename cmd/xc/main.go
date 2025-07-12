@@ -26,8 +26,8 @@ import (
 //go:embed usage.txt
 var usage string
 
-// ErrNoMarkdownFile will be returned if no markdown file is found in the cwd or any parent directories.
-var ErrNoMarkdownFile = errors.New("no xc compatible documentation file found")
+// ErrNoTaskFile will be returned if no markdown file is found in the cwd or any parent directories.
+var ErrNoTaskFile = errors.New("no xc compatible documentation file found")
 
 type config struct {
 	version, help, short, display, noTTY, complete, uncomplete bool
@@ -103,14 +103,22 @@ func searchUpForFile(curr string, heading *string) (models.Tasks, string, error)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parseorg.ErrNoTasksHeading) {
 		return nil, "", err
 	}
+	rm = filepath.Join(curr, "README.org")
+	tasks, directory, err = tryParse(rm, heading)
+	if err == nil {
+		return tasks, directory, nil
+	}
+	if err != nil && !errors.Is(err, fs.ErrNotExist) && !errors.Is(err, parseorg.ErrNoTasksHeading) {
+		return nil, "", err
+	}
 	git := filepath.Join(curr, ".git")
 	_, err = os.Stat(git)
 	if err == nil {
-		return nil, "", ErrNoMarkdownFile
+		return nil, "", ErrNoTaskFile
 	}
 	next := filepath.Dir(curr)
 	if strings.HasSuffix(next, string([]rune{filepath.Separator})) {
-		return nil, "", ErrNoMarkdownFile
+		return nil, "", ErrNoTaskFile
 	}
 	return searchUpForFile(next, heading)
 }
