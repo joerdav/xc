@@ -73,8 +73,12 @@ scoop install xc
 ```
 {{% /details %}}
 {{% details "AUR" %}}
+
+Use `yay` or any AUR helper that you like to install the `xc` package.
+You can also install the pre-compiled package named `xc-bin` or the `xc-git` that follows the latest commit.
+
 ```sh
-TODO
+yay -S xc
 ```
 {{% /details %}}
 
