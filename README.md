@@ -1,4 +1,4 @@
-# xc - Simple, Convenient, Markdown-based task runner.
+# xc - Simple, Convenient, Docs-based task runner.
 
 <div align="center">
 
@@ -23,11 +23,12 @@ then the `README.md` will surface and describe these scripts.
 In such a case, since the documentation is separate, it may not be updated when scripts are changed or added.
 `xc` aims to solve this by defining the scripts [inline with the documentation](https://en.wikipedia.org/wiki/Literate_programming).
 
-`xc` is designed to maximise convenience, and minimise complexity.
-Each `xc` task is defined in simple, human-readable Markdown.
-This means that even people without the `xc` tool installed can use the README.md
-(or whatever Markdown file contains the tasks)
-as a source of useful commands for the project.
+`xc` is designed to maximise convenience, and minimise complexity. Each `xc`
+task is defined in simple, human-readable
+[Markdown](https://en.wikipedia.org/wiki/Markdown) or
+[org-mode](https://orgmode.org/). This means that even people without the `xc`
+tool installed can use the README (or whatever documentation file contains the
+tasks) as a source of useful commands for the project.
 
 # Installation
 
@@ -35,11 +36,12 @@ Installation instructions are described at <https://xcfile.dev/getting-started/#
 
 # Features
 
-- Tasks defined in Markdown files as code blocks.
+- Tasks defined in Markdown or org-mode files as code blocks.
 - Editor integration:
 	- [VSCode](https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode) (list and run `xc` tasks)
 	  ![vscode demo](https://user-images.githubusercontent.com/19927761/214538057-963f9a47-ff95-486c-8856-b90bd358be3f.png)
 	- [Vim](https://xcfile.dev/ide-support/#vim) (recommended config for listing and running `xc` tasks)
+- See also: [`org-mode` specific features](./ABOUT.org).
 
 # Example
 
