@@ -13,6 +13,8 @@ A script is what defines a tasks behaviour.
 
 To define a script you must add a code block under the name of a task.
 
+In Markdown:
+
 ````markdown
 ## Tasks
 ### Task1
@@ -22,6 +24,18 @@ echo "Hello العالمية!"
 echo "Hello ертөнц!"
 ```
 ````
+
+Or in org-mode:
+
+```org
+** Tasks
+*** Task1
+#+begin_src bash
+echo "Hello 世界!"
+echo "Hello العالمية!"
+echo "Hello ертөнц!"
+#+end_src
+```
 
 ## Shebangs
 

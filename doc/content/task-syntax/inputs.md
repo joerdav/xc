@@ -130,3 +130,7 @@ $ xc greet Joe Bob Steve
 + echo 'Hello, Joe Bob Steve.'
 Hello, Joe Bob Steve.
 ```
+
+## Note for org-mode users
+
+The inputs from `xc` do not interact with org-mode's `:var` inputs to a block. Block vars are ignored.
