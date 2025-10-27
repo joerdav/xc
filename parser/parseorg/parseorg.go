@@ -1,0 +1,322 @@
+package parseorg
+
+import (
+	"bufio"
+	"errors"
+	"fmt"
+	"io"
+	"strings"
+
+	"github.com/joerdav/xc/models"
+)
+
+// ErrNoTasksHeading is returned if the markdown contains no xc block
+var ErrNoTasksHeading = errors.New("no xc block found")
+
+const (
+	trimValues       = "_*~=/ "
+	codeBlockStarter = "#+begin_src"
+	codeBlockEnd     = "#+end_src"
+	defaultHeading   = "tasks"
+	headingMarkerTag = ":xc_heading:"
+)
+
+type parser struct {
+	scanner               *bufio.Scanner
+	tasks                 models.Tasks
+	currTask              models.Task
+	rootHeadingLevel      int
+	nextLine, currentLine string
+	reachedEnd            bool
+}
+
+func (p *parser) Parse() (tasks models.Tasks, err error) {
+	ok := true
+	for ok {
+		ok, err = p.parseTask()
+		if err != nil || !ok {
+			break
+		}
+	}
+	tasks = p.tasks
+	return
+}
+
+func (p *parser) scan() bool {
+	p.currentLine = p.nextLine
+	if p.reachedEnd {
+		return false
+	}
+	if !p.scanner.Scan() {
+		p.reachedEnd = true
+		p.nextLine = ""
+		return true
+	}
+	p.nextLine = p.scanner.Text()
+	return true
+}
+
+func (p *parser) skipComment(commentLevel int) (ok bool, level int, text string, markerFound bool) {
+	loop := true
+	for loop {
+		ok, level, text, markerFound = p.parseHeading(false)
+		if ok && level <= commentLevel {
+			return
+		}
+		loop = p.scan()
+	}
+	return
+}
+
+func (p *parser) parseHeading(advance bool) (ok bool, level int, text string, markerFound bool) {
+	if strings.Contains(p.currentLine, headingMarkerTag) {
+		markerFound = true
+	}
+	t := strings.TrimSpace(p.currentLine)
+	s := strings.Fields(t)
+	if len(s) < 2 || len(s[0]) < 1 || strings.Count(s[0], "*") != len(s[0]) {
+		return
+	}
+	level = len(s[0])
+	if s[1] == "COMMENT" {
+		p.scan()
+		ok, level, text, markerFound = p.skipComment(level)
+	} else {
+		ok = true
+		text = strings.Join(s[1:], " ")
+	}
+	if !advance {
+		return
+	}
+	p.scan()
+	return
+}
+
+// AttributeType represents metadata related to a Task.
+//
+//	# Tasks
+//	## Task1
+//	AttributeName: AttributeValue
+//	```
+//	script
+//	```
+type AttributeType int
+
+const (
+	// AttributeTypeEnv sets the environment variables for a Task.
+	// It can be represented by an attribute with name `environment` or `env`.
+	AttributeTypeEnv AttributeType = iota
+	// AttributeTypeDir sets the working directory for a Task.
+	// It can be represented by an attribute with name `directory` or `dir`.
+	AttributeTypeDir
+	// AttributeTypeReq sets the required Tasks for a Task, they will run
+	// prior to the execution of the selected task.
+	// It can be represented by an attribute with name `requires` or `req`.
+	AttributeTypeReq
+	// AttributeTypeInp sets the required inputs for a Task, inputs can be provided
+	// as commandline arguments or environment variables.
+	AttributeTypeInp
+	// AttributeTypeRun sets the tasks requiredBehaviour, can be always or once.
+	// Default is always
+	AttributeTypeRun
+	// AttributeTypeRunDeps sets the tasks dependenciesBehaviour, can be sync or async.
+	AttributeTypeRunDeps
+	// AttributeTypeInteractive indicates if this is an interactive task
+	// if it is, then logs are not prefixed and the stdout/stderr are passed directly
+	// from the OS
+	AttributeTypeInteractive
+)
+
+var attMap = map[string]AttributeType{
+	"req":             AttributeTypeReq,
+	"requires":        AttributeTypeReq,
+	"env":             AttributeTypeEnv,
+	"environment":     AttributeTypeEnv,
+	"dir":             AttributeTypeDir,
+	"directory":       AttributeTypeDir,
+	"inputs":          AttributeTypeInp,
+	"run":             AttributeTypeRun,
+	"rundeps":         AttributeTypeRunDeps,
+	"rundependencies": AttributeTypeRunDeps,
+	"interactive":     AttributeTypeInteractive,
+}
+
+func (p *parser) parseAttribute() (bool, error) {
+	a, rest, found := strings.Cut(p.currentLine, ":")
+	if !found {
+		return false, nil
+	}
+	ty, ok := attMap[strings.ToLower(strings.Trim(a, trimValues))]
+	if !ok {
+		return false, nil
+	}
+	switch ty {
+	case AttributeTypeInp:
+		vs := strings.Split(rest, ",")
+		for _, v := range vs {
+			p.currTask.Inputs = append(p.currTask.Inputs, strings.Trim(v, trimValues))
+		}
+	case AttributeTypeReq:
+		vs := strings.Split(rest, ",")
+		for _, v := range vs {
+			p.currTask.DependsOn = append(p.currTask.DependsOn, strings.Trim(v, trimValues))
+		}
+	case AttributeTypeEnv:
+		vs := strings.Split(rest, ",")
+		for _, v := range vs {
+			p.currTask.Env = append(p.currTask.Env, strings.Trim(v, trimValues))
+		}
+	case AttributeTypeDir:
+		if p.currTask.Dir != "" {
+			return false, fmt.Errorf("directory appears more than once for %s", p.currTask.Name)
+		}
+		s := strings.Trim(rest, trimValues)
+		p.currTask.Dir = s
+	case AttributeTypeRun:
+		s := strings.Trim(rest, trimValues)
+		r, ok := models.ParseRequiredBehaviour(s)
+		if !ok {
+			return false, fmt.Errorf("run contains invalid behaviour %q should be (always, once): %s", s, p.currTask.Name)
+		}
+		p.currTask.RequiredBehaviour = r
+	case AttributeTypeRunDeps:
+		s := strings.Trim(rest, trimValues)
+		r, ok := models.ParseDepsBehaviour(s)
+		if !ok {
+			return false, fmt.Errorf("runDeps contains invalid behaviour %q should be (sync, async): %s", s, p.currTask.Name)
+		}
+		p.currTask.DepsBehaviour = r
+	case AttributeTypeInteractive:
+		s := strings.Trim(rest, trimValues)
+		p.currTask.Interactive = s == "true"
+	}
+	p.scan()
+	return true, nil
+}
+
+func (p *parser) parseCodeBlock() error {
+	t := p.currentLine
+	if !strings.HasPrefix(t, codeBlockStarter) {
+		return nil
+	}
+	if len(p.currTask.Script) > 0 {
+		return fmt.Errorf("command block already exists for task %s", p.currTask.Name)
+	}
+	var ended bool
+	codeBlockIndent := -1
+	for p.scan() {
+		if codeBlockIndent < 0 {
+			codeBlockIndent = len(p.currentLine) - len(strings.TrimLeft(p.currentLine, " "))
+		}
+		if strings.HasPrefix(p.currentLine, codeBlockEnd) {
+			ended = true
+			break
+		}
+		if strings.TrimSpace(p.currentLine) != "" {
+			p.currTask.Script += strings.TrimPrefix(p.currentLine, strings.Repeat(" ", codeBlockIndent)) + "\n"
+		}
+	}
+	if !ended {
+		return fmt.Errorf("command block in task %s was not ended", p.currTask.Name)
+	}
+	p.scan()
+	return nil
+}
+
+func (p *parser) findTaskHeading() (heading string, done bool, err error) {
+	for {
+		tok, level, text, markerFound := p.parseHeading(true)
+		if !tok || level > p.rootHeadingLevel+1 {
+			if !p.scan() {
+				return "", false, fmt.Errorf("failed to read file: %w", p.scanner.Err())
+			}
+			continue
+		}
+		if level <= p.rootHeadingLevel {
+			return "", true, nil
+		}
+
+		if markerFound {
+			fmt.Printf("%s found in %s, but this will not be used as a tasks heading.\n", headingMarkerTag, text)
+		}
+		return strings.Trim(text, trimValues), false, nil
+	}
+}
+
+func (p *parser) parseTaskBody() (bool, error) {
+	for {
+		ok, err := p.parseAttribute()
+		if err != nil {
+			return false, err
+		}
+		if p.reachedEnd {
+			// parse attribute again in case it is on the last line
+			_, err = p.parseAttribute()
+			return false, err
+		}
+		if ok {
+			continue
+		}
+		err = p.parseCodeBlock()
+		if err != nil {
+			return false, err
+		}
+		tok, level, _, _ := p.parseHeading(false)
+		if tok && level <= p.rootHeadingLevel {
+			return false, nil
+		}
+		if tok && level == p.rootHeadingLevel+1 {
+			return true, nil
+		}
+		if strings.TrimSpace(p.currentLine) != "" && !strings.HasPrefix(p.currentLine, "#+") {
+			// TODO skip content in property drawers
+			p.currTask.Description = append(p.currTask.Description, strings.Trim(p.currentLine, trimValues))
+		}
+		if !p.scan() {
+			return false, nil
+		}
+	}
+}
+
+func (p *parser) parseTask() (ok bool, err error) {
+	p.currTask = models.Task{}
+	heading, done, err := p.findTaskHeading()
+	if err != nil || done {
+		return
+	}
+	p.currTask.Name = heading
+	ok, err = p.parseTaskBody()
+	if err != nil {
+		return
+	}
+	if len(p.currTask.Script) < 1 && len(p.currTask.DependsOn) < 1 {
+		err = fmt.Errorf("task %s has no commands or required tasks", p.currTask.Name)
+		return
+	}
+	p.tasks = append(p.tasks, p.currTask)
+	return
+}
+
+// NewParser will read from r until it finds a valid xc heading block.
+// If no block is found an error is returned.
+func NewParser(r io.Reader, heading *string) (p parser, err error) {
+	p.scanner = bufio.NewScanner(r)
+	for p.scan() {
+		ok, level, text, markerFound := p.parseHeading(true)
+		if !ok {
+			continue
+		}
+
+		parsedHeading := strings.TrimSpace(text)
+		specifiedHeadingFound := heading != nil && strings.EqualFold(parsedHeading, strings.TrimSpace(*heading))
+		unspecifiedHeadingFound := heading == nil && (markerFound || strings.EqualFold(parsedHeading, defaultHeading))
+		if !specifiedHeadingFound && !unspecifiedHeadingFound {
+			continue
+		}
+
+		p.rootHeadingLevel = level
+		return
+	}
+	err = ErrNoTasksHeading
+	return
+}

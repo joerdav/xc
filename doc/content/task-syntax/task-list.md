@@ -7,11 +7,11 @@ menu: { main: { parent: 'task-syntax', weight: 1 } }
 
 ## Task List
 
-The task list is the section of markdown that contains xc tasks.
+The task list is the section of documentation that contains xc tasks.
 
 ## Syntax
 
-An xc compatible markdown file needs to define a heading of any level called `Tasks`.
+An xc compatible text file needs to define a heading of any level called `Tasks`.
 
 The tasks within a `Tasks` section will need to be one heading level lower than `Tasks`.
 
@@ -45,11 +45,11 @@ Please note that the word `tasks` is not case sensitive.
 
 ## Constraints
 
-You cannot define two `Tasks` sections. If you do, the one that appears first in the markdown file will be used
+Note `xc` cannot find tasks in two or more `Tasks` sections. If you have more than one `Tasks` section, the one that appears first will be used.
 
 ## The `<!-- xc-heading -->` Comment
 
-By putting the special comment `<!-- xc-heading -->` on the line before the heading, you can specify the xc heading without the `--heading` flag.
+In Markdown files, you can put the special comment `<!-- xc-heading -->` on the line before a heading, and `xc` will recognize that as the task heading.
 
 ```markdown
 <!-- xc-heading -->
@@ -60,4 +60,18 @@ By putting the special comment `<!-- xc-heading -->` on the line before the head
 ### Task2
 
 ## Next H2 Heading
+```
+
+## The `:xc_heading:` Tag
+
+In org-mode files, you can put the special tag `:xc_heading:` on a heading, and `xc` will recognize that as the task heading.
+
+```org
+** Getting started                                         :xc_heading:
+
+*** Task1
+
+*** Task2
+
+** Next H2 Heading
 ```

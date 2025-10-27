@@ -8,7 +8,7 @@ canonifyURLs: true
 
 params:
   name: xc
-  description: Define project tasks within the README.md file, similar to npm scripts or a Makefile, but more human readable.
+  description: Define project tasks within the README file, similar to npm scripts or a Makefile, but more human readable.
 
 markup:
   goldmark:

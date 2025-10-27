@@ -1,0 +1,68 @@
+* My Readme
+
+Here is a readme.
+
+** Subtitle
+Sub text
+
+** tasks
+
+*** list
+
+Lists files
+
+#+begin_src
+  ls
+#+end_src
+
+*** list2
+
+Lists files
+
+Directory: ./somefolder
+
+#+begin_src
+ls
+#+end_src
+
+*** hello
+
+Print a message
+
+Requires: list, list2
+
+Env: `somevar=val`
+Inputs: FOO, BAR
+
+#+begin_src bash
+echo "Hello, world!"
+echo "Hello, world2!"
+#+end_src
+
+*** all-lists
+
+An example of a commandless task.
+
+Requires: list, list2
+
+*** COMMENT just a comment
+
+An example of a comment node that's not a task.
+
+#+begin_src bash
+  echo "You should never see this output!"
+#+end_src
+
+
+** Out Of Scope
+
+
+*** something
+
+Print a message
+
+Requires: list, list2
+
+#+begin_src
+echo "Hello, world!"
+#+end_src

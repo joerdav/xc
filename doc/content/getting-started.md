@@ -108,6 +108,23 @@ echo world
 ```
 ````
 
+Or if you prefer, create a file called README.org:
+
+```org
+** Tasks
+*** hello
+Prints hello
+#+begin_src sh
+echo hello
+#+end_src
+*** world
+Prints world
+Requires: hello
+#+begin_src sh
+echo world
+#+end_src
+```
+
 ## List tasks.
 
 Run `xc` to list the tasks.
@@ -132,7 +149,7 @@ world
 
 ## Let people know you use xc.
 
-Add the following badge to your `README.md` so that people know it's xc compatible.
+Add the following badge to your `README` so that people know it's xc compatible.
 
 ```
 [![xc compatible](https://xcfile.dev/badge.svg)](https://xcfile.dev)
