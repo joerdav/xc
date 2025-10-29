@@ -19,4 +19,8 @@ Just use the following config:
 
 ```
 :map <leader>xc :call fzf#run({'source':'xc -short', 'options': '--prompt "xc> " --preview "xc -md {}"', 'sink': 'RunInInteractiveShell xc', 'window': {'width': 0.9, 'height': 0.6}})
-```
+``**
+
+## Emacs
+
+Extension: <https://codeberg.org/ryanprior/xc.el>
