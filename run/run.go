@@ -127,7 +127,7 @@ func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []strin
 		return err
 	}
 	runFunc := r.runDepsSync
-	depsAsync := task.DepsBehaviour == models.DependencyBehaviourAsync
+	depsAsync := async || task.DepsBehaviour == models.DependencyBehaviourAsync
 	if depsAsync {
 		runFunc = r.runDepsAsync
 	}

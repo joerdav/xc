@@ -223,6 +223,8 @@ func runMain() error {
 		return install.Install("xc")
 	}
 	tasks, dir, err := parse(cfg.filename, cfg.heading, cfg.filetype)
+	// TODO remove the Interactive attribute & this deprecation warning
+	warnInteractive(tasks)
 	completion(tasks).Complete("xc")
 	// xc -version
 	if cfg.version {

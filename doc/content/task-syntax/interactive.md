@@ -7,8 +7,9 @@ menu: { main: { parent: "task-syntax", weight: 12 } }
 
 ## Interactive attribute
 
-By default, the logs of a task are prefixed with the task name. This does not work well for interactive tasks which usually require complete control over the terminal.
-If you want to run a task interactively, you can set the `interactive` attribute to `true`.
+**This attribute is deprecated and has no function. It will be removed.**
+
+Previously, this attribute inhibited adding the task name as a log prefix, but un-prefixed logs are now the default.
 
 ```markdown
 ### configure
