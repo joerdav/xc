@@ -104,10 +104,10 @@ func (r *Runner) Run(ctx context.Context, name string, inputs []string) error {
 	if err != nil {
 		return err
 	}
-	return r.runWithPadding(ctx, name, inputs, padding)
+	return r.runWithPadding(ctx, name, inputs, padding, false)
 }
 
-func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []string, padding int) error {
+func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []string, padding int, async bool) error {
 	task, ok := r.tasks.Get(name)
 	if !ok {
 		return fmt.Errorf("task %s not found", name)
@@ -127,10 +127,11 @@ func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []strin
 		return err
 	}
 	runFunc := r.runDepsSync
-	if task.DepsBehaviour == models.DependencyBehaviourAsync {
+	depsAsync := async || task.DepsBehaviour == models.DependencyBehaviourAsync
+	if depsAsync {
 		runFunc = r.runDepsAsync
 	}
-	if err := runFunc(ctx, padding, task.DependsOn...); err != nil {
+	if err := runFunc(ctx, padding, depsAsync, task.DependsOn...); err != nil {
 		return err
 	}
 	if len(task.Script) == 0 {
@@ -139,26 +140,27 @@ func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []strin
 	env = append(env, inp...)
 
 	var prefix string
-	if !task.Interactive {
+	if async {
 		prefix = fmt.Sprintf("%*s", padding, strings.TrimSpace(task.Name))
 	}
+
 	return r.scriptRunner.Execute(ctx, task.Script, env, inputs, r.getExecutionPath(task), prefix)
 }
 
-func (r *Runner) runDepsSync(ctx context.Context, padding int, dependencies ...string) error {
+func (r *Runner) runDepsSync(ctx context.Context, padding int, async bool, dependencies ...string) error {
 	for _, t := range dependencies {
 		ta, err := shlex.Split(t)
 		if err != nil {
 			return err
 		}
-		if err := r.runWithPadding(ctx, ta[0], ta[1:], padding); err != nil {
+		if err := r.runWithPadding(ctx, ta[0], ta[1:], padding, async); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *Runner) runDepsAsync(ctx context.Context, padding int, dependencies ...string) error {
+func (r *Runner) runDepsAsync(ctx context.Context, padding int, _ bool, dependencies ...string) error {
 	var wg sync.WaitGroup
 	errs := make([]error, len(dependencies))
 	for i, t := range dependencies {
@@ -171,7 +173,7 @@ func (r *Runner) runDepsAsync(ctx context.Context, padding int, dependencies ...
 				return
 			}
 
-			errs[index] = r.runWithPadding(ctx, ta[0], ta[1:], padding)
+			errs[index] = r.runWithPadding(ctx, ta[0], ta[1:], padding, true)
 		}(i, t)
 	}
 

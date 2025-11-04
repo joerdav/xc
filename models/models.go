@@ -46,8 +46,9 @@ func (t Task) Display(w io.Writer) {
 		fmt.Fprintln(w)
 	}
 	fmt.Fprintln(w, "Run:", t.RequiredBehaviour)
+	// TODO remove after deprecation period
 	if t.Interactive {
-		fmt.Fprintln(w, "Interactive: true")
+		fmt.Fprintln(w, "<!--Interactive: true (attribute deprecated)-->")
 	}
 	fmt.Fprintln(w)
 	if len(t.Script) > 0 {
