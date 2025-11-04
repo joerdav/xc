@@ -41,6 +41,8 @@ Installation instructions are described at <https://xcfile.dev/getting-started/#
 	- [VSCode](https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode) (list and run `xc` tasks)
 	  ![vscode demo](https://user-images.githubusercontent.com/19927761/214538057-963f9a47-ff95-486c-8856-b90bd358be3f.png)
 	- [Vim](https://xcfile.dev/ide-support/#vim) (recommended config for listing and running `xc` tasks)
+    - [Emacs](https://codeberg.org/ryanprior/xc.el)
+      ![emacs demo](https://codeberg.org/ryanprior/xc.el/media/branch/main/screenshot-v1.png)
 - See also: [`org-mode` specific features](https://xcfile.dev/org-mode-features).
 
 # Example
