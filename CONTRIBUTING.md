@@ -23,7 +23,7 @@ We expect contributors to keep documentation (in `docs/`) up to date, reflecting
 We aim to support popular, stable, lightweight plain-text markup languages. Our priorities for language support:
 - New languages should work as similar to the Markdown implementation as possible
 - Users should be able to read and maintain tasks without writing excessive markup or understanding implicit behavior
-- The implementer wants to actually maintain `xc` tasks using the new language (we won't add languages just to have them)
+- New languages should be ubiquitous enough that it makes sense for the project to take on the maintenance burden to support them going forward. See for example the [list of markup languages supported by GitHub](https://github.com/github/markup/blob/master/README.md#markups) to get a rough idea.
 
 Steps to add support:
 - Create a GitHub issue to propose the addition and discuss
