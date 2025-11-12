@@ -34,6 +34,9 @@ tasks) as a source of useful commands for the project.
 
 Installation instructions are described at <https://xcfile.dev/getting-started/#installation>.
 
+# Contributing
+Find our guidelines & HOWTOs at [CONTRIBUTING.md](https://github.com/joerdav/xc/blob/main/CONTRIBUTING.md).
+
 # Features
 
 - Tasks defined in Markdown or org-mode files as code blocks.
