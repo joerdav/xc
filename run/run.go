@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
@@ -16,7 +17,7 @@ import (
 const maxDeps = 50
 
 type ScriptRunner interface {
-	Execute(ctx context.Context, text string, env, args []string, dir, logPrefix string) error
+	Execute(ctx context.Context, text string, env, args []string, dir, logPrefix string, trace bool) error
 }
 
 // Runner is responsible for running Tasks.
@@ -26,6 +27,7 @@ type Runner struct {
 	dir          string
 	alreadyRan   map[string]bool
 	alreadyRanMu sync.Mutex
+	trace        bool
 }
 
 // NewRunner takes Tasks and returns a Runner.
@@ -37,11 +39,15 @@ type Runner struct {
 // NewRunner will return an error in the case that Dependent tasks are cyclical,
 // invalid or at a larger depth than 50.
 func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
+	trace := !slices.Contains(
+		[]string{"false", "no", "0"},
+		strings.ToLower(os.Getenv("XC_TRACE")))
 	runner = Runner{
 		scriptRunner: newInterpreter(),
 		tasks:        ts,
 		dir:          dir,
 		alreadyRan:   map[string]bool{},
+		trace:        trace,
 	}
 	for _, t := range ts {
 		err = runner.ValidateDependencies(t.Name, []string{})
@@ -54,8 +60,8 @@ func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
 
 const scriptHeader = ` #!/bin/bash
       set -e
-      set -o xtrace
 `
+const traceHeader = "      set -o xtrace\n"
 
 func taskUsage(task models.Task) string {
 	argUsage := fmt.Sprintf("xc %s", task.Name)
@@ -144,7 +150,7 @@ func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []strin
 		prefix = fmt.Sprintf("%*s", padding, strings.TrimSpace(task.Name))
 	}
 
-	return r.scriptRunner.Execute(ctx, task.Script, env, inputs, r.getExecutionPath(task), prefix)
+	return r.scriptRunner.Execute(ctx, task.Script, env, inputs, r.getExecutionPath(task), prefix, r.trace)
 }
 
 func (r *Runner) runDepsSync(ctx context.Context, padding int, async bool, dependencies ...string) error {

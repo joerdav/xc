@@ -16,7 +16,7 @@ type mockScriptRunner struct {
 }
 
 func (r *mockScriptRunner) Execute(
-	ctx context.Context, text string, env, args []string, dir, logPrefix string,
+	ctx context.Context, text string, env, args []string, dir, logPrefix string, trace bool,
 ) error {
 	r.runnerMutex.Lock()
 	defer r.runnerMutex.Unlock()

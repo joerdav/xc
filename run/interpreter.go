@@ -44,11 +44,11 @@ func newInterpreter() interpreter {
 }
 
 func (i interpreter) Execute(
-	ctx context.Context, script string, env, args []string, dir, logPrefix string,
+	ctx context.Context, script string, env, args []string, dir, logPrefix string, trace bool,
 ) error {
 	interpreterCmd, interpreterArgs, text, ok := parseShebang(script)
 	if !ok {
-		return i.executeShell(ctx, script, env, args, dir, logPrefix)
+		return i.executeShell(ctx, script, env, args, dir, logPrefix, trace)
 	}
 	return i.executeShebang(ctx, interpreterCmd, interpreterArgs, text, env, args, dir, logPrefix)
 }
@@ -87,7 +87,7 @@ func (i interpreter) executeShebang(
 }
 
 func (i interpreter) executeShell(
-	ctx context.Context, text string, env, args []string, dir, logPrefix string,
+	ctx context.Context, text string, env, args []string, dir, logPrefix string, trace bool,
 ) error {
 	if shellShebangRe.MatchString(text) {
 		text = strings.Join(strings.Split(text, "\n")[1:], "\n")
@@ -95,6 +95,11 @@ func (i interpreter) executeShell(
 	var script bytes.Buffer
 	if _, err := script.Write([]byte(scriptHeader)); err != nil {
 		return fmt.Errorf("failed to write script header: %w", err)
+	}
+	if trace {
+		if _, err := script.Write([]byte(traceHeader)); err != nil {
+			return fmt.Errorf("failed to write trace header: %w", err)
+		}
 	}
 	if _, err := script.Write([]byte(text)); err != nil {
 		return fmt.Errorf("failed to write script: %w", err)
