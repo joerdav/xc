@@ -10,5 +10,8 @@ pkgs.buildGoModule rec {
     rev = version;
     sha256 = "";
   };
+  env = {
+    CGO_ENABLED = "0";
+  };
   vendorHash = "";
 }
