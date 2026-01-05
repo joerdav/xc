@@ -2,13 +2,13 @@
 
 pkgs.buildGoModule rec {
   pname = "xc";
-  version = "v0.8.6";
+  version = "v0.9.0";
   subPackages = [ "cmd/xc" ];
   src = pkgs.fetchFromGitHub {
     owner = "joerdav";
     repo = "xc";
     rev = version;
-    sha256 = "Q17ldwHp1Wp/u0BkUZiA1pRJaFpo/5iDW011k9qkIEA=";
+    sha256 = "hOwRPTH7vE8/U8UuT1z0yyRZvCGvKSX/Ncs4lFwVGVU=";
   };
   env = {
     CGO_ENABLED = "0";
