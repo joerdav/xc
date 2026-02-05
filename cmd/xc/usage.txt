@@ -6,6 +6,8 @@ xc <task> [inputs...]
         Specify a markdown file that contains tasks (default: "README.md").
   -d -display
         Print the markdown code of a task rather than running it.
+  -output <string>
+        Specify the output type to display. (default: "markdown", consider: "json")
   -H -heading <string>
         Specify the heading for xc tasks (default: "Tasks").
 
