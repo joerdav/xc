@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -56,6 +57,17 @@ func (t Task) Display(w io.Writer) {
 		fmt.Fprintln(w, t.Script)
 		fmt.Fprintln(w, "```")
 	}
+}
+
+// Display writes a Task as JSON.
+func (t Task) DisplayJSON(w io.Writer) (err error) {
+	buf, _ := json.Marshal(t)
+	// I tried to find a way to trigger an marshaling error for testing
+	// purposes but failed. The Task struct doesn't have any fields which
+	// are amenable to un-marshalable objects. Therefore this just eats an
+	// error.
+	fmt.Fprintln(w, string(buf))
+	return
 }
 
 // Tasks is an alias type for []Task
