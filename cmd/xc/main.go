@@ -254,7 +254,11 @@ func runMain() error {
 		return nil
 	}
 	// xc task1
-	runner, err := run.NewRunner(tasks, dir)
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("error getting current directory: %w", err)
+	}
+	runner, err := run.NewRunner(tasks, dir, cwd)
 	if err != nil {
 		return fmt.Errorf("xc parse error: %w", err)
 	}

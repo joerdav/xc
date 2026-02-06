@@ -182,7 +182,7 @@ func TestRunAsync(t *testing.T) {
 			for i := range tt.tasks {
 				tt.tasks[i].DepsBehaviour = models.DependencyBehaviourAsync
 			}
-			runner, err := NewRunner(tt.tasks, "")
+			runner, err := NewRunner(tt.tasks, "", "")
 			if (err != nil) != tt.expectedParseError {
 				t.Fatalf("expected error %v, got %v", tt.expectedParseError, err)
 			}
@@ -206,7 +206,7 @@ func TestRun(t *testing.T) {
 	for _, tt := range testCases() {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			runner, err := NewRunner(tt.tasks, "")
+			runner, err := NewRunner(tt.tasks, "", "")
 			if (err != nil) != tt.expectedParseError {
 				t.Fatalf("expected error %v, got %v", tt.expectedParseError, err)
 			}
@@ -234,7 +234,7 @@ func TestRunWithInputs(t *testing.T) {
 				Script: "somecmd",
 				Inputs: []string{"FOO"},
 			},
-		}, "")
+		}, "", "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -250,7 +250,7 @@ func TestRunWithInputs(t *testing.T) {
 				Script: "somecmd",
 				Inputs: []string{"FOO"},
 			},
-		}, "")
+		}, "", "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -271,7 +271,7 @@ func TestRunWithInputs(t *testing.T) {
 				Script: "somecmd",
 				Inputs: []string{"FOO"},
 			},
-		}, "")
+		}, "", "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -317,7 +317,7 @@ func TestOptionalInputPrecedence(t *testing.T) {
 		return val, found
 	}
 	t.Run("env default is used when no cli arg or os env is set", func(t *testing.T) {
-		runner, err := NewRunner(makeTask(), "")
+		runner, err := NewRunner(makeTask(), "", "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -340,7 +340,7 @@ func TestOptionalInputPrecedence(t *testing.T) {
 	})
 
 	t.Run("cli arg overrides env default", func(t *testing.T) {
-		runner, err := NewRunner(makeTask(), "")
+		runner, err := NewRunner(makeTask(), "", "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -364,7 +364,7 @@ func TestOptionalInputPrecedence(t *testing.T) {
 
 	t.Run("os env overrides env default when input is declared", func(t *testing.T) {
 		t.Setenv("MY_VAR", "from_shell")
-		runner, err := NewRunner(makeTask(), "")
+		runner, err := NewRunner(makeTask(), "", "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -388,7 +388,7 @@ func TestOptionalInputPrecedence(t *testing.T) {
 
 	t.Run("cli arg overrides os env", func(t *testing.T) {
 		t.Setenv("MY_VAR", "from_shell")
-		runner, err := NewRunner(makeTask(), "")
+		runner, err := NewRunner(makeTask(), "", "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -420,7 +420,7 @@ func TestOptionalInputPrecedence(t *testing.T) {
 				Script: "somecmd",
 				Env:    []string{"MY_VAR=forced_value"},
 			},
-		}, "")
+		}, "", "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -441,4 +441,55 @@ func TestOptionalInputPrecedence(t *testing.T) {
 			t.Fatalf("expected MY_VAR=forced_value, got MY_VAR=%s", got)
 		}
 	})
+}
+
+func TestGetExecutionPath(t *testing.T) {
+	tests := []struct {
+		name     string
+		dir      string
+		cwd      string
+		taskDir  string
+		expected string
+	}{
+		{
+			name:     "empty dir uses runner dir",
+			dir:      "/repo",
+			cwd:      "/repo/subdir",
+			taskDir:  "",
+			expected: "/repo",
+		},
+		{
+			name:     "relative dir is joined with runner dir",
+			dir:      "/repo",
+			cwd:      "/repo/subdir",
+			taskDir:  "./src",
+			expected: "/repo/src",
+		},
+		{
+			name:     "absolute dir is used as-is",
+			dir:      "/repo",
+			cwd:      "/repo/subdir",
+			taskDir:  "/tmp/build",
+			expected: "/tmp/build",
+		},
+		{
+			name:     "$PWD uses caller working directory",
+			dir:      "/repo",
+			cwd:      "/repo/subdir",
+			taskDir:  "$PWD",
+			expected: "/repo/subdir",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Runner{
+				dir: tt.dir,
+				cwd: tt.cwd,
+			}
+			got := r.getExecutionPath(models.Task{Dir: tt.taskDir})
+			if got != tt.expected {
+				t.Fatalf("expected %q, got %q", tt.expected, got)
+			}
+		})
+	}
 }

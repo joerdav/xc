@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -129,7 +130,11 @@ func interactivePicker(ctx context.Context, tasks []models.Task, dir string) err
 	if task == nil {
 		return nil
 	}
-	runner, err := run.NewRunner(tasks, dir)
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("error getting current directory: %w", err)
+	}
+	runner, err := run.NewRunner(tasks, dir, cwd)
 	if err != nil {
 		return fmt.Errorf("xc parse error: %w", err)
 	}
