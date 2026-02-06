@@ -1,0 +1,1 @@
+{"Name":"generate-all","Description":null,"Script":"","Dir":"","Env":null,"DependsOn":["generate-templ","generate-translations"],"Inputs":null,"ParsingError":"","RequiredBehaviour":0,"DepsBehaviour":1,"Interactive":false}
