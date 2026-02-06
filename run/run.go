@@ -127,7 +127,15 @@ func (r *Runner) runWithPadding(ctx context.Context, name string, inputs []strin
 	r.alreadyRan[task.Name] = true
 	r.alreadyRanMu.Unlock()
 	env := os.Environ()
-	env = append(env, task.Env...)
+	for _, e := range task.Env {
+		key, _, _ := strings.Cut(e, "=")
+		// If this env key is also an Input, treat it as a default:
+		// only apply it when the OS environment doesn't already provide a value.
+		if environmentContainsInput(task.Inputs, key) && environmentContainsInput(env, key) {
+			continue
+		}
+		env = append(env, e)
+	}
 	inp, err := getInputs(task, inputs, env)
 	if err != nil {
 		return err
