@@ -84,3 +84,37 @@ func TestLoad_WithLocal_OverridesBase(t *testing.T) {
 		os.Unsetenv("ONLY_LOCAL")
 	})
 }
+
+func TestLoad_WorldReadable_LogsWarningAndSkips(t *testing.T) {
+	// This test only runs on Unix systems
+	if os.Getenv("GOOS") == "windows" {
+		t.Skip("skipping permission test on Windows")
+	}
+	
+	// Arrange
+	tmpDir := t.TempDir()
+	envFile := filepath.Join(tmpDir, ".env")
+	
+	// Create world-readable .env file
+	if err := os.WriteFile(envFile, []byte("SECRET=exposed"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	
+	// Act
+	err := Load(tmpDir)
+	
+	// Assert
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	
+	// Verify SECRET was NOT loaded (file was skipped)
+	if got := os.Getenv("SECRET"); got != "" {
+		t.Errorf("SECRET should not be loaded from world-readable file, got %q", got)
+	}
+	
+	// Cleanup
+	t.Cleanup(func() {
+		os.Unsetenv("SECRET")
+	})
+}
