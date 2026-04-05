@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -130,5 +131,31 @@ func TestLoad_WorldReadable_LogsWarningAndSkips(t *testing.T) {
 	// Verify SECRET was NOT loaded (file was skipped)
 	if got := os.Getenv("SECRET"); got != "" {
 		t.Errorf("SECRET should not be loaded from world-readable file, got %q", got)
+	}
+}
+
+func TestLoadFile_MalformedFile_ReturnsErrorWithContext(t *testing.T) {
+	preserveEnv(t, "TEST_VAR")
+	
+	tmpDir := t.TempDir()
+	malformedFile := filepath.Join(tmpDir, ".env.bad")
+	// Create malformed env file (unclosed quote)
+	if err := os.WriteFile(malformedFile, []byte(`KEY="unclosed`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	
+	err := LoadFile(malformedFile)
+	
+	if err == nil {
+		t.Fatal("expected error for malformed file, got nil")
+	}
+	// Check that error includes filename
+	if !filepath.IsAbs(malformedFile) {
+		t.Fatalf("test setup error: expected absolute path, got %q", malformedFile)
+	}
+	// Error should mention the file
+	errStr := err.Error()
+	if !strings.Contains(errStr, malformedFile) && !strings.Contains(errStr, filepath.Base(malformedFile)) {
+		t.Errorf("error %q should mention file %q", errStr, malformedFile)
 	}
 }

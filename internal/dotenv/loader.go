@@ -2,6 +2,7 @@ package dotenv
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -43,7 +44,7 @@ func loadFile(path string, override bool) error {
 		return nil // File not found is OK
 	}
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to check %s: %w", path, err)
 	}
 	
 	// Security check: Skip world-readable or group-readable files (Unix only)
@@ -58,7 +59,14 @@ func loadFile(path string, override bool) error {
 	
 	// Load the file
 	if override {
-		return godotenv.Overload(path)
+		if err := godotenv.Overload(path); err != nil {
+			return fmt.Errorf("failed to load %s: %w", path, err)
+		}
+		return nil
 	}
-	return godotenv.Load(path)
+	
+	if err := godotenv.Load(path); err != nil {
+		return fmt.Errorf("failed to load %s: %w", path, err)
+	}
+	return nil
 }
