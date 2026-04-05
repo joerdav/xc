@@ -2,3 +2,8 @@ coverage.out
 dist/
 doc/public/
 result
+
+# Environment files
+.env
+.env.local
+.env.*.local

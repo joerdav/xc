@@ -48,6 +48,97 @@ Find our guidelines & HOWTOs at [CONTRIBUTING.md](https://github.com/joerdav/xc/
       ![emacs demo](https://codeberg.org/ryanprior/xc.el/media/branch/main/screenshot-v1.png)
 - See also: [`org-mode` specific features](https://xcfile.dev/org-mode-features).
 
+
+# Environment Variables
+
+xc supports loading environment variables from `.env` files, making it easy to manage different configurations without cluttering your task definitions.
+
+## Basic Usage
+
+Create a `.env` file in your project root:
+
+```
+API_KEY=your_api_key_here
+DATABASE_URL=postgres://localhost/mydb
+ENV=development
+```
+
+xc will automatically load these variables before running tasks. They will be available to all tasks in your documentation file.
+
+## Load Order
+
+Environment variables are loaded in the following order (later values override earlier ones):
+
+1. System environment variables
+2. `.env` file (if present)
+3. `.env.local` file (if present)
+4. Task-level `Env:` statements
+5. Command-line input values
+6. Inline `export` statements in task scripts
+
+This allows you to:
+- Set defaults in `.env`
+- Override with local values in `.env.local` (great for secrets, add to `.gitignore`)
+- Still use task-level env for task-specific configuration
+
+## CLI Options
+
+```bash
+# Skip loading .env files
+xc --no-env <task>
+
+# Load a custom env file
+xc --env-file .env.prod <task>
+```
+
+## Security
+
+For security, xc will skip `.env` files with world-readable or group-readable permissions and log a warning. Ensure your `.env` files have restricted permissions:
+
+```bash
+chmod 600 .env
+chmod 600 .env.local
+```
+
+## Example
+
+**Before** (cluttered task definition):
+```markdown
+## deploy
+
+Deploy the application.
+
+Env: DATABASE_URL=postgres://prod/db, API_KEY=secret123, ENV=production
+
+\```
+./deploy.sh
+\```
+```
+
+**After** (with .env):
+```markdown
+## deploy
+
+Deploy the application.
+
+\```
+./deploy.sh
+\```
+```
+
+With `.env` file:
+```
+DATABASE_URL=postgres://prod/db
+API_KEY=secret123
+ENV=production
+```
+
+And `.env.local` for local overrides (gitignored):
+```
+DATABASE_URL=postgres://localhost/db
+ENV=development
+```
+
 # Example
 
 Take the `tag` task in the [README.md](https://github.com/joerdav/xc#tag) of the `xc` repository:
