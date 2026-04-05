@@ -134,6 +134,25 @@ func TestLoad_WorldReadable_LogsWarningAndSkips(t *testing.T) {
 	}
 }
 
+func TestLoadFile_CustomPath_LoadsVariables(t *testing.T) {
+	preserveEnv(t, "CUSTOM_VAR")
+	
+	tmpDir := t.TempDir()
+	customFile := filepath.Join(tmpDir, ".env.custom")
+	if err := os.WriteFile(customFile, []byte("CUSTOM_VAR=custom_value"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	
+	err := LoadFile(customFile)
+	
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got := os.Getenv("CUSTOM_VAR"); got != "custom_value" {
+		t.Errorf("CUSTOM_VAR = %q, want %q", got, "custom_value")
+	}
+}
+
 func TestLoadFile_MalformedFile_ReturnsErrorWithContext(t *testing.T) {
 	preserveEnv(t, "TEST_VAR")
 	
