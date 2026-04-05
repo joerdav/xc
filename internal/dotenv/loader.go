@@ -30,6 +30,11 @@ func Load(dir string) error {
 	return nil
 }
 
+// LoadFile loads a single environment file (for custom --env-file flag).
+func LoadFile(path string) error {
+	return loadFile(path, false)
+}
+
 // loadFile loads a single env file with security checks.
 // If override is true, uses Overload instead of Load.
 func loadFile(path string, override bool) error {
