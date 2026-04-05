@@ -9,15 +9,25 @@ import (
 )
 
 // Load loads .env files from the specified directory.
-// If .env does not exist, no error is returned.
+// Loads .env first, then .env.local (which overrides .env values).
+// If neither file exists, no error is returned.
 func Load(dir string) error {
+	// Load .env
 	envPath := filepath.Join(dir, ".env")
-	
-	// Check if file exists
-	if _, err := os.Stat(envPath); errors.Is(err, os.ErrNotExist) {
-		return nil // File not found is OK
+	if _, err := os.Stat(envPath); !errors.Is(err, os.ErrNotExist) {
+		if err := godotenv.Load(envPath); err != nil {
+			return err
+		}
 	}
 	
-	// Load the .env file
-	return godotenv.Load(envPath)
+	// Load .env.local (overrides .env)
+	localPath := filepath.Join(dir, ".env.local")
+	if _, err := os.Stat(localPath); !errors.Is(err, os.ErrNotExist) {
+		// Use Overload to override existing vars from .env
+		if err := godotenv.Overload(localPath); err != nil {
+			return err
+		}
+	}
+	
+	return nil
 }
