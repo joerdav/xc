@@ -222,6 +222,22 @@ func runMain() error {
 	
 	cfg := flags()
 	
+	// Early exits (don't load .env for these)
+	if cfg.uncomplete {
+		return install.Uninstall("xc")
+	}
+	if cfg.complete {
+		return install.Install("xc")
+	}
+	if cfg.version {
+		fmt.Printf("xc version: %s\n", getVersion())
+		return nil
+	}
+	if cfg.help {
+		flag.Usage()
+		return nil
+	}
+	
 	// Load .env files before parsing tasks (unless --no-env is set)
 	if !cfg.noEnv {
 		cwd, err := os.Getwd()
@@ -241,26 +257,11 @@ func runMain() error {
 			}
 		}
 	}
-	if cfg.uncomplete {
-		return install.Uninstall("xc")
-	}
-	if cfg.complete {
-		return install.Install("xc")
-	}
+	
 	tasks, dir, err := parse(cfg.filename, cfg.heading, cfg.filetype)
 	// TODO remove the Interactive attribute & this deprecation warning
 	warnInteractive(tasks)
 	completion(tasks).Complete("xc")
-	// xc -version
-	if cfg.version {
-		fmt.Printf("xc version: %s\n", getVersion())
-		return nil
-	}
-	// xc -h / xc -help
-	if cfg.help {
-		flag.Usage()
-		return nil
-	}
 	if err != nil {
 		return err
 	}
