@@ -3,6 +3,7 @@ package dotenv
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -87,7 +88,7 @@ func TestLoad_WithLocal_OverridesBase(t *testing.T) {
 
 func TestLoad_WorldReadable_LogsWarningAndSkips(t *testing.T) {
 	// This test only runs on Unix systems
-	if os.Getenv("GOOS") == "windows" {
+	if runtime.GOOS == "windows" {
 		t.Skip("skipping permission test on Windows")
 	}
 	
