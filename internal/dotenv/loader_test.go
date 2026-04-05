@@ -7,6 +7,31 @@ import (
 	"testing"
 )
 
+// preserveEnv saves the current values of the given environment variables
+// and restores them after the test completes.
+func preserveEnv(t *testing.T, keys ...string) {
+	t.Helper()
+	saved := make(map[string]string)
+	hasValue := make(map[string]bool)
+	
+	for _, key := range keys {
+		if val, ok := os.LookupEnv(key); ok {
+			saved[key] = val
+			hasValue[key] = true
+		}
+	}
+	
+	t.Cleanup(func() {
+		for _, key := range keys {
+			if hasValue[key] {
+				os.Setenv(key, saved[key])
+			} else {
+				os.Unsetenv(key)
+			}
+		}
+	})
+}
+
 func TestLoad_FileNotFound_NoError(t *testing.T) {
 	tmpDir := t.TempDir()
 	err := Load(tmpDir)
@@ -16,6 +41,8 @@ func TestLoad_FileNotFound_NoError(t *testing.T) {
 }
 
 func TestLoad_ValidEnv_LoadsVariables(t *testing.T) {
+	preserveEnv(t, "TEST_KEY", "ANOTHER")
+	
 	// Arrange
 	tmpDir := t.TempDir()
 	envFile := filepath.Join(tmpDir, ".env")
@@ -37,15 +64,11 @@ func TestLoad_ValidEnv_LoadsVariables(t *testing.T) {
 	if got := os.Getenv("ANOTHER"); got != "value2" {
 		t.Errorf("ANOTHER = %q, want %q", got, "value2")
 	}
-	
-	// Cleanup
-	t.Cleanup(func() {
-		os.Unsetenv("TEST_KEY")
-		os.Unsetenv("ANOTHER")
-	})
 }
 
 func TestLoad_WithLocal_OverridesBase(t *testing.T) {
+	preserveEnv(t, "KEY", "ONLY_BASE", "ONLY_LOCAL")
+	
 	// Arrange
 	tmpDir := t.TempDir()
 	
@@ -77,13 +100,6 @@ func TestLoad_WithLocal_OverridesBase(t *testing.T) {
 	if got := os.Getenv("ONLY_LOCAL"); got != "local_value" {
 		t.Errorf("ONLY_LOCAL = %q, want %q", got, "local_value")
 	}
-	
-	// Cleanup
-	t.Cleanup(func() {
-		os.Unsetenv("KEY")
-		os.Unsetenv("ONLY_BASE")
-		os.Unsetenv("ONLY_LOCAL")
-	})
 }
 
 func TestLoad_WorldReadable_LogsWarningAndSkips(t *testing.T) {
@@ -91,6 +107,8 @@ func TestLoad_WorldReadable_LogsWarningAndSkips(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("skipping permission test on Windows")
 	}
+	
+	preserveEnv(t, "SECRET")
 	
 	// Arrange
 	tmpDir := t.TempDir()
@@ -113,9 +131,4 @@ func TestLoad_WorldReadable_LogsWarningAndSkips(t *testing.T) {
 	if got := os.Getenv("SECRET"); got != "" {
 		t.Errorf("SECRET should not be loaded from world-readable file, got %q", got)
 	}
-	
-	// Cleanup
-	t.Cleanup(func() {
-		os.Unsetenv("SECRET")
-	})
 }
