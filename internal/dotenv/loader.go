@@ -1,11 +1,23 @@
 package dotenv
 
 import (
-	_ "github.com/joho/godotenv" // Will be used in implementation
+	"errors"
+	"os"
+	"path/filepath"
+
+	"github.com/joho/godotenv"
 )
 
 // Load loads .env files from the specified directory.
-// This is a placeholder that will be implemented via TDD.
+// If .env does not exist, no error is returned.
 func Load(dir string) error {
-	return nil
+	envPath := filepath.Join(dir, ".env")
+	
+	// Check if file exists
+	if _, err := os.Stat(envPath); errors.Is(err, os.ErrNotExist) {
+		return nil // File not found is OK
+	}
+	
+	// Load the .env file
+	return godotenv.Load(envPath)
 }
