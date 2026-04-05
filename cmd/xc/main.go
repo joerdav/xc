@@ -14,6 +14,7 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"github.com/joerdav/xc/internal/dotenv"
 	"github.com/joerdav/xc/models"
 	"github.com/joerdav/xc/parser/parsemd"
 	"github.com/joerdav/xc/parser/parseorg"
@@ -215,6 +216,17 @@ func runMain() error {
 		<-c
 		cancel()
 	}()
+	
+	// Load .env files before parsing tasks
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Printf("warning: failed to get current directory: %v", err)
+	} else {
+		if err := dotenv.Load(cwd); err != nil {
+			log.Printf("warning: failed to load .env: %v", err)
+		}
+	}
+	
 	cfg := flags()
 	if cfg.uncomplete {
 		return install.Uninstall("xc")
