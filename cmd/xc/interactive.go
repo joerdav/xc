@@ -28,7 +28,8 @@ const (
 	paginationPadding   = 4
 	helpPadding         = 4
 	listItemWidth       = 20
-	listItemHeight      = 6
+	listItemHeight      = 14
+	listHeightMargin    = 2
 )
 
 type taskItem struct {
@@ -76,6 +77,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
+		m.list.SetHeight(msg.Height - listHeightMargin)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -111,7 +113,7 @@ func interactivePicker(ctx context.Context, tasks []models.Task, dir string) err
 	for _, t := range tasks {
 		items = append(items, taskItem{t})
 	}
-	l := list.New(items, itemDelegate{}, listItemWidth, listItemHeight+len(tasks))
+	l := list.New(items, itemDelegate{}, listItemWidth, listItemHeight)
 	l.Title = "xc: Choose a task"
 	l.SetShowStatusBar(false)
 	l.DisableQuitKeybindings()
