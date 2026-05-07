@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -15,14 +15,15 @@
       {
         defaultPackage = xc;
         packages = {
+          default = xc;
           xc = xc;
         };
         devShells = {
           default = pkgs.mkShell {
-            packages = [ xc ];
-          };
-          xc = pkgs.mkShell {
-            packages = [ xc ];
+            packages = [
+              pkgs.go_1_25
+              pkgs.golangci-lint
+            ];
           };
         };
       }
