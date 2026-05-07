@@ -88,8 +88,8 @@ echo "Hello, world2!"
 	if len(result) != len(expected) {
 		t.Fatalf("want %d tasks got %d", len(expected), len(result))
 	}
-	for i := range result {
-		assertTask(t, expected[i], result[i])
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
 	}
 }
 
@@ -123,8 +123,8 @@ func TestParseFileToEOF(t *testing.T) {
 	if len(result) != len(expected) {
 		t.Fatalf("want %d tasks got %d", len(expected), len(result))
 	}
-	for i := range result {
-		assertTask(t, expected[i], result[i])
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
 	}
 }
 
@@ -240,8 +240,8 @@ func TestCustomHeadingByFlag(t *testing.T) {
 	if len(result) != len(expected) {
 		t.Fatalf("want %d tasks got %d", len(expected), len(result))
 	}
-	for i := range result {
-		assertTask(t, expected[i], result[i])
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
 	}
 }
 
@@ -264,8 +264,8 @@ func TestCustomHeadingByNextLineMarker(t *testing.T) {
 	if len(result) != len(expected) {
 		t.Fatalf("want %d tasks got %d", len(expected), len(result))
 	}
-	for i := range result {
-		assertTask(t, expected[i], result[i])
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
 	}
 }
 
