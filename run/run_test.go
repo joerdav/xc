@@ -177,7 +177,6 @@ func testCases() []testCase {
 
 func TestRunAsync(t *testing.T) {
 	for _, tt := range testCases() {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			for i := range tt.tasks {
 				tt.tasks[i].DepsBehaviour = models.DependencyBehaviourAsync
@@ -204,7 +203,6 @@ func TestRunAsync(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	for _, tt := range testCases() {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			runner, err := NewRunner(tt.tasks, "")
 			if (err != nil) != tt.expectedParseError {

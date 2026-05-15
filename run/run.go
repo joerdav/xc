@@ -64,16 +64,18 @@ const scriptHeader = ` #!/bin/bash
 const traceHeader = "      set -o xtrace\n"
 
 func taskUsage(task models.Task) string {
-	argUsage := fmt.Sprintf("xc %s", task.Name)
+	var sb strings.Builder
+	sb.WriteString("Task has required inputs:\n\t")
+	fmt.Fprint(&sb, "xc ", task.Name)
 	for _, n := range task.Inputs {
-		argUsage += fmt.Sprintf(" <%s>", strings.ToLower(n))
+		fmt.Fprintf(&sb, " <%s>", strings.ToLower(n))
 	}
-	envUsage := ""
+	sb.WriteString("\n\t")
 	for _, n := range task.Inputs {
-		envUsage += fmt.Sprintf("%s=<%s> ", n, strings.ToLower(n))
+		fmt.Fprintf(&sb, "%s=<%s> ", n, strings.ToLower(n))
 	}
-	envUsage += fmt.Sprintf("xc %s", task.Name)
-	return fmt.Sprintf("Task has required inputs:\n\t%s\n\t%s", argUsage, envUsage)
+	fmt.Fprintf(&sb, "xc %s", task.Name)
+	return sb.String()
 }
 
 func environmentContainsInput(env []string, input string) bool {
@@ -178,17 +180,14 @@ func (r *Runner) runDepsAsync(ctx context.Context, padding int, _ bool, dependen
 	var wg sync.WaitGroup
 	errs := make([]error, len(dependencies))
 	for i, t := range dependencies {
-		wg.Add(1)
-		go func(index int, task string) {
-			defer wg.Done()
-			ta, err := shlex.Split(task)
+		wg.Go(func() {
+			ta, err := shlex.Split(t)
 			if err != nil {
-				errs[index] = err
+				errs[i] = err
 				return
 			}
-
-			errs[index] = r.runWithPadding(ctx, ta[0], ta[1:], padding, true)
-		}(i, t)
+			errs[i] = r.runWithPadding(ctx, ta[0], ta[1:], padding, true)
+		})
 	}
 
 	wg.Wait()
@@ -246,10 +245,8 @@ func (r *Runner) ValidateDependencies(task string, prevTasks []string) error {
 		if !ok {
 			return fmt.Errorf("task %s not found", t)
 		}
-		for _, pt := range prevTasks {
-			if pt == st.Name {
-				return fmt.Errorf("task %s contains a circular dependency", t)
-			}
+		if slices.Contains(prevTasks, st.Name) {
+			return fmt.Errorf("task %s contains a circular dependency", t)
 		}
 		err := r.ValidateDependencies(st.Name, append([]string{st.Name}, prevTasks...))
 		if err != nil {

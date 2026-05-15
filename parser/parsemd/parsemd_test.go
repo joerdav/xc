@@ -88,8 +88,8 @@ echo "Hello, world2!"
 	if len(result) != len(expected) {
 		t.Fatalf("want %d tasks got %d", len(expected), len(result))
 	}
-	for i := range result {
-		assertTask(t, expected[i], result[i])
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
 	}
 }
 
@@ -123,8 +123,8 @@ func TestParseFileToEOF(t *testing.T) {
 	if len(result) != len(expected) {
 		t.Fatalf("want %d tasks got %d", len(expected), len(result))
 	}
-	for i := range result {
-		assertTask(t, expected[i], result[i])
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
 	}
 }
 
@@ -240,8 +240,8 @@ func TestCustomHeadingByFlag(t *testing.T) {
 	if len(result) != len(expected) {
 		t.Fatalf("want %d tasks got %d", len(expected), len(result))
 	}
-	for i := range result {
-		assertTask(t, expected[i], result[i])
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
 	}
 }
 
@@ -264,8 +264,8 @@ func TestCustomHeadingByNextLineMarker(t *testing.T) {
 	if len(result) != len(expected) {
 		t.Fatalf("want %d tasks got %d", len(expected), len(result))
 	}
-	for i := range result {
-		assertTask(t, expected[i], result[i])
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
 	}
 }
 
@@ -433,7 +433,6 @@ func TestParseAttribute(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			var p parser
 			p.scanner = bufio.NewScanner(strings.NewReader(tt.in))
@@ -473,7 +472,7 @@ func BenchmarkParse10_000Tasks(b *testing.B) {
 	buf.WriteString(`
 ## Tasks
 		`)
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		buf.WriteString(`
 ### task-` + fmt.Sprint(i) + `
 
@@ -490,7 +489,7 @@ echo "Hello, world2!"
 ` + codeBlockStarter)
 	}
 	file := buf.String()
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		p, err := NewParser(strings.NewReader(file), nil)
 		if err != nil {
 			b.Fatal(err)
