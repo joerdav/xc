@@ -67,6 +67,7 @@ func flags() config {
 
 	flag.BoolVar(&cfg.short, "short", false, "list task names in a short format")
 	flag.BoolVar(&cfg.short, "s", false, "list task names in a short format")
+	flag.BoolVar(&cfg.short, "list", false, "list task names in a short format")
 
 	flag.BoolVar(&cfg.display, "d", false, "print the plain text code of a task rather than running it")
 	flag.BoolVar(&cfg.display, "display", false, "print the plain text code of a task rather than running it")
@@ -294,6 +295,7 @@ func completion(tasks models.Tasks) *complete.Command {
 			"file":    predict.Files("*.md"),
 			"s":       predict.Nothing,
 			"short":   predict.Nothing,
+			"list":    predict.Nothing,
 			"d":       predict.Nothing,
 			"display": predict.Nothing,
 			"H":       predict.Nothing,
