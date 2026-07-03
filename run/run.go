@@ -25,6 +25,7 @@ type Runner struct {
 	scriptRunner ScriptRunner
 	tasks        models.Tasks
 	dir          string
+	cwd          string
 	alreadyRan   map[string]bool
 	alreadyRanMu sync.Mutex
 	trace        bool
@@ -38,7 +39,7 @@ type Runner struct {
 //
 // NewRunner will return an error in the case that Dependent tasks are cyclical,
 // invalid or at a larger depth than 50.
-func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
+func NewRunner(ts models.Tasks, dir, cwd string) (runner Runner, err error) {
 	trace := !slices.Contains(
 		[]string{"false", "no", "0"},
 		strings.ToLower(os.Getenv("XC_TRACE")))
@@ -46,6 +47,7 @@ func NewRunner(ts models.Tasks, dir string) (runner Runner, err error) {
 		scriptRunner: newInterpreter(),
 		tasks:        ts,
 		dir:          dir,
+		cwd:          cwd,
 		alreadyRan:   map[string]bool{},
 		trace:        trace,
 	}
@@ -216,6 +218,9 @@ func (r *Runner) getLogPadding(name string) (int, error) {
 func (r *Runner) getExecutionPath(task models.Task) string {
 	if task.Dir == "" {
 		return r.dir
+	}
+	if task.Dir == "$PWD" {
+		return r.cwd
 	}
 	if filepath.IsAbs(task.Dir) {
 		return task.Dir

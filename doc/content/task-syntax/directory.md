@@ -21,3 +21,16 @@ directory: ./src
 sh build.sh
 ```
 ````
+
+## Using the caller's working directory
+
+By default, tasks run in the directory where the README file is located, even if `xc` is invoked from a subdirectory. Setting `directory` to `$PWD` will instead run the task in the directory where `xc` was invoked.
+
+````markdown
+## Tasks
+### List
+directory: $PWD
+```
+ls
+```
+````
