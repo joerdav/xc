@@ -64,7 +64,7 @@ func taskToJSON(task Task) string {
 	r, w, _ := os.Pipe()
 	defer w.Close()
 	defer r.Close()
-	_ = task.DisplayJSON(w)
+	task.DisplayJSON(w)
 	w.Close()
 	res, _ := io.ReadAll(r)
 	return string(res)

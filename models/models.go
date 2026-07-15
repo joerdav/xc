@@ -60,14 +60,11 @@ func (t Task) Display(w io.Writer) {
 }
 
 // Display writes a Task as JSON.
-func (t Task) DisplayJSON(w io.Writer) (err error) {
+func (t Task) DisplayJSON(w io.Writer) {
 	buf, _ := json.Marshal(t)
-	// I tried to find a way to trigger an marshaling error for testing
-	// purposes but failed. The Task struct doesn't have any fields which
-	// are amenable to un-marshalable objects. Therefore this just eats an
-	// error.
+	// Error discarded because the Task struct doesn't have any fields with
+	// types at risk of being un-marshalable.
 	fmt.Fprintln(w, string(buf))
-	return
 }
 
 // Tasks is an alias type for []Task

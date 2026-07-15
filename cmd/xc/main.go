@@ -257,10 +257,7 @@ func runMain() error {
 		case "markdown":
 			ta.Display(os.Stdout)
 		case "json":
-			err = ta.DisplayJSON(os.Stdout)
-			if err != nil {
-				return fmt.Errorf("xc: %w", err)
-			}
+			ta.DisplayJSON(os.Stdout)
 		default:
 			fmt.Printf("xc: unrecognized output type: %s", cfg.outputType)
 		}
