@@ -14,6 +14,7 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"github.com/joerdav/xc/internal/dotenv"
 	"github.com/joerdav/xc/models"
 	"github.com/joerdav/xc/parser/parsemd"
 	"github.com/joerdav/xc/parser/parseorg"
@@ -30,8 +31,8 @@ var usage string
 var ErrNoTaskFile = errors.New("no xc compatible documentation file found")
 
 type config struct {
-	version, help, short, display, noTTY, complete, uncomplete bool
-	filename, heading, filetype                                string
+	version, help, short, display, noTTY, complete, uncomplete, noEnv bool
+	filename, heading, filetype, envFile                              string
 }
 
 var version = ""
@@ -76,6 +77,9 @@ func flags() config {
 	flag.BoolVar(&cfg.uncomplete, "uncomplete", false, "uninstall shell completion for xc")
 
 	flag.BoolVar(&cfg.noTTY, "no-tty", false, "disable interactive picker")
+
+	flag.BoolVar(&cfg.noEnv, "no-env", false, "skip loading .env files")
+	flag.StringVar(&cfg.envFile, "env-file", "", "load environment from specified file")
 
 	flag.Parse()
 	return cfg
@@ -216,27 +220,49 @@ func runMain() error {
 		<-c
 		cancel()
 	}()
+	
 	cfg := flags()
+	
+	// Early exits (don't load .env for these)
 	if cfg.uncomplete {
 		return install.Uninstall("xc")
 	}
 	if cfg.complete {
 		return install.Install("xc")
 	}
-	tasks, dir, err := parse(cfg.filename, cfg.heading, cfg.filetype)
-	// TODO remove the Interactive attribute & this deprecation warning
-	warnInteractive(tasks)
-	completion(tasks).Complete("xc")
-	// xc -version
 	if cfg.version {
 		fmt.Printf("xc version: %s\n", getVersion())
 		return nil
 	}
-	// xc -h / xc -help
 	if cfg.help {
 		flag.Usage()
 		return nil
 	}
+	
+	// Load .env files before parsing tasks (unless --no-env is set)
+	if !cfg.noEnv {
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Printf("warning: failed to get current directory: %v", err)
+		} else {
+			if cfg.envFile != "" {
+				// Load custom env file
+				if err := dotenv.LoadFile(filepath.Join(cwd, cfg.envFile)); err != nil {
+					log.Printf("warning: failed to load %s: %v", cfg.envFile, err)
+				}
+			} else {
+				// Load default .env and .env.local
+				if err := dotenv.Load(cwd); err != nil {
+					log.Printf("warning: failed to load .env: %v", err)
+				}
+			}
+		}
+	}
+	
+	tasks, dir, err := parse(cfg.filename, cfg.heading, cfg.filetype)
+	// TODO remove the Interactive attribute & this deprecation warning
+	warnInteractive(tasks)
+	completion(tasks).Complete("xc")
 	if err != nil {
 		return err
 	}
