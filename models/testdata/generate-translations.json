@@ -1,0 +1,1 @@
+{"Name":"generate-translations","Description":null,"Script":"go run ./i18n/generate\n","Dir":"","Env":null,"DependsOn":null,"Inputs":null,"ParsingError":"","RequiredBehaviour":0,"DepsBehaviour":0,"Interactive":false}

@@ -31,7 +31,7 @@ var ErrNoTaskFile = errors.New("no xc compatible documentation file found")
 
 type config struct {
 	version, help, short, display, noTTY, complete, uncomplete bool
-	filename, heading, filetype                                string
+	filename, heading, filetype, outputType                    string
 }
 
 var version = ""
@@ -71,6 +71,8 @@ func flags() config {
 
 	flag.BoolVar(&cfg.display, "d", false, "print the plain text code of a task rather than running it")
 	flag.BoolVar(&cfg.display, "display", false, "print the plain text code of a task rather than running it")
+
+	flag.StringVar(&cfg.outputType, "output", "markdown", "specify the output type to display")
 
 	flag.BoolVar(&cfg.complete, "complete", false, "install shell completion for xc")
 	flag.BoolVar(&cfg.uncomplete, "uncomplete", false, "uninstall shell completion for xc")
@@ -251,7 +253,14 @@ func runMain() error {
 	}
 	// xc -display task1
 	if cfg.display {
-		ta.Display(os.Stdout)
+		switch strings.ToLower(cfg.outputType) {
+		case "markdown":
+			ta.Display(os.Stdout)
+		case "json":
+			ta.DisplayJSON(os.Stdout)
+		default:
+			fmt.Printf("xc: unrecognized output type: %s", cfg.outputType)
+		}
 		return nil
 	}
 	// xc task1

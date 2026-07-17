@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -56,6 +57,14 @@ func (t Task) Display(w io.Writer) {
 		fmt.Fprintln(w, t.Script)
 		fmt.Fprintln(w, "```")
 	}
+}
+
+// Display writes a Task as JSON.
+func (t Task) DisplayJSON(w io.Writer) {
+	buf, _ := json.Marshal(t)
+	// Error discarded because the Task struct doesn't have any fields with
+	// types at risk of being un-marshalable.
+	fmt.Fprintln(w, string(buf))
 }
 
 // Tasks is an alias type for []Task

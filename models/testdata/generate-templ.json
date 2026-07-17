@@ -1,0 +1,1 @@
+{"Name":"generate-templ","Description":null,"Script":"go run -mod=mod github.com/a-h/templ/cmd/templ generate\ngo mod tidy\n","Dir":"","Env":null,"DependsOn":null,"Inputs":null,"ParsingError":"","RequiredBehaviour":0,"DepsBehaviour":0,"Interactive":false}
