@@ -16,6 +16,7 @@ var ErrNoTasksHeading = errors.New("no xc block found")
 const (
 	trimValues           = "_*` "
 	codeBlockStarter     = "```"
+	indentedCodeIndent   = "    "
 	defaultHeading       = "tasks"
 	headingMarkerComment = "<!-- xc-heading -->"
 )
@@ -244,6 +245,42 @@ func (p *parser) parseCodeBlock() error {
 	return nil
 }
 
+func isIndentedCode(line string) bool {
+	return strings.HasPrefix(line, indentedCodeIndent) || strings.HasPrefix(line, "\t")
+}
+
+func trimCodeIndent(line string) string {
+	if strings.HasPrefix(line, "\t") {
+		return line[1:]
+	}
+	return strings.TrimPrefix(line, indentedCodeIndent)
+}
+
+// parseIndentedCodeBlock handles a script written as an indented code block,
+// where each line is indented with four spaces or a tab instead of being
+// wrapped in a ``` fence. A blank line does not end the block if more indented
+// code follows it, so chunks separated by a blank line are treated as one
+// script, the same way a fenced block ignores blank lines.
+func (p *parser) parseIndentedCodeBlock() error {
+	if !isIndentedCode(p.currentLine) {
+		return nil
+	}
+	if len(p.currTask.Script) > 0 {
+		return fmt.Errorf("command block already exists for task %s", p.currTask.Name)
+	}
+	for {
+		if isIndentedCode(p.currentLine) {
+			p.currTask.Script += trimCodeIndent(p.currentLine) + "\n"
+		} else if strings.TrimSpace(p.currentLine) != "" {
+			break
+		}
+		if !p.scan() {
+			break
+		}
+	}
+	return nil
+}
+
 func (p *parser) findTaskHeading() (heading string, done bool, err error) {
 	for {
 		tok, level, text, markerFound := p.parseHeading(true)
@@ -281,6 +318,9 @@ func (p *parser) parseTaskBody() (bool, error) {
 		}
 		err = p.parseCodeBlock()
 		if err != nil {
+			return false, err
+		}
+		if err = p.parseIndentedCodeBlock(); err != nil {
 			return false, err
 		}
 		tok, level, _, _ := p.parseHeading(false)

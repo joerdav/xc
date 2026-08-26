@@ -24,6 +24,9 @@ var tillEOF string
 //go:embed testdata/notasks.md
 var e string
 
+//go:embed testdata/indented.md
+var indented string
+
 func assertTask(t *testing.T, expected, actual models.Task) {
 	t.Helper()
 	if expected.Name != actual.Name {
@@ -277,6 +280,61 @@ func TestUnTerminatedCodeBlock(t *testing.T) {
 some code
 `), nil)
 	_, err := p.parseTask()
+	if err == nil {
+		t.Fatal("expected error got nil")
+	}
+}
+
+func TestParseIndentedScripts(t *testing.T) {
+	p, err := NewParser(strings.NewReader(indented), nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := p.Parse()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	expected := models.Tasks{
+		{Name: "list", Description: []string{"Lists files"}, Script: "ls\n"},
+		{
+			Name:        "greet",
+			Description: []string{"Print a message"},
+			Script:      "echo \"Hello, world!\"\necho \"Hello, world2!\"\n",
+		},
+	}
+	if len(result) != len(expected) {
+		t.Fatalf("want %d tasks got %d", len(expected), len(result))
+	}
+	for i, exp := range expected {
+		assertTask(t, exp, result[i])
+	}
+}
+
+func TestIndentedBlockSeparatedByBlankLine(t *testing.T) {
+	p, _ := NewParser(strings.NewReader(`
+# Tasks
+## a task
+    echo one
+
+    echo two
+`), nil)
+	_, err := p.parseTask()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "echo one\necho two\n"
+	if p.currTask.Script != want {
+		t.Fatalf("script want=%q got=%q", want, p.currTask.Script)
+	}
+}
+
+func TestIndentedBlockAfterFencedBlock(t *testing.T) {
+	var p parser
+	p.scanner = bufio.NewScanner(strings.NewReader("    echo hi"))
+	p.scan()
+	p.scan()
+	p.currTask.Script = "an existing script"
+	err := p.parseIndentedCodeBlock()
 	if err == nil {
 		t.Fatal("expected error got nil")
 	}
