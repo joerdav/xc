@@ -37,6 +37,20 @@ echo "Hello ертөнц!"
 #+end_src
 ```
 
+## Indented code blocks
+
+A script can also be written as an indented code block, using four spaces or a tab
+instead of a ``` fence. This is handy when the surrounding document already uses
+fenced blocks for something else.
+
+````markdown
+## Tasks
+### Task1
+
+    echo "Hello 世界!"
+    echo "Hello العالمية!"
+````
+
 ## Shebangs
 
 To define an alternative interpreter such as python, then include a shebang, similar to the unix style.
