@@ -10,6 +10,12 @@ weight: -6
 
 Extension: <https://marketplace.visualstudio.com/items?itemName=xc-vscode.xc-vscode>
 
+## IntelliJ 
+
+(And other Jetbrains IDEs)
+
+Plugin: [XC Tasks](https://plugins.jetbrains.com/plugin/34345-xc-tasks)
+
 ## vim
 
 There is no vim plugin for `xc`, but [fzf.vim](https://github.com/junegunn/fzf.vim) can be used in
